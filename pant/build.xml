@@ -66,4 +66,7 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target name="-post-jar" >
+        <copy file="dist/pant.jar" todir="/home/pzajac/pant"/>
+    </target>
 </project>
