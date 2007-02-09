@@ -1,31 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/JavaFile.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/Repository.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/SourceRoot.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/cvs/CVSMetric.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/cvs/CVSStatistics.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/cvs/Diff.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/cvs/StatisticsRecord.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/issuezilla/Issue.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/javac/CountsItem.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/javac/MeasuringJavac.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/javac/MetricsRunner.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/main/ClassRankMatrixGenerator.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/main/UpdateIssues.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/main/UsageOwnerIndexer.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/CVSStatHandler.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/ChartConf.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/CountsStatHandler.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/JavaFileHandler.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/Record.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/RecordType.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/Statistics.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/src/org/netbeans/metrics/statistics/VersionDateComparator.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/test/org/netbeans/ant/metrics/javac/CountsMetricTest.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/test/org/netbeans/metrics/main/ClassRankMatrixTest.java</file>
-        <file>file:/home/pzajac/cvss/retouche/codeviation/pant/test/org/netbeans/metrics/main/UsageOwnerIndexerTest.java</file>
-    </open-files>
 </project-private>
