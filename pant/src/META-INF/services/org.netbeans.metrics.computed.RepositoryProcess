@@ -1,3 +1,3 @@
-org.netbeans.metrics.main.UpdateIssues
-org.netbeans.metrics.main.UsageOwnerIndexer
-org.netbeans.metrics.main.UsageReporterIndexer
+org.netbeans.metrics.computed.UpdateIssues
+org.netbeans.metrics.computed.UsageOwnerIndexer
+org.netbeans.metrics.computed.UsageReporterIndexer
