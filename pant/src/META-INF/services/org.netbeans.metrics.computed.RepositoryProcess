@@ -1,3 +1,8 @@
 org.netbeans.metrics.computed.UpdateIssues
 org.netbeans.metrics.computed.UsageOwnerIndexer
 org.netbeans.metrics.computed.UsageReporterIndexer
+org.netbeans.metrics.computed.UsageReporterAfterFixIndexer
+org.netbeans.metrics.computed.UsageOwnerAfterFixIndexer
+org.netbeans.metrics.computed.UsageOwnerBeforeFixIndexer
+org.netbeans.metrics.computed.PageRankProcess
+
