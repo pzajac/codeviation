@@ -1,2 +1,3 @@
 org.netbeans.metrics.statistics.CountsStatHandler
 org.netbeans.metrics.statistics.CVSStatHandler
+org.netbeans.metrics.statistics.PageRankStatHandler
