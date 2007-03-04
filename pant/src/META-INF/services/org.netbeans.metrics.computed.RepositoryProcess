@@ -5,4 +5,5 @@ org.netbeans.metrics.computed.UsageReporterAfterFixIndexer
 org.netbeans.metrics.computed.UsageOwnerAfterFixIndexer
 org.netbeans.metrics.computed.UsageOwnerBeforeFixIndexer
 org.netbeans.metrics.computed.PageRankProcess
+org.netbeans.metrics.computed.IssuesPageRankProcess
 
