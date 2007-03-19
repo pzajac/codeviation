@@ -1,0 +1,9 @@
+org.codeviation.tasks.UpdateIssues
+org.codeviation.tasks.UsageOwnerIndexer
+org.codeviation.tasks.UsageReporterIndexer
+org.codeviation.tasks.UsageReporterAfterFixIndexer
+org.codeviation.tasks.UsageOwnerAfterFixIndexer
+org.codeviation.tasks.UsageOwnerBeforeFixIndexer
+org.codeviation.tasks.PageRankProcess
+org.codeviation.tasks.IssuesPageRankProcess
+
