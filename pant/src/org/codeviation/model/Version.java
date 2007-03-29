@@ -107,6 +107,9 @@ public class Version implements Comparable<Version> , Serializable {
          if (date == null) {
              throw new NullPointerException("date");
          }
+         if (revString == null) {
+             throw new NullPointerException("revString");
+         }
     }
     
     public JavaFile getJavaFile() {
