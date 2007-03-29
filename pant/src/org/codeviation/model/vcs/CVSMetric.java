@@ -69,7 +69,9 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
     }
     
     public Diff [] getAllDiffs() {
-        if (updateCVS && (diffs == null || diffs.length == 0 || !rootVersion.contains(javaFile.getCVSVersionName()))) {
+        String ver = javaFile.getCVSVersionName();
+        // version should be sometimes null (for example non versioned file
+        if (updateCVS && (diffs == null || diffs.length == 0 || !(ver != null && rootVersion.contains(ver)))) {
             try {
                 Logger.getLogger(getClass().getName()).log(Level.FINE, "getAllDiffs() Start:" + javaFile.getCVSPath());
                 CvsUtil util = javaFile.getPackage().getCvsUtil();
