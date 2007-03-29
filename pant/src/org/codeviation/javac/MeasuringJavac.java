@@ -57,10 +57,13 @@ public final class MeasuringJavac extends Javac13 {
         }
         attributes.log("tag :" + cvsProp);
         attributes.log(PersistenceManager.PANT_CACHE_FOLDER + " :" + PersistenceManager.getDefault().getFolder(), Project.MSG_VERBOSE);
+        // XXX rather customize target via property
+        // We use java 1.6, rather use jdk1.5 target
+        this.target = "1.5";
         try {
             setupLogFile();
             Commandline cmd = new Commandline();
-              
+            
             setupModernJavacCommandlineSwitches( cmd );
             List<String> options = Arrays.asList( cmd.getArguments() );
             attributes.log("Options:");

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import org.codeviation.model.PositionInterval;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.logging.Logger;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Position;
 import org.codeviation.model.PositionIntervalResult;
@@ -19,6 +19,10 @@ public class Blocks {
     JavaFile javaFile;
     String className;
 
+    // for unit tests
+    static Logger logger = Logger.getLogger(Blocks.class.getName());
+    static boolean debug = false;
+    
     Map<Interval,BlocksItem> intervals = new HashMap<Interval,BlocksItem>();
         
     private static final class Interval {
@@ -71,6 +75,10 @@ public class Blocks {
             Interval interval = entry.getKey();
             Position startPos = javaFile.getPosition(interval.start);
             Position endPos = javaFile.getPosition(interval.end ) ;
+            if (debug) {
+                logger.fine("BlockItem:" +interval.start + ":" + interval.end + ":" + entry.getValue());
+            }
+            
             PositionInterval pi = new PositionInterval(startPos,endPos);
             PositionIntervalResult<BlocksItem> pir = new PositionIntervalResult<BlocksItem>(pi,entry.getValue());
             metric.addSrcVerObject(pir, v);
@@ -85,5 +93,12 @@ public class Blocks {
             System.out.println("add" + item + ":" + startPos + "," + endPos );
         }
     }    
+
+    /** just only for testing
+     */
+    public static void setDebug(boolean debug) {
+        Blocks.debug = debug;
+    }
+
 }
 

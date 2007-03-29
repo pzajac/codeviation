@@ -156,7 +156,7 @@ public final class Repository {
             if (!getName().equals("nbcvs")) {
                 throw new java.lang.IllegalStateException("Supported only nbcvs");
             }
-            return PrepareNbTags.parseDate(tag.substring(3));
+            return PrepareNbTags.parseTagDate(tag);
         } catch (ParseException ex) {
            logger.log(java.util.logging.Level.SEVERE,ex.getMessage(), ex);
         }

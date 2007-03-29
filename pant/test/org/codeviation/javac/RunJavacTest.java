@@ -57,11 +57,15 @@ public class RunJavacTest extends TestCase {
         testPrjF = ExamplesSetup.getUsageMetricsProjectDir();
     }
     
+    static File getBuildDir(File testPrjF) {
+        return new File (testPrjF,"build");
+        
+    }
     static void runJavac(File testPrjF) {
         Javac javac = new Javac();
         Project prj = new Project();
         prj.setProperty("build.compiler","org.codeviation.javac.MeasuringJavac");
-        File buildDir = new File (testPrjF,"build");
+        File buildDir = getBuildDir(testPrjF);
         TestUtil.deleteFile(buildDir);
         buildDir.mkdirs();
         Path path = new Path(prj);
@@ -69,7 +73,9 @@ public class RunJavacTest extends TestCase {
         javac.setSrcdir(path);
         javac.setDestdir(buildDir);
         javac.setProject(prj);
-        javac.execute();          
+//        javac.setTarget("1.5");
+        javac.execute();
+        
     }
     
       public void runJavacBiggerApp() {

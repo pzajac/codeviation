@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
@@ -24,7 +25,8 @@ public class PrepareNbTags {
     Date to;
     int stepInDays;
     Set<Date> dates = new TreeSet<Date>();
-    static SimpleDateFormat tagSimpleFormat = new SimpleDateFormat("yyyyMMddHHmm");
+    private static SimpleDateFormat nbSimpleFormat = new SimpleDateFormat("yyyyMMddHHmm");
+    private static SimpleDateFormat tagDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     
     /** Creates a new instance of PrepareNbTags */
     public PrepareNbTags() {
@@ -45,7 +47,7 @@ public class PrepareNbTags {
                         // BLDyyyMMddhhmm  
                         String dateString = line.substring(3,3 + 4 + 2 + 2 + 2 + 2);
                         try {
-                            Date date = tagSimpleFormat.parse(dateString);
+                            Date date = nbSimpleFormat.parse(dateString);
                             if (date.compareTo(from) > 0 && date.compareTo(to) < 0) {
                                 dates.add(date);
                             }
@@ -66,7 +68,7 @@ public class PrepareNbTags {
             for (Date date : dates) {
                 long time = date.getTime();
                 if (nextTime < time) {
-                    writer.println("BLD" + tagSimpleFormat.format(date));
+                    writer.println("BLD" + nbSimpleFormat.format(date));
                     nextTime = time + stepsInMilis;
                 }
             }
@@ -94,7 +96,32 @@ public class PrepareNbTags {
     } 
     
     public static Date parseDate(String dateString) throws ParseException {
-        return tagSimpleFormat.parse(dateString);
+        return nbSimpleFormat.parse(dateString);
+    }
+    
+    public static Date parseTagDate(String tagDate) throws ParseException {
+        
+        // NetBeans format BLDyyyyMMddHHmm
+        if (tagDate.startsWith("BLD")) {
+            return parseDate(tagDate.substring(3));
+        } else {
+            // YYYY/MM/dd HH:mm:ss
+            StringTokenizer tokenizer = new StringTokenizer(tagDate,"/: ");
+            StringBuilder dateBuf = new StringBuilder();
+            while(tokenizer.hasMoreElements()) {
+                dateBuf.append(tokenizer.nextElement());
+            }
+            // yyyy + MM + dd + HH + mm + ss;
+            final int dateLen =  4 + 2 + 2 + 2 + 2 + 2; 
+            while (dateBuf.length() < dateLen) {
+                dateBuf.append("00");
+            }
+            String dateString = dateBuf.toString();
+            if (dateString.length() > dateLen) {
+                dateString = dateString.substring(0,dateLen);
+            }
+            return tagDateFormat.parse(dateString);
+        }
     }
     /**
      * Parameters:

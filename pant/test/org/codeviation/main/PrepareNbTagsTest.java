@@ -12,6 +12,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import junit.framework.TestCase;
 
 /**
@@ -94,5 +97,17 @@ public class PrepareNbTagsTest extends TestCase {
             fos.close();
         }
         return file;
+    }
+    
+    public void testParseTagDate() throws ParseException {
+        SimpleDateFormat tagDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        Date date = PrepareNbTags.parseTagDate("BLD200401020300");
+        assertEquals("20040102030000",tagDateFormat.format(date));
+        date = PrepareNbTags.parseTagDate("2005/01/02 03:00");
+        assertEquals("20050102030000",tagDateFormat.format(date));        
+        date = PrepareNbTags.parseTagDate("2005/01/02 03:00:01");
+        assertEquals("20050102030001",tagDateFormat.format(date));        
+        date = PrepareNbTags.parseTagDate("2005/01/02");
+        assertEquals("20050102000000",tagDateFormat.format(date));        
     }
 }

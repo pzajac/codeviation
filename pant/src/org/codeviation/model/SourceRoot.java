@@ -267,7 +267,7 @@ public final  class SourceRoot {
              String usedTag = null;
              for (String tag : tags) {
                 try {
-                    Date tagDate = PrepareNbTags.parseDate(tag.substring(3));
+                    Date tagDate = PrepareNbTags.parseTagDate(tag);
                     if (date.compareTo(tagDate) > 0) {
                         if (usedTagDate == null || usedTagDate.compareTo(tagDate) < 0) {
                             usedTagDate = tagDate;

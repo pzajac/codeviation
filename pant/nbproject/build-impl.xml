@@ -457,6 +457,7 @@ is divided into following sections:
     </target>
     <target name="-do-compile-test-single" if="have.tests" depends="init,compile,-pre-pre-compile-test,-pre-compile-test-single">
         <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
+        <echo>${javac.includes}</echo>
         <j2seproject3:javac srcdir="${test.src.dir}" destdir="${build.test.classes.dir}" debug="true" classpath="${javac.test.classpath}" includes="${javac.includes}" excludes=""/>
         <copy todir="${build.test.classes.dir}">
             <fileset dir="${test.src.dir}" includes="${includes}" excludes="${build.classes.excludes},${excludes}"/>
@@ -494,7 +495,7 @@ is divided into following sections:
     <target name="-post-test-run-single" if="have.tests" depends="init,compile-test-single,-pre-test-run-single,-do-test-run-single">
         <fail if="tests.failed">Some tests failed; see details above.</fail>
     </target>
-    <target name="test-single" depends="init,compile-test-single,-pre-test-run-single,-do-test-run-single,-post-test-run-single" description="Run single unit test."/>
+    <target name="test-single" depends="init,compile-test,-pre-test-run-single,-do-test-run-single,-post-test-run-single" description="Run single unit test."/>
     <!--
     =======================
     JUNIT DEBUGGING SECTION

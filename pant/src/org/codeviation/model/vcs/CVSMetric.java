@@ -134,12 +134,12 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
                    int endOffset = endPos.getOffset() - line.getPosition().getOffset();
                    String content = line.getNewContent();
                    if (line == startLine) {
-                       return content.substring(startOffset,endOffset);
+                       return content.substring(startOffset,endOffset + 1);
                    } else {
                        if (out.length() > 0) {
                             out.append("\n");
                        }    
-                       out.append(content.substring(0,endOffset));
+                       out.append(content.substring(0,endOffset + 1));
                    }
                    return out.toString();
                } else if (line != startLine) {

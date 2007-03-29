@@ -36,7 +36,7 @@ public class BlocksBuilder implements MetricBuilder {
       JavaFile jf = MetricsRunner.getJavaFile(e);
       if (jf != null) {
           Blocks blocks = new Blocks(jf,e.toString());
-          visitor.scan(TreePath.getPath(cut, tree), blocks);
+          visitor.scan(new TreePath(cut), blocks);
           blocks.persists();
       }
     }    

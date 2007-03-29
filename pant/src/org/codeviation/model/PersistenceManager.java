@@ -95,7 +95,7 @@ public class PersistenceManager implements Serializable{
     public SourceRoot getOrCreateSourceRoot(File srcRoot) throws IOException { 
         Repository rep = getRepository(srcRoot);
         if (rep == null) {
-            throw new IllegalStateException("Mising repository. Please add new repository root record to repositories.lst");
+            throw new IllegalStateException("Mising repository. Please add new repository root record to repositories.lst for srcroot " + srcRoot);
         }
         return rep.getOrCreateSourceRoot(srcRoot);
     }

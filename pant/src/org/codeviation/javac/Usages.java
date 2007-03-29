@@ -42,7 +42,7 @@ public class Usages {
     public void addUsage(String method,String clazz,int startPos,int endPos) {
         if (javaFile.getCVSVersion() != null) {
              startPos = javaFile.unifyAbsolutePosition(startPos);
-             endPos = javaFile.unifyAbsolutePosition(endPos);
+             endPos = javaFile.unifyAbsolutePosition(endPos - 1);
              PositionInterval interval = new PositionInterval(javaFile.getPosition(startPos),
                                              javaFile.getPosition(endPos));
             items.add(new PositionIntervalResult<UsageItem>(interval,new UsageItem(method,clazz)));
