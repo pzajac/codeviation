@@ -225,8 +225,10 @@ public final class JavaFile {
     }
     
     /** @return  position for current version
+     *  Converts absolute file position to internal Position
      */
     public Position getPosition(int offset) {
+        offset = unifyAbsolutePosition(offset);
         Version v = getCVSVersion();
         List<Line> lines = getLines(v);
         return Line.getPosition(lines,v,offset);
@@ -234,7 +236,7 @@ public final class JavaFile {
 
     /** size of( [0A,0d]) = 1
      */ 
-    public int unifyAbsolutePosition(int offset) {
+    private  int unifyAbsolutePosition(int offset) {
         if (winSeparators == null) {
             List<Integer> separators = new ArrayList<Integer>();
             byte data[] = null;

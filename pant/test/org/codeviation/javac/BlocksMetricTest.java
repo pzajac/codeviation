@@ -19,6 +19,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.Iterator;
 import junit.framework.TestCase;
 import org.codeviation.javac.impl.blocks.Blocks;
 import org.codeviation.model.JavaFile;
@@ -43,9 +44,9 @@ public class BlocksMetricTest extends TestCase {
    static class BlocksHandler extends Handler {
           Set<String> values;
           List<String> positions;
-          String fileText;
+          byte fileText[];
           
-          BlocksHandler(Set<String> values ,List<String> positions,String fileText) {
+          BlocksHandler(Set<String> values ,List<String> positions,byte[] fileText) {
             this.values = values;
             this.positions = positions;
             this.fileText = fileText;
@@ -56,8 +57,10 @@ public class BlocksMetricTest extends TestCase {
                     int start = Integer.parseInt(tokens[1]);
                     int end = Integer.parseInt(tokens[2]);
                     String type = tokens[3];
-                    String val = tokens[3] + ":" + fileText.substring(start, end + 1);
-                    System.out.println(val);
+                    if (end >= fileText.length) {
+                        end = fileText.length - 2;
+                    }
+                    String val = tokens[3] + ":"  + new String(fileText,start, end - start + 1);
                     values.add(val);
                     positions.add(tokens[0] +":" +  tokens[1] + ":" +  tokens[2]);
                 }
@@ -91,7 +94,7 @@ public class BlocksMetricTest extends TestCase {
        File file = new File(testPrjF,"src/testblockmetrics/Simple.java");
        ExamplesSetup.updateFile(filePath, "1.2");
        
-       final String fileText = getText(file);
+       final byte fileText[] = getBytes(file);
        final Set<String> values = new HashSet<String>();
        final List<String> posValues = new ArrayList<String>();
        Logger blocksLogger = Logger.getLogger(Blocks.class.getName());
@@ -108,9 +111,19 @@ public class BlocksMetricTest extends TestCase {
        for (PositionIntervalResult<BlocksItem> result : results) {
            PositionInterval i = result.getInterval();
            String val = result.getObject() + ":" + cvsm.getContent(i.getStartPosition(),i.getEndPosition());
-//           System.out.println("'" + val + "'");
            assertTrue(val,values.contains(val));
        }
+       
+       PositionVersionIntervalResultContainer<String> classes = bm.getClasses();
+       assertEquals(1,classes.getAllObjects().size());
+       PositionIntervalResult<String> res = classes.getAllObjects().iterator().next();
+       assertEquals("class name","testblockmetrics.Simple",res.getObject());
+       
+       PositionVersionIntervalResultContainer<String> methods = bm.getMethods();
+       assertEquals(1,classes.getAllObjects().size());
+       Iterator<PositionIntervalResult<String>> pirIt = methods.getAllObjects().iterator();
+       PositionIntervalResult<String> pir = pirIt.next();
+       assertEquals("Simple(boolean)",pir.getObject());
     }
    public void testMany() throws IOException, InterruptedException {
        Blocks.setDebug(true); 
@@ -119,7 +132,7 @@ public class BlocksMetricTest extends TestCase {
        ExamplesSetup.updateFile(filePath, "1.2");
        
    
-       final String fileText = getText(file);
+       final byte[] fileText = getBytes(file);
        final Set<String> values = new HashSet<String>();
        final List<String> posValues = new ArrayList<String>();
        Logger blocksLogger = Logger.getLogger(Blocks.class.getName());
@@ -138,20 +151,20 @@ public class BlocksMetricTest extends TestCase {
        for (PositionIntervalResult<BlocksItem> result : results) {
            PositionInterval i = result.getInterval();
            String val = result.getObject() + ":" + cvsm.getContent(i.getStartPosition(),i.getEndPosition());
-           System.out.println("'" + val + "'\n" + i);
+//           System.out.println("'" + val + "'\n" + i);
            VersionInterval vi = container.get(result);
-           System.out.println(vi.getFrom());
-           System.out.println(vi.getTo());
+//           System.out.println(vi.getFrom());
+//           System.out.println(vi.getTo());
            assertTrue(val,values.contains(val));
        }
 
    }
  
-   private  String getText(File file) throws IOException {
+   private  byte[] getBytes(File file) throws IOException {
        FileInputStream fis = new FileInputStream(file);
        byte bytes[] = new byte[(int)file.length()];
        fis.read(bytes);
        fis.close();
-       return new String(bytes);
+       return bytes;
    }
 }

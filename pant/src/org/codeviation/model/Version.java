@@ -310,7 +310,7 @@ public class Version implements Comparable<Version> , Serializable {
                             issues.add(bugNumber);
                         }
                     } catch (NumberFormatException e) {
-                        logger.log(Level.SEVERE, " should be number" , e);
+//                        logger.log(Level.SEVERE, " should be number" , e);
                     }
                     number.setLength(0);
                     parseNumberState = false;

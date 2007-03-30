@@ -42,6 +42,7 @@ import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WhileLoopTree;
 import com.sun.source.tree.WildcardTree;
+import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import java.util.Stack;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
@@ -183,17 +184,16 @@ import org.netbeans.modules.java.source.usages.ClassFileUtil;
 //        }
         
          @Override public Void visitClass (final ClassTree node, final Blocks p) {
+            TreePath path = TreePath.getPath(cu, node);
             final ClassSymbol sym = ((JCTree.JCClassDecl)node).sym;
+            p.addClassName(getStartPosition(path),getEndPosition(path),sym.toString());
             boolean errorInDecl = false;
             boolean errorIgnorSubtree = true;
-            String className = null;
             if (sym != null) {
                 errorInDecl = hasErrorName(sym);               
                 if (!errorInDecl) {
                     final StringBuilder classNameBuilder = new StringBuilder ();
                     ClassFileUtil.encodeClassName(sym, classNameBuilder, '.');  //NOI18N
-                    className = classNameBuilder.toString();
-                    final String classNameType = classNameBuilder.toString();                                        
                     errorIgnorSubtree = false;
                 }
                 
@@ -201,24 +201,14 @@ import org.netbeans.modules.java.source.usages.ClassFileUtil;
             if (!errorIgnorSubtree) {
                 Element old = enclosingElement;
                 try {
-                    List<? extends Tree> members = node.getMembers();
                     JTreeOffset offset = new JTreeOffset(node);
-                    
                     treeStack.push(offset);
-//                    scan(node.getModifiers(), p);
-//                    scan(node.getTypeParameters(), p);
-//                    scan(node.getExtendsClause(), p);
-//                    scan(node.getImplementsClause(), p);
-//                    scan(node.getMembers(), p);
                     super.visitClass(node, p);
-//                    TreePath path = getCurrentPath();
-//                    addBlockItem(getStartPosition(path),getEndPosition(path) , p, BlocksItem.CLASS);
                     
                     if (offset != treeStack.pop()) {
                         throw new IllegalStateException("Broken stack: " + node);
                     }
-                    
-                    addBlockItem(offset.getStartOffset(),offset.getEndOffset() , p, BlocksItem.CLASS);
+                    addBlockItem(offset.getStartOffset(),offset.getEndOffset()  , p, BlocksItem.CLASS);
                 } finally {
                     enclosingElement = old;
                 }
@@ -234,18 +224,20 @@ import org.netbeans.modules.java.source.usages.ClassFileUtil;
         }
          
         public Void visitMethod(MethodTree node, Blocks p) {
+            enclosingElement = ((JCMethodDecl) node).sym;
+            TreePath mpath = TreePath.getPath(cu, node);
+            
             Element old = enclosingElement;
             BlockTree bn = node.getBody();
-            TreePath path = TreePath.getPath(cu, bn);
-            treeStack.lastElement().updateStartOffset(getStartPosition(path));
-            addBlockItem(getStartPosition(path), getEndPosition(path),p,BlocksItem.METHOD);
-            return super.visitBlock(bn,p);
-//            try {
-//                enclosingElement = ((JCMethodDecl) node).sym;
-//                return super.visitMethod(node, p);
-//            } finally {
-//                enclosingElement = old;
-//            }
+            if (bn != null) {
+                TreePath path = TreePath.getPath(cu, bn);
+                int sp = getStartPosition(path);
+                p.addMethodSignature(getStartPosition(mpath),sp, enclosingElement.toString());
+                treeStack.lastElement().updateStartOffset(sp);
+                addBlockItem(sp, getEndPosition(path),p,BlocksItem.METHOD);
+                return super.visitBlock(bn,p);
+            }
+            return null;
         }
         
         private boolean hasErrorName (Symbol cs) {

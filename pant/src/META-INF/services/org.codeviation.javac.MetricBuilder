@@ -1,2 +1,3 @@
 org.codeviation.javac.CountsBuilder
 org.codeviation.javac.UsageMetricBuilder
+org.codeviation.javac.impl.blocks.BlocksBuilder

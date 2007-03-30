@@ -24,6 +24,10 @@ public class Blocks {
     static boolean debug = false;
     
     Map<Interval,BlocksItem> intervals = new HashMap<Interval,BlocksItem>();
+    
+    Map<Interval,String> classes = new HashMap<Blocks.Interval, String>();
+    Map<Interval,String> methods = new HashMap<Blocks.Interval, String>();
+    
         
     private static final class Interval {
         int start;
@@ -71,17 +75,25 @@ public class Blocks {
             metric = new BlocksMetric();
         }
        
+        // store blocks
+        //
         for (Entry<Interval,BlocksItem> entry : intervals.entrySet()) {
-            Interval interval = entry.getKey();
-            Position startPos = javaFile.getPosition(interval.start);
-            Position endPos = javaFile.getPosition(interval.end ) ;
-            if (debug) {
-                logger.fine("BlockItem:" +interval.start + ":" + interval.end + ":" + entry.getValue());
-            }
-            
-            PositionInterval pi = new PositionInterval(startPos,endPos);
+            PositionInterval pi = getPositionInterval(entry.getKey(),entry.getValue());
             PositionIntervalResult<BlocksItem> pir = new PositionIntervalResult<BlocksItem>(pi,entry.getValue());
             metric.addSrcVerObject(pir, v);
+        }
+        // store classes
+        //
+        for (Entry<Interval,String> entry : classes.entrySet()) {
+            PositionInterval pi = getPositionInterval(entry.getKey(),entry.getValue());
+            PositionIntervalResult<String> pir = new PositionIntervalResult<String>(pi,entry.getValue());
+            metric.addClass(pir, v);
+        }
+        // store methods
+        for (Entry<Interval,String> entry : methods.entrySet()) {
+            PositionInterval pi = getPositionInterval(entry.getKey(),entry.getValue());
+            PositionIntervalResult<String> pir = new PositionIntervalResult<String>(pi,entry.getValue());
+            metric.addMethod(pir, v);
         }
         javaFile.setMetric(metric);
     }
@@ -90,15 +102,34 @@ public class Blocks {
         Interval i = new Interval(startPos,endPos);
         if (startPos != -1 && endPos != -1 && !intervals.containsKey(i)) {
             intervals.put(i,item);
-            System.out.println("add" + item + ":" + startPos + "," + endPos );
         }
     }    
 
+    public void addClassName(int startPos,int endPos,String className) {
+        Interval i = new Interval(startPos,endPos);
+        if (startPos != -1 && endPos != -1 && !intervals.containsKey(i)) {
+            classes.put(i,className);
+        }
+    }
+    public void addMethodSignature(int startPos,int endPos,String className) {
+        Interval i = new Interval(startPos,endPos);
+        if (startPos != -1 && endPos != -1 && !intervals.containsKey(i)) {
+            methods.put(i,className);
+        }
+    }
     /** just only for testing
      */
     public static void setDebug(boolean debug) {
         Blocks.debug = debug;
     }
-
+  
+    private <T> PositionInterval getPositionInterval(Interval interval,T value) {
+        Position startPos = javaFile.getPosition(interval.start);
+        Position endPos = javaFile.getPosition(interval.end);
+        if (debug) {
+            logger.fine("BlockItem:" +interval.start + ":" + interval.end + ":" + value);
+        }
+        return  new PositionInterval(startPos,endPos);
+    }
 }
 

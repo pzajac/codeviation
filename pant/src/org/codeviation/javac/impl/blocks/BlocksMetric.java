@@ -6,17 +6,35 @@ import java.io.ObjectOutputStream;
 import java.util.Set;
 import org.codeviation.model.PositionInterval;
 import org.codeviation.model.PositionIntervalResult;
+import org.codeviation.model.PositionVersionIntervalResultContainer;
+import org.codeviation.model.Version;
 import org.codeviation.model.VersionInterval;
 import org.codeviation.model.VersionedMetric;
-import org.codeviation.javac.UsageItem;
 
 
 /**
- *
- * @author pzajac
+ * This metrics persists versions of blocks
+ * @author pzajac 
  */
 public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io.Serializable {
-    private static final long serialVersionUID = 1;
+   private static final long serialVersionUID = 1;
+   private PositionVersionIntervalResultContainer<String> classes = new PositionVersionIntervalResultContainer<String>();   
+   private PositionVersionIntervalResultContainer<String> methods = new PositionVersionIntervalResultContainer<String>();   
+
+
+   public void addClass(PositionIntervalResult<String> pir,Version v) {
+       classes.add(pir, v);
+   }
+   public void addMethod(PositionIntervalResult<String> pir,Version v) {
+       methods.add(pir, v);
+   }
+
+   public PositionVersionIntervalResultContainer<String> getClasses() {
+       return classes;
+   }
+   public PositionVersionIntervalResultContainer<String> getMethods() {
+       return methods;
+   }
 
     /** Creates a new instance of BlocksMetric */
     public BlocksMetric() {
@@ -38,6 +56,7 @@ public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io
         return true;
     }
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        // read blocks
         int size = ois.readInt();
         for (int i = 0 ; i < size ; i++) {
             PositionInterval pi = PositionInterval.read(ois);
@@ -46,9 +65,31 @@ public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io
             PositionIntervalResult<BlocksItem> pir = new PositionIntervalResult<BlocksItem>(pi,bi);
             getStorage().add(pir,vi);
         }
+        // read classes 
+        size = ois.readInt();
+        classes = new PositionVersionIntervalResultContainer<String>();
+        for (int i = 0 ; i < size ; i++) {
+            PositionInterval pi = PositionInterval.read(ois);
+            String name = (String) ois.readObject();
+            VersionInterval vi = VersionInterval.read(ois);
+            PositionIntervalResult<String> pir = new PositionIntervalResult<String>(pi,name);
+            classes.add(pir, vi);
+        }
+        // read methods
+        size = ois.readInt();
+        methods = new PositionVersionIntervalResultContainer<String>();
+        for (int i = 0 ; i < size ; i++) {
+            PositionInterval pi = PositionInterval.read(ois);
+            String name = (String) ois.readObject();
+            VersionInterval vi = VersionInterval.read(ois);
+            PositionIntervalResult<String> pir = new PositionIntervalResult<String>(pi,name);
+            methods.add(pir, vi);
+        }
+        
     }
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {        
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        // blocks
         Set<PositionIntervalResult<BlocksItem>> blocks = getStorage().getAllObjects();
         oos.writeInt(blocks.size());
         for (PositionIntervalResult<BlocksItem> block : blocks) {
@@ -56,6 +97,27 @@ public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io
             block.getObject().write(oos);
             VersionInterval vi = getStorage().get(block);
             vi.write(oos);
-        }        
+        }
+        // classes
+        Set<PositionIntervalResult<String>> cpirs = classes.getAllObjects();
+        oos.writeInt(cpirs.size());
+        for (PositionIntervalResult<String> pir : cpirs) {
+            pir.getInterval().write(oos);
+            
+            oos.writeObject(pir.getObject());
+            VersionInterval vi = classes.get(pir);
+            vi.write(oos);
+        }
+        
+        // methods
+        Set<PositionIntervalResult<String>> mpirs = methods.getAllObjects();
+        oos.writeInt(mpirs.size());
+        for (PositionIntervalResult<String> pir : mpirs) {
+            pir.getInterval().write(oos);
+            
+            oos.writeObject(pir.getObject());
+            VersionInterval vi = methods.get(pir);
+            vi.write(oos);
+        }
     }
 }

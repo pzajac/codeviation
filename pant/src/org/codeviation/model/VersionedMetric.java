@@ -33,6 +33,5 @@ public abstract class VersionedMetric<T> implements Metric {
        public PositionVersionIntervalResultContainer<T> getStorage() {
            return storage;
        }
-       public abstract String getDescription();
-       
+       public abstract String getDescription();       
 }

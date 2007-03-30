@@ -71,7 +71,9 @@ public class CVSMetricTest extends TestCase {
         //----------------------------   
         doFile("CatalogNode.java");
     }
-    public void testDynamicProperties () throws IOException, InterruptedException {
+    /** file commited with -kb paramater
+     */
+    public void testJavaBinaryFile () throws IOException, InterruptedException {
         String version = "1.2";
         String args[] = new String[] {"cvs","update","-r",version,"DynamicProperties.java"};
         CvsUtil.executeCvsCommand(args, new File(prj,"src/testj2seexample"));
@@ -83,6 +85,7 @@ public class CVSMetricTest extends TestCase {
         Version v = jf.getCVSVersion();
         assertEquals(version,v.getRevision());
         List<Line> lines = jf.getLines(v);
+        // failing
         TestUtil.assertFile(lines, jf.getCVSFile());
     }
 
