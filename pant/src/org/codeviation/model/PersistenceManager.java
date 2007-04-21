@@ -147,7 +147,7 @@ public class PersistenceManager implements Serializable{
     public Repository getRepository(File cvsFile) {
         for (Repository rep : repositories.values()) {
             if (cvsFile.getAbsolutePath().indexOf(rep.getCvsRoot().getAbsolutePath()) == 0) {
-                return rep;
+                    return rep;
             }
         }
         return null;

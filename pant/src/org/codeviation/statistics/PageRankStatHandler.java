@@ -19,8 +19,8 @@ import org.codeviation.tasks.PageRankMetric;
  * Statistics Handler for PageRankMetric
  * @author pzajac
  */
-public final class PageRankStatHandler implements JavaFileHandler<Statistics>,ChartConfProvider{
-    private Statistics stats;
+public final class PageRankStatHandler implements JavaFileHandler<Statistics<String>>,ChartConfProvider{
+    private Statistics<String> stats;
     private boolean initialized;
     private ChartConf conf;
     
@@ -35,7 +35,7 @@ public final class PageRankStatHandler implements JavaFileHandler<Statistics>,Ch
     static RecordType  PAGE_RANK_MAX_POSITION = new RecordType("Page Rank - max position",2,false);
     static RecordType  PAGE_RANK_AVG_POSITION = new RecordType("Page Rank - avg position",3,false);
 
-    public void init(Statistics stats) {
+    public void init(Statistics<String> stats) {
         this.stats = stats;
         initialized = false;
     }

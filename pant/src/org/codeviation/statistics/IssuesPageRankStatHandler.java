@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.XYSeriesCollection;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Repository;
 import org.codeviation.model.SourceRoot;
@@ -22,6 +21,9 @@ import org.codeviation.statistics.math.Histogram.GraphType;
 import org.codeviation.bugtracking.issuezilla.Issue;
 import org.codeviation.bugtracking.issuezilla.IssuezillaUtil;
 import org.codeviation.bugtracking.issuezilla.Priority;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  * Histogram:
@@ -190,9 +192,12 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
                 allSeries.addSeries(priorityBugsHistogram[i].getXYSeries(true,Priority.get(i).toString(),minKey,maxKey,graphType));
             }
         }
-        
-        JFreeChart chart = ChartFactory.createLineXYChart(conf.getTitle(),
-                                                  conf.getXAxisTitle(), conf.getYAxisTitle(), allSeries, 
+       
+        JFreeChart chart = ChartFactory.createXYLineChart(conf.getTitle(),
+                                                  conf.getXAxisTitle(), 
+                                                  conf.getYAxisTitle(), 
+                                                  allSeries,
+                                                  PlotOrientation.VERTICAL,
                                                   true,
                                                   true,
                                                   false);

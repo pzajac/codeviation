@@ -22,6 +22,7 @@ public final class PositionIntervalResult<T> implements Serializable {
         this.interval = interval;
         this.result = object;
     }
+    @SuppressWarnings("unchecked")
     public boolean equals (Object obj) {
         if (obj instanceof PositionIntervalResult) {
             PositionIntervalResult<T> srcVer = (PositionIntervalResult<T>)obj;

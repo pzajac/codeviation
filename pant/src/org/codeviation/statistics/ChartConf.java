@@ -15,15 +15,15 @@ public class ChartConf {
     private String yAxisTitle;
     private String name;
     private List <RecordType> recordTypes;
-    private JavaFileHandler statHandler;
-    private Class<Graph> graphClass;
+    private JavaFileHandler<? extends Graph> statHandler;
+    private Class<? extends Graph> graphClass;
     
     public ChartConf(String title,
             String xAxisTitle,
             String yAxisTitle,
             String name,
             List<RecordType> recordTypes,
-            JavaFileHandler statHandler) {
+            JavaFileHandler<? extends Graph> statHandler) {
         this.title = title;
         this.xAxisTitle = xAxisTitle;
         this.yAxisTitle = yAxisTitle;
@@ -63,11 +63,11 @@ public class ChartConf {
         return new ArrayList<RecordType>(recordTypes);
     }
     
-    public JavaFileHandler getStatHandler() {
+    public JavaFileHandler<? extends Graph> getStatHandler() {
         return statHandler;
     }
     
-    public void setGraphClass(Class graphClass) {
+    public void setGraphClass(Class<? extends Graph> graphClass) {
         this.graphClass = graphClass;
     }
 

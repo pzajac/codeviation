@@ -124,6 +124,7 @@ public final class JavaFile {
     public void setCVSMetric(CVSMetric cvsMetric) {
         this.cvsMetric = cvsMetric;
     }
+    @SuppressWarnings("unchecked")
     public <T extends Metric> T  getMetric(Class<T> type) {
         //  JavaFileUtil.currentJavaFile is shared for storing metrics!!! 
         synchronized (JavaFile.class) {
@@ -159,7 +160,10 @@ public final class JavaFile {
         //only alredy initialized non presinsten Metrics are returned
         List<Metric> mrs = new ArrayList<Metric>();
         mrs.addAll(staticMetrics.values());
-        mrs.addAll(getPackage().getSourceRoot().getMetrics(getPackage().getName(),getName()));
+        synchronized (JavaFile.class) {
+              JavaFileUtil.setCurrentJavaFile(this);
+              mrs.addAll(getPackage().getSourceRoot().getMetrics(getPackage().getName(),getName()));
+        }
         return mrs;
     }
     

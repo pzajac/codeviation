@@ -22,15 +22,15 @@ public final class GenericGraph implements Graph {
         handler.addJavaFile(jf);
     }
 
-    public void addPackage(Package pkg) {
-        for (JavaFile jf : pkg.getJavaFiles()) {
+    public void addJavaFiles(Iterable<JavaFile> jfs) {
+        for (JavaFile jf : jfs) {
             addJavaFile(jf);
         }
     }
 
     public void addSourceRoot(SourceRoot srcRoot) {
         for (Package pack : srcRoot.getPackages()) {
-            addPackage(pack);            
+            addJavaFiles(pack);            
         }
     }
 

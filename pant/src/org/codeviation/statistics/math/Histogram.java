@@ -7,8 +7,8 @@ import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.Vector;
-import org.jfree.data.XYSeries;
 import org.codeviation.math.LinearRegression;
+import org.jfree.data.xy.XYSeries;
 
 /**
  *Generates histogram from x -> y values.
@@ -184,8 +184,8 @@ public final class Histogram {
             Vector xCoords = new DenseVector(series.getItemCount());
             Vector yCoords = new DenseVector(series.getItemCount());
             for (int i = 0 ; i < series.getItemCount() ; i++) {
-                xCoords.set(i,series.getXValue(i).doubleValue());
-                yCoords.set(i,series.getYValue(i).doubleValue());
+                xCoords.set(i,series.getX(i).doubleValue());
+                yCoords.set(i,series.getY(i).doubleValue());
             }
             double coefs[] = LinearRegression.solve(xCoords, yCoords);
             series.clear();

@@ -36,6 +36,8 @@ public final class Repository {
     private static final Logger logger = Logger.getLogger(PersistenceManager.class.getName());
     /** rel_path_in_cvs -> SourceRoot */
     private Map<String,SourceRoot> sourceRoots;
+    /** last modification of SOURCE_ROOTS_LIST_FILE*/
+    private long sourceRootsModification;
     /** Creates a new instance of Repository */
     Repository(File cvsRoot,String name) {
         this.cvsRoot = cvsRoot;
@@ -48,6 +50,7 @@ public final class Repository {
         File sourceRootsListFile = new File (getCacheRoot(),SOURCE_ROOTS_LIST_FILE);
         try {
             if (sourceRootsListFile.exists()) {
+                sourceRootsModification = sourceRootsListFile.lastModified();
                 BufferedReader reader = new BufferedReader(new FileReader (sourceRootsListFile));
                 try {
                     String line = null;
@@ -113,6 +116,10 @@ public final class Repository {
     }
     
     public List<SourceRoot> getSourceRoots() {
+        File sourceRootsListFile = new File (getCacheRoot(),SOURCE_ROOTS_LIST_FILE);
+        if (sourceRootsListFile.exists() && sourceRootsListFile.lastModified() != sourceRootsModification) {
+            readSourceRoots();
+        }
         List<SourceRoot> roots = new ArrayList<SourceRoot>(sourceRoots.values());
         return roots;
     }
@@ -148,14 +155,12 @@ public final class Repository {
         return tags;
     }
     
-    /** XXX supported only nbcvs 
+    /** Get date for tag or timestamp
+     *  @param tag cvs tag or timestamp 'YYYY/MM/dd [hh:mm[:ss]]' 
      * @return null if tag was not resolved
      */
     public Date getTagDate(String tag) {
         try {
-            if (!getName().equals("nbcvs")) {
-                throw new java.lang.IllegalStateException("Supported only nbcvs");
-            }
             return PrepareNbTags.parseTagDate(tag);
         } catch (ParseException ex) {
            logger.log(java.util.logging.Level.SEVERE,ex.getMessage(), ex);

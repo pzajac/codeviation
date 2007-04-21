@@ -14,6 +14,7 @@ public interface JavaFileHandler <GRAPH extends Graph> {
     public void init(GRAPH stats) ;
     
     /** invoked before first getValue()
+     * @param conf 
      */
     public void initGraphPaint(ChartConf conf);
     

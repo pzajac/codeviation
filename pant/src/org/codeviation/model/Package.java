@@ -16,6 +16,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -27,7 +28,7 @@ import org.codeviation.model.vcs.CvsUtil;
  * Package reprezents java package. Contains group of javafiles
  * @author  pz97949
  */
-public final class Package {
+public final class Package implements Iterable<JavaFile>{
     final private String name;
     WeakReference<List<JavaFile>> files;
     final private SourceRoot sourceRoot;
@@ -198,6 +199,10 @@ public final class Package {
              Logger.getLogger(PersistenceManager.class.getName()).log(Level.SEVERE,"Error during creating java files names list.",ioe);
         }
         return lines;
+    }
+
+    public Iterator<JavaFile> iterator() {
+        return getJavaFiles().iterator();
     }
     
 }

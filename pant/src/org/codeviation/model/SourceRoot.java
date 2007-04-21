@@ -16,8 +16,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +35,7 @@ import org.codeviation.main.PrepareNbTags;
 /**
  * Representation of one source root processed by javac. 
  */
-public final  class SourceRoot {
+public final  class SourceRoot implements Iterable<JavaFile> {
     Repository rep;
     /** relpath in repositry cvs
      */
@@ -128,7 +130,7 @@ public final  class SourceRoot {
         }
         return packageNames;
     }  
-    
+    @SuppressWarnings("unchecked")
     public <T extends Metric> T getMetric(String packageName,String fileName,Class<T> clazz){
         File pfile = getPackageFile(packageName);
         File f = new File(pfile,fileName + "_" + clazz.getName() + JAVA_METRICS_EXT);
@@ -217,6 +219,7 @@ public final  class SourceRoot {
     
     /** get all cvs tags processed by path
      */
+     @SuppressWarnings("unchecked")
     public Set<String> getCvsTags() {
         Set<String> tags = null;
         try {
@@ -315,5 +318,12 @@ public final  class SourceRoot {
     public Repository getRepository() {
         return rep;
     }
-    
+
+    public Iterator<JavaFile> iterator() {
+        List<JavaFile> files = new ArrayList<JavaFile>();
+        for (Package pack : getPackages()) {
+            files.addAll(pack.getJavaFiles());
+        }
+        return files.iterator();
+    }    
 }

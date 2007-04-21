@@ -5,35 +5,35 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardLegend;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.StandardXYItemRenderer;
-import org.jfree.chart.renderer.XYItemRenderer;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.codeviation.model.JavaFile;
-import org.codeviation.model.Package;
-import org.codeviation.model.SourceRoot;
 import org.codeviation.model.Version;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 
 /**
  * Statistics chart 
  *  
+ * @param T keys
  * @author pzajac
  */
-public final class Statistics implements Graph {
+public final class Statistics<T> implements Graph {
     Date fromDate;
     Date toDate;
     // time step
     long step;
     Record items[];
-    List keys;
+    List<T> keys;
     
 //    Map<String,Object> params = new HashMap<String,Object>();
         Map<Object,Record> objToRecord ;
@@ -47,10 +47,10 @@ public final class Statistics implements Graph {
         this.items = new Record[count];
         init();
     }
-    public void initKeys(List keys,Date from,Date to) {
+    public void initKeys(List<T> keys,Date from,Date to) {
         this.fromDate = from;
         this.toDate = to;
-        this.keys = new ArrayList(keys);
+        this.keys = new ArrayList<T>(keys);
         this.items = new Record[keys.size()];
         init();
         
@@ -78,17 +78,11 @@ public final class Statistics implements Graph {
     public  void addJavaFile(JavaFile jf) {
         statHandler.addJavaFile( jf);
     }
-    
-    public void addPackage(Package pkg) {
-        for (JavaFile jf : pkg.getJavaFiles()) {
+    public void addJavaFiles(Iterable<JavaFile> jfs) {
+        for (JavaFile jf : jfs) {
             addJavaFile(jf);
         }
-    }
-    public void addSourceRoot(SourceRoot srcRoot) {
-        for (Package pkg : srcRoot.getPackages()) {
-            addPackage(pkg);
-        }
-    }
+    }  
 //    public int getLastIndex() {
 //        return items.length - 1;
 //    }
@@ -140,6 +134,7 @@ public final class Statistics implements Graph {
         long minDate = fromDate.getTime();
         long maxDate = toDate.getTime();
         long interval = maxDate - minDate;
+        Set<Day> days = new HashSet<Day>();
         
         if (items.length > 0) {
             statHandler.initGraphPaint(chartConf);
@@ -157,7 +152,11 @@ public final class Statistics implements Graph {
                     }
                     long timeLong = (long)(step*i + minDate);
                     Date time = new Date(timeLong);
-                    series.add(new Day(time),addValue);
+                    Day day = new Day(time);
+                    if (!days.contains(day)) {
+                        days.add(day);
+                        series.add(new Day(time),addValue);
+                    }
                 }
                 data.addSeries(series);
             }
@@ -171,15 +170,15 @@ public final class Statistics implements Graph {
                 true,
                 false
                 );
-        StandardLegend sl = (StandardLegend) chart.getLegend();
-        sl.setDisplaySeriesShapes(true);
+//        StandardLegend sl = (StandardLegend) chart.getLegend();
+//        sl.setDisplaySeriesShapes(true);
         
         XYPlot plot = chart.getXYPlot();
         XYItemRenderer renderer = plot.getRenderer();
         if (renderer instanceof StandardXYItemRenderer) {
             StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
-            rr.setPlotShapes(true);
-            rr.setDefaultShapeFilled(true);
+            rr.setBaseShapesVisible(true);
+//            rr.setDefaultShapeFilled(true);
         }
         DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("MM-yyyy"));

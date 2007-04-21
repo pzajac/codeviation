@@ -26,6 +26,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -288,17 +290,21 @@ public class Issue {
                 ResultSet rs = stmt.executeQuery(query);
                 while (rs.next()) {
                     Issue issue = new Issue(rs.getInt("issue_id"));
-                    String propertyNames[] = getSimplePropertyNames();
-                    for (int i = 0 ; i < propertyNames.length ; i++ ) {
-                        String value = rs.getString(propertyNames[i]);
-
-                        issue.setPropertyAsString(propertyNames[i], value);
+                    try {
+                        String propertyNames[] = getSimplePropertyNames();
+                        for (int i = 0 ; i < propertyNames.length ; i++ ) {
+                            String value = rs.getString(propertyNames[i]);
+                            issue.setPropertyAsString(propertyNames[i], value);
+                        }
+                        issue.bReadLongDesc  = false;
+                        issue.bReadDependsOn = false;
+                        issue.bReadCCs = false;
+                        issue.bReadBlocks = false;
+                        list.add(issue);
+                    } catch(Exception e) {
+                        // XXX dirty hack!
+                        Logger.getLogger(Issue.class.getName()).log(Level.SEVERE,"Issue " + issue.getIssueId(),e);
                     }
-                    issue.bReadLongDesc  = false;
-                    issue.bReadDependsOn = false;
-                    issue.bReadCCs = false;
-                    issue.bReadBlocks = false;
-                    list.add(issue);
                 }
                rs.close();
             }

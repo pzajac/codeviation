@@ -5,20 +5,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardLegend;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.StandardXYItemRenderer;
-import org.jfree.chart.renderer.XYItemRenderer;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Package;
 import org.codeviation.model.SourceRoot;
 import org.codeviation.model.Version;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 
 /**
  *
@@ -101,15 +100,15 @@ public class CountsStatistics {
                                                          true,
                                                          false
                                                      );
-            StandardLegend sl = (StandardLegend) chart.getLegend();
-            sl.setDisplaySeriesShapes(true);
+//            StandardLegend sl = (StandardLegend) chart.getLegend();
+//            sl.setDisplaySeriesShapes(true);
 
             XYPlot plot = chart.getXYPlot();
             XYItemRenderer renderer = plot.getRenderer();
             if (renderer instanceof StandardXYItemRenderer) {
                 StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
-                rr.setPlotShapes(true);
-                rr.setDefaultShapeFilled(true);
+                rr.setPlotLines(true);
+//                rr.setDefaultShapeFilled(true);
             }
             DateAxis axis = (DateAxis) plot.getDomainAxis();
             axis.setDateFormatOverride(new SimpleDateFormat("MMM-yyyy"));
