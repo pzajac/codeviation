@@ -74,12 +74,12 @@ public class PageRankProcessTest extends TestCase {
         assertEquals("month ",0,calendar.get(Calendar.MONTH));
         assertEquals("day ",1,calendar.get(Calendar.DAY_OF_MONTH));
         assertEquals("hour ",19,calendar.get(Calendar.HOUR_OF_DAY));
-        Statistics stats = new Statistics(minDate,maxDate); 
+        Statistics<String> stats = new Statistics<String>(minDate,maxDate); 
         stats.setItemsCount(10);
         JavaFileHandler handler = chartConf.getStatHandler();
         handler.init(stats);
         stats.setJavaFileHandler(handler);
-        stats.addSourceRoot(srcRoot);
+        stats.addJavaFiles(srcRoot);
         JFreeChart chart = stats.getChart(chartConf, false);
         assertNotNull(chart);
         

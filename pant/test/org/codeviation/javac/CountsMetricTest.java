@@ -42,6 +42,7 @@ public class CountsMetricTest extends TestCase {
         RunJavacTest.runJavac(testPrjF);          
         File javaMainFile = new File(testPrjF,"src/usagemetrics/Main.java");
         JavaFile jf = JavaFile.getJavaFile(javaMainFile, "usagemetrics");
+        jf.getAllMetrics();
         CountsMetric metric = jf.getMetric(CountsMetric.class);
         assertNotNull(metric);
         

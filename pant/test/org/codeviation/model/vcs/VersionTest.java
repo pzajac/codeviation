@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 import org.codeviation.model.JavaFile;
@@ -34,7 +33,9 @@ public class VersionTest extends TestCase {
     private Version version = new Version ("3.4.5.4", COMMENT,new Date(234234234),USER,Version.State.EXP);
     private static String USER = "zajo";
     
-    /** Creates a new instance of VersionTest */
+    /** Creates a new instance of VersionTest 
+     * @param name 
+     */
     public VersionTest(String name) {
         super(name);
     }
@@ -92,7 +93,7 @@ public class VersionTest extends TestCase {
     }
     
     public void testSortVersions() {
-        ArrayList versions = new ArrayList ();
+        ArrayList<Version> versions = new ArrayList<Version> ();
         versions.add(new Version ("1.3", "adas", new Date(3333333),USER,State.EXP));
         versions.add(new Version ("1.2", "adas", new Date(2222222),USER,State.EXP));
         versions.add(new Version ("1.4", "adas", new Date(4444444),USER,State.EXP));
@@ -107,7 +108,7 @@ public class VersionTest extends TestCase {
         assertTrue("1.4 != " + version.getRevision(), version.getRevision().equals("1.4"));
     }
     public void testSortVersions2() {
-        ArrayList versions = new ArrayList ();
+        ArrayList<Version> versions = new ArrayList<Version> ();
         versions.add(new Version ("1.3", "adas",new Date (3333333),USER,State.EXP));
         versions.add(new Version ("1.2.2","adas",new Date(22222222),USER,State.EXP));
         versions.add(new Version ("1.2.1","adas",new Date(22222221),USER,State.EXP));
@@ -122,7 +123,7 @@ public class VersionTest extends TestCase {
         version = version.getNext();
         assertTrue("1.3 != " + version.getRevision(), version.getRevision().equals("1.3"));
         assertTrue("1.2.1 != " + branch.getRevision(), branch.getRevision().equals("1.2.1"));
-        version = (Version) branch.getNext();
+        version =  branch.getNext();
         assertTrue("1.2.2 != " + version.getRevision(), version.getRevision().equals("1.2.2"));
     }
     

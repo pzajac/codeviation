@@ -3,7 +3,7 @@ package org.codeviation.statistics.histogram;
 
 import junit.framework.TestCase;
 import org.codeviation.statistics.math.Histogram;
-import org.jfree.data.XYSeries;
+import org.jfree.data.xy.XYSeries;
 
 /**
  *
@@ -63,13 +63,13 @@ public class HistogramTest extends TestCase {
         assertEquals(3,hist.getMax(),EPSILON);
         
         XYSeries series =  hist.getXYSeries(true, "Test");
-        assertEquals(1.0/sum,series.getYValue(0).doubleValue(), EPSILON);
-        assertEquals(0.2/sum,series.getYValue(1).doubleValue(), EPSILON);
-        assertEquals(0.2/sum,series.getYValue(2).doubleValue(), EPSILON);
+        assertEquals(1.0/sum,series.getY(0).doubleValue(), EPSILON);
+        assertEquals(0.2/sum,series.getY(1).doubleValue(), EPSILON);
+        assertEquals(0.2/sum,series.getY(2).doubleValue(), EPSILON);
        
-        assertEquals(0.1,series.getXValue(0).doubleValue(), EPSILON);
-        assertEquals(0.1 + (3 - 0.1)/3. ,series.getXValue(1).doubleValue(), EPSILON);
-        assertEquals(0.1 + 2*(3 - 0.1)/3.,series.getXValue(2).doubleValue(), EPSILON);
+        assertEquals(0.1,series.getX(0).doubleValue(), EPSILON);
+        assertEquals(0.1 + (3 - 0.1)/3. ,series.getX(1).doubleValue(), EPSILON);
+        assertEquals(0.1 + 2*(3 - 0.1)/3.,series.getX(2).doubleValue(), EPSILON);
 
     }          
 }

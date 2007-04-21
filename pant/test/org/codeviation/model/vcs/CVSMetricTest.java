@@ -52,7 +52,7 @@ public class CVSMetricTest extends TestCase {
     }
     
     public void testMenuBar () throws IOException {
-        doFile("MenuBar.java");
+        doFile("MenuBar.java");        
     }
     public void testNbTopManager () throws IOException {
         doFile("NbTopManager.java");

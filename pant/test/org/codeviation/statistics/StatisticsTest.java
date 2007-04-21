@@ -45,7 +45,7 @@ public class StatisticsTest extends TestCase {
         assertNotNull(handler);
         stats.setJavaFileHandler(handler);
         handler.init(stats);
-        stats.addSourceRoot(srcRoot);
+        stats.addJavaFiles(srcRoot);
         JFreeChart chart = stats.getChart(conf, false);
         assertNotNull(chart);
         

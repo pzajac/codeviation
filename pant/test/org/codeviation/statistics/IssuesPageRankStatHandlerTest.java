@@ -47,7 +47,7 @@ public class IssuesPageRankStatHandlerTest extends TestCase {
             SourceRoot srcRoot = rep.getSourceRoot("apisupport/project/src");
             assertNotNull(srcRoot);
             
-            graph.addSourceRoot(srcRoot);
+            graph.addJavaFiles(srcRoot);
             handler.initGraphPaint(conf);
             JFreeChart chart = graph.getChart(conf, false);
                 
