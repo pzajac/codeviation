@@ -88,6 +88,51 @@ public class ChartConf {
         }
         return null;
     }
+
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ChartConf other = (ChartConf) obj;
+        if (this.title != other.title && (this.title == null || !this.title.equals(other.title))) {
+            return false;
+        }
+        if (this.xAxisTitle != other.xAxisTitle &&
+            (this.xAxisTitle == null || !this.xAxisTitle.equals(other.xAxisTitle))) {
+            return false;
+        }
+        if (this.yAxisTitle != other.yAxisTitle &&
+            (this.yAxisTitle == null || !this.yAxisTitle.equals(other.yAxisTitle))) {
+            return false;
+        }
+        if (this.name != other.name && (this.name == null || !this.name.equals(other.name))) {
+            return false;
+        }
+        if (this.recordTypes != other.recordTypes &&
+            (this.recordTypes == null || !this.recordTypes.equals(other.recordTypes))) {
+            return false;
+        }
+        return true;
+    }
+
+    public int hashCode() {
+        int hash = 3;
+        hash = 29 * hash + this.title != null
+                            ? this.title.hashCode(): 0;
+        hash = 29 * hash + this.xAxisTitle != null
+                            ? this.xAxisTitle.hashCode(): 0;
+        hash = 29 * hash + this.yAxisTitle != null
+                            ? this.yAxisTitle.hashCode(): 0;
+        hash = 29 * hash + this.name != null
+                            ? this.name.hashCode(): 0;
+        hash = 29 * hash + (this.recordTypes != null
+                            ? this.recordTypes.hashCode(): 0);
+        return hash;
+    }
+
     private static void logException(Exception e) {
         Logger.getLogger(ChartConf.class.getName()).log(Level.SEVERE,e.getMessage(),e);
     }

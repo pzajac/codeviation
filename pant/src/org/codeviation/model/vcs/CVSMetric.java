@@ -108,7 +108,7 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
             try {
                 Logger.getLogger(getClass().getName()).log(Level.FINE, "getRootVersion() Start:" + javaFile.getCVSPath());
                 setRootVersion(cvsUtil.getRootVersinTree(javaFile.getName()));
-                Logger.getLogger(getClass().getName()).log(Level.FINE, "getRootVersion() End:" + javaFile.getCVSPath());
+                Logger.getLogger(getClass().getName()).log(Level.FINE, "getRootVersion() End:" + javaFile.getCVSPath ());
                 // store it permamently
                 javaFile.setMetric(this);
             } catch (IOException ioe) {

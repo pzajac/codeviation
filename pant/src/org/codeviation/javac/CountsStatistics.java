@@ -73,7 +73,7 @@ public class CountsStatistics {
     
     public JFreeChart getChart(Set<CountsItem.Type> types) {
        TimeSeriesCollection data = new TimeSeriesCollection();
-         data.setDomainIsPointsInTime(false);
+         //data.setDomainIsPointsInTime(false);
          long minDate = fromDate.getTime();
          long maxDate = toDate.getTime();
          long interval = maxDate - minDate;
@@ -84,7 +84,7 @@ public class CountsStatistics {
                  for (int i = 0 ; i < items.length ; i++ ) {
                      CountsItem rec = items[i];
                      float value = rec.getValue(type);
-                     long timeLong = (long)(step*i + minDate);
+                     long timeLong = (step*i + minDate);
                      Date time = new Date(timeLong);
                      series.add(new Day(time),value);
                  }

@@ -40,7 +40,7 @@ public class PersistenceManagerTest extends TestCase {
         Package pack = src.getPackage(PKG_NAME);
         File pkgFile = new File(pack.getCVSPath());
         assertNull(src.getMetric(PKG_NAME, TEST_JAVA,UsagesMetric.class));
-        assertTrue(src.getMetrics(PKG_NAME, TEST_JAVA).isEmpty());
+        assertTrue(src.getMetricClasses(PKG_NAME, TEST_JAVA).isEmpty());
         
         // add a metric to the file 
         UsagesMetric result = new UsagesMetric();
@@ -48,6 +48,6 @@ public class PersistenceManagerTest extends TestCase {
         
         UsagesMetric result2 =  src.getMetric(PKG_NAME, TEST_JAVA, UsagesMetric.class);
         assertNotNull(result2);
-        assertTrue(src.getMetrics(PKG_NAME, TEST_JAVA).size() == 1);        
+        assertTrue(src.getMetricClasses(PKG_NAME, TEST_JAVA).size() == 1);        
     }
 }

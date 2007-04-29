@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.lang.IllegalStateException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -156,13 +157,21 @@ public final class JavaFile {
         }
     }
     
-    public List<Metric> getAllMetrics() {
+    @SuppressWarnings("unchecked")
+    public Set<Metric> getAllMetrics() {
         //only alredy initialized non presinsten Metrics are returned
-        List<Metric> mrs = new ArrayList<Metric>();
+        Set<Metric> mrs = new HashSet<Metric>();
         mrs.addAll(staticMetrics.values());
-        synchronized (JavaFile.class) {
-              JavaFileUtil.setCurrentJavaFile(this);
-              mrs.addAll(getPackage().getSourceRoot().getMetrics(getPackage().getName(),getName()));
+        Set<Class> metricsClasses = getPackage().getSourceRoot().getMetricClasses(getPackage().getName(), getName());
+        // first initialize CVS metrics
+        if (metricsClasses.remove(CVSMetric.class)) {
+           mrs.add(getCVSResultMetric()); 
+        }
+        for (Class clazz : metricsClasses) {
+            Metric m = getMetric(clazz);
+            if (m != null) {
+                mrs.add(m);
+            }
         }
         return mrs;
     }

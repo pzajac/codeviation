@@ -97,7 +97,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
             File pFile = getPackageFile(name);
             if (pFile != null) {
                 p = new Package(this,name);
-                getPackagesMap().put(name,p);
+                    getPackagesMap().put(name,p);
             }
         }
         return p;
@@ -106,15 +106,18 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     private Map<String,Package> getPackagesMap() {
         if (packages == null) {
             packages = new TreeMap<String,Package>();
-            // read packages
-            for (File file :getCacheDir().listFiles()) {
-                if (file.getName().endsWith(PACKAGE_EXT)) {
-                    String name = file.getName();
-                    name = name.substring(0,name.length() - PACKAGE_EXT.length());
+        }
+        // read packages
+        for (File file :getCacheDir().listFiles()) {
+            if (file.getName().endsWith(PACKAGE_EXT)) {
+                String name = file.getName();
+                name = name.substring(0,name.length() - PACKAGE_EXT.length());
+                if (!packages.containsKey(name)) {
                     packages.put(name,new Package(this,name));
                 }
             }
         }
+        
         return packages;
     }
     public List<Package> getPackages() {
@@ -150,24 +153,21 @@ public final  class SourceRoot implements Iterable<JavaFile> {
         return null;
     }
     
-    public List<Metric> getMetrics(String packageName,String file) {
+    public Set<Class> getMetricClasses(String packageName,String file) {
         File pfile = getPackageFile(packageName);
         File metrics[] = pfile.listFiles();
-        List<Metric> results = new ArrayList<Metric>();
+        Set<Class> results = new HashSet<Class>();
+        String prefix = file + "_";
         for (File f : metrics) {
             String name = f.getName();
-            if (name.startsWith(file + "_") && name.endsWith(JAVA_METRICS_EXT)) {
+            if (name.startsWith(prefix) && name.endsWith(JAVA_METRICS_EXT)) {
                 try {
-                    log.fine("readMetric:" + f.getPath());
-                    ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-                    try {
-                      results.add((Metric)ois.readObject());  
-                    } finally {
-                        ois.close();
-                    }
-                } catch (Exception e) {
-                    log(e);
-                } 
+                    Class clazz = Class.forName(name.substring(
+                            prefix.length(), name.length() -JAVA_METRICS_EXT.length()));
+                    results.add(clazz);
+                } catch(ClassNotFoundException cnfe) {
+                    log.log(Level.SEVERE,null,cnfe);
+                }
 
             } 
         }
