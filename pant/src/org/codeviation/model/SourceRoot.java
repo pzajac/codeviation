@@ -226,10 +226,14 @@ public final  class SourceRoot implements Iterable<JavaFile> {
             File tagsFile = new File(getCacheDir(),CVS_TAGS_FILE_NANE);
             if (tagsFile.exists()) {
                 ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tagsFile ));
-                tags =  (Set<String>) ois.readObject();
-                if (tags.contains(null)) {
-                    log.log(Level.SEVERE,"null tags " + getRelPath());
-                    tags = null;
+                try {
+                    tags =  (Set<String>) ois.readObject();
+                    if (tags.contains(null)) {
+                        log.log(Level.SEVERE,"null tags " + getRelPath());
+                        tags = null;
+                    }
+                } finally{
+                    ois.close();
                 }
             } 
             
@@ -261,34 +265,32 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     }
     
     /** get cvs tag for actual branch
+     * @param date 
+     * @return tag value for the tag date
      */ 
     public String getCvsTag(Date date) {
-        // XXX supported only nbcvs
-        if (rep.getName().equals("nbcvs")) {
-             Set<String> tags = getCvsTags();
-             Date usedTagDate = null; 
-             String usedTag = null;
-             for (String tag : tags) {
-                try {
-                    Date tagDate = PrepareNbTags.parseTagDate(tag);
-                    if (date.compareTo(tagDate) > 0) {
-                        if (usedTagDate == null || usedTagDate.compareTo(tagDate) < 0) {
-                            usedTagDate = tagDate;
-                            usedTag = tag;
-                        }
+         Set<String> tags = getCvsTags();
+         Date usedTagDate = null; 
+         String usedTag = null;
+         for (String tag : tags) {
+            try {
+                Date tagDate = PrepareNbTags.parseTagDate(tag);
+                if (date.compareTo(tagDate) > 0) {
+                    if (usedTagDate == null || usedTagDate.compareTo(tagDate) < 0) {
+                        usedTagDate = tagDate;
+                        usedTag = tag;
                     }
-                    
-                } catch (ParseException ex) {
-                    log(ex);
                 }
-             }
-             return usedTag;
-        } else {
-            throw new UnsupportedOperationException("Not supported for non nborg repositories");
-        }
-    }
+
+            } catch (ParseException ex) {
+                log(ex);
+            }
+         }
+         return usedTag;
+}
  
-    /** XXX suported only nbcvs
+    /** 
+     * @return minimal tag date
      */
     public Date getMinTagDate() {    
         Set<String> tags = getCvsTags();
@@ -301,7 +303,8 @@ public final  class SourceRoot implements Iterable<JavaFile> {
         }
         return usedTagDate;
     }
-    /** XXX suported only nbcvs
+    /** 
+     * @return maximal tag date
      */
     public Date getMaxTagDate() {
         Set<String> tags = getCvsTags();
