@@ -62,10 +62,10 @@ public final class CVSStatHandler implements JavaFileHandler<Statistics>, ChartC
     }
 
     public float getValue(Record rec, RecordType type) {
-        float buggyLines = (float) rec.getValue(LnState.ADDED_BUG.getIndex()) + 
+        float buggyLines = rec.getValue(LnState.ADDED_BUG.getIndex()) + 
                 rec.getValue(LnState.CHANGED_BUG.getIndex()) +
                 rec.getValue(LnState.REMOVED_BUG.getIndex());
-        float otherLines = (float) rec.getValue(LnState.OTHER_ADDED.getIndex()) + 
+        float otherLines =  rec.getValue(LnState.OTHER_ADDED.getIndex()) + 
                 rec.getValue(LnState.OTHER_CHANGED.getIndex()) +
                 rec.getValue(LnState.OTHER_REMOVED.getIndex());
         
@@ -92,15 +92,15 @@ public final class CVSStatHandler implements JavaFileHandler<Statistics>, ChartC
     }
     public  ChartConf[] getChartConfs() {
         return new ChartConf[] {
-            new ChartConf("Bugs Count", 
+            new ChartConf<Statistics>("Bugs Count", 
                 "Date", "Count", "Bugs Count for history",
                 Arrays.asList(CVSMetric.BUGS_COUNT_TYPE), 
                 new CVSStatHandler()),
-            new ChartConf("Bugs  density per line ", 
+            new ChartConf<Statistics>("Bugs  density per line ", 
                 "Date", "bug/non bug lines", "Ration of bug fix and normal commit",
                 Arrays.asList(CVSMetric.BUGS_LINE_DENSITY), 
                 new CVSStatHandler()),
-            new ChartConf("Lines History", 
+            new ChartConf<Statistics>("Lines History", 
                 "Date", "Value", "Lines history",
                 Arrays.asList(CVSMetric.BUG_LINES,
                     CVSMetric.NON_BUG_LINES), 

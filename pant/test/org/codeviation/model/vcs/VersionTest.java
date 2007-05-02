@@ -225,7 +225,23 @@ public class VersionTest extends TestCase {
 //          }
 //          pw.close();
     }
-    
+
+    public void testFilterVersions() {
+        List<Version> versions = new ArrayList<Version>();
+        Version v1 = new Version ("1.3", "adas", new Date(3333333),USER,State.EXP);
+        Version v2 = new Version ("1.2", "adas", new Date(2222222),USER,State.EXP);
+        Version v3 = new Version ("1.4", "adas", new Date(4444444),USER,State.EXP);
+        Version v4 = new Version ("1.1", "adas", new Date(1111111),USER,State.EXP);
+        versions.add(v1);
+        versions.add(v2);
+        versions.add(v3);
+        versions.add(v4);
+        
+        List<Version> results = Version.filterVersions(versions, new Date(1211111), new Date(3533333));
+        assertEquals("results.size()",2,results.size());
+        results.contains(v2);
+        results.contains(v3);
+    }
     public static void compareLogs(InputStream is1,InputStream is2) throws IOException {
         assertNotNull(is1);
         assertNotNull(is2);

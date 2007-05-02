@@ -8,22 +8,23 @@ import java.util.logging.Logger;
 
 /**
  * Configuration for one chart
+* @param GRAPH extends Graph
  */
-public class ChartConf {
+public class ChartConf <GRAPH extends Graph>{
     private String title;
     private String xAxisTitle;
     private String yAxisTitle;
     private String name;
     private List <RecordType> recordTypes;
-    private JavaFileHandler<? extends Graph> statHandler;
-    private Class<? extends Graph> graphClass;
+    private JavaFileHandler<GRAPH> statHandler;
+    private Class<GRAPH> graphClass;
     
     public ChartConf(String title,
             String xAxisTitle,
             String yAxisTitle,
             String name,
             List<RecordType> recordTypes,
-            JavaFileHandler<? extends Graph> statHandler) {
+            JavaFileHandler<GRAPH> statHandler) {
         this.title = title;
         this.xAxisTitle = xAxisTitle;
         this.yAxisTitle = yAxisTitle;
@@ -63,18 +64,18 @@ public class ChartConf {
         return new ArrayList<RecordType>(recordTypes);
     }
     
-    public JavaFileHandler<? extends Graph> getStatHandler() {
+    public JavaFileHandler<GRAPH> getStatHandler() {
         return statHandler;
     }
     
-    public void setGraphClass(Class<? extends Graph> graphClass) {
+    public void setGraphClass(Class<GRAPH> graphClass) {
         this.graphClass = graphClass;
     }
 
     public String toString() {
         return name;
     }
-    public Graph createGraph() {
+    public GRAPH createGraph() {
         if (graphClass != null) {
             try {
                 return graphClass.newInstance();

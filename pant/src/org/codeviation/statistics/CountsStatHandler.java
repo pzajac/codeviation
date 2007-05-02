@@ -6,20 +6,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 import no.uib.cipr.matrix.Vector;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.SourceRoot;
 import org.codeviation.model.Version;
 import org.codeviation.javac.CountsItem;
 import org.codeviation.javac.CountsMetric;
+import org.codeviation.model.Version.State;
 
 /**
  * Statistics Handler for CountsMetric
  * @author pzajac
  */
-public final class CountsStatHandler implements JavaFileHandler<Statistics>,ChartConfProvider{
+public final class CountsStatHandler implements JavaFileHandler<Statistics<String>>,ChartConfProvider{
     Statistics stats;
-    
+    static Logger logger = Logger.getLogger(Statistics.class.getName());
 
     public void addJavaFile( JavaFile jf) {
         CountsMetric cm = jf.getMetric(CountsMetric.class);
@@ -40,10 +42,14 @@ public final class CountsStatHandler implements JavaFileHandler<Statistics>,Char
                 for (int i = 1 ; i < versions.size() ; i++) {
                     prevVer = nextVer;
                     prevRec = nextRec;
+                    if (prevVer.getState() == State.DEAD) {
+                        continue;
+                    }
                     if (prevRec == -1) {
                         if (prevVer.getDate().compareTo(stats.getFromDate()) < 0)  {
                             prevRec = 0;
                         } else {
+                            logger.info("brea:" + prevVer.getDate());
                             break;
                         }
                     }
@@ -54,8 +60,8 @@ public final class CountsStatHandler implements JavaFileHandler<Statistics>,Char
                         if (nextRec == prevRec) {
                             break;
                         }
-                    } else if (nextRec > stats.getItemsCount() - 1) {
-                        nextRec = stats.getItemsCount() - 1;
+                    } else if (nextRec >= stats.getItemsCount() - 1 || i + 1 ==  versions.size()) {
+                        nextRec = stats.getItemsCount() ;
                     }
                     // fill all Records between <prevRec,nextRec>
                     //
@@ -77,8 +83,11 @@ public final class CountsStatHandler implements JavaFileHandler<Statistics>,Char
     }
     
     public ChartConf[] getChartConfs() {
-        return new ChartConf[] {new ChartConf("Class Elements Counts", 
+        return new ChartConf[] {new ChartConf<Statistics<String>>("Class Elements Counts", 
                 "Date", "Count", "Class Elements Counts",
+                Arrays.asList(CountsItem.RT_CLASSES,CountsItem.RT_FIELDS,CountsItem.RT_METHODS), new CountsStatHandler()),
+                new ChartConf<Statistics<String>>("Class Elements Counts", 
+                "Date", "Count", "All Elements Counts",
                 Arrays.asList(CountsItem.RECORD_TYPES), new CountsStatHandler())
         };
     }

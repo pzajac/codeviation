@@ -16,10 +16,10 @@ import org.codeviation.model.JavaFile;
  *
  * @author pzajac
  */
-public interface Graph {
+public interface Graph<GRAPH extends Graph> {
     public  void addJavaFiles(Iterable<JavaFile> jfs) ;
-    public JFreeChart getChart(ChartConf chart,boolean aditive);
-    public void setJavaFileHandler(JavaFileHandler handler);
+    public JFreeChart getChart(ChartConf<GRAPH> chart,boolean aditive);
+    public void setJavaFileHandler(JavaFileHandler<GRAPH> handler);
     public void setItemsCount(int count);
     public int getItemsCount();
 }

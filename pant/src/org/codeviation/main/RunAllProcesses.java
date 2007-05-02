@@ -54,10 +54,6 @@ public class RunAllProcesses {
             System.out.println(tag);
         }
         System.out.println("");
-        if (rep == null) {
-            System.out.println("No nbcvs repository found.");
-            return;
-        }
         for (RepositoryProcess process : Lookup.getDefault().lookupAll(RepositoryProcess.class)) {
             if (filters.size() == 0 || filters.contains(process.getName())) {
                 atLeastOneProcess = true;
@@ -71,6 +67,7 @@ public class RunAllProcesses {
             }
         }
         if (!atLeastOneProcess) {
+            System.out.println("No process was run.");
             help();
         }
     }

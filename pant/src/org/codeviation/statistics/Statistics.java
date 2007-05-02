@@ -1,6 +1,8 @@
 
 package org.codeviation.statistics;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -18,8 +21,13 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Version;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.annotations.XYPointerAnnotation;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.time.Month;
+import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.RectangleInsets;
 
 /**
  * Statistics chart 
@@ -27,16 +35,17 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
  * @param T keys
  * @author pzajac
  */
-public final class Statistics<T> implements Graph {
+public final class Statistics<T> implements Graph<Statistics<T>> {
     Date fromDate;
     Date toDate;
     // time step
     long step;
     Record items[];
     List<T> keys;
-    
+
+    static Logger logger = Logger.getLogger(Statistics.class.getName());
 //    Map<String,Object> params = new HashMap<String,Object>();
-        Map<Object,Record> objToRecord ;
+        Map<T,Record> objToRecord ;
      JavaFileHandler statHandler;
     /** Creates a new instance of CountsStatistics */
     public Statistics(Date from,Date to) {
@@ -54,7 +63,7 @@ public final class Statistics<T> implements Graph {
         this.items = new Record[keys.size()];
         init();
         
-        objToRecord = new HashMap<Object,Record>();
+        objToRecord = new HashMap<T,Record>();
         for (int i = 0 ; i < keys.size() ; i++) {
             objToRecord.put(keys.get(i),items[i]);
         }
@@ -111,7 +120,7 @@ public final class Statistics<T> implements Graph {
         return  getItem(v.getDate().getTime());
     }
 
-    public Record getItemForKey(Object key) {
+    public Record getItemForKey(T key) {
         if (objToRecord == null) {
             throw new IllegalStateException("objToRecord has not been initialized");
         }
@@ -124,13 +133,13 @@ public final class Statistics<T> implements Graph {
         return toDate;
     }
     
-    public JFreeChart getChart(ChartConf chartConf) {
+    public JFreeChart getChart(ChartConf<Statistics<T>> chartConf) {
         return getChart(chartConf,false);
     }
-    public JFreeChart getChart(ChartConf chartConf,boolean additive) {
+    public JFreeChart getChart(ChartConf<Statistics<T>> chartConf,boolean additive) {
         List<RecordType> types = chartConf.getRecordTypes();
         TimeSeriesCollection data = new TimeSeriesCollection();
-        data.setDomainIsPointsInTime(false);
+      //  data.setDomainIsPointsInTime(false);
         long minDate = fromDate.getTime();
         long maxDate = toDate.getTime();
         long interval = maxDate - minDate;
@@ -139,6 +148,7 @@ public final class Statistics<T> implements Graph {
         if (items.length > 0) {
             statHandler.initGraphPaint(chartConf);
             for (RecordType type : types) {
+                days.clear();
                 TimeSeries series = new TimeSeries(type.getDisplayName());
                 boolean additiveSer = additive && type.isSupportAdditive();
                 float addValue = 0;
@@ -150,7 +160,7 @@ public final class Statistics<T> implements Graph {
                     } else {
                         addValue = value;
                     }
-                    long timeLong = (long)(step*i + minDate);
+                    long timeLong = (step*i + minDate);
                     Date time = new Date(timeLong);
                     Day day = new Day(time);
                     if (!days.contains(day)) {
@@ -170,18 +180,50 @@ public final class Statistics<T> implements Graph {
                 true,
                 false
                 );
-//        StandardLegend sl = (StandardLegend) chart.getLegend();
+//       StandardLegend sl = (StandardLegend) chart.getLegend();
 //        sl.setDisplaySeriesShapes(true);
         
         XYPlot plot = chart.getXYPlot();
-        XYItemRenderer renderer = plot.getRenderer();
-        if (renderer instanceof StandardXYItemRenderer) {
-            StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
-            rr.setBaseShapesVisible(true);
-//            rr.setDefaultShapeFilled(true);
-        }
         DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("MM-yyyy"));
+        
+        
+        chart.setBackgroundPaint(Color.WHITE);
+        chart.setTitle((String)null);
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setDomainGridlinePaint(Color.WHITE);
+        plot.setRangeGridlinePaint(Color.BLACK);
+        plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+        plot.setDomainCrosshairVisible(false);
+        plot.setRangeCrosshairVisible(false);
+        
+        plot.setWeight(10);
+        
+        XYItemRenderer r = plot.getRenderer();
+        System.out.println(r.getClass());
+        if (r instanceof XYLineAndShapeRenderer) {
+            XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) r;
+      //      renderer.setBaseShapesVisible(true);
+//            renderer.setBaseShapesFilled(true);
+            renderer.setUseFillPaint(true);
+            System.out.println(renderer.getLegendItemLabelGenerator());
+            renderer.setBaseItemLabelsVisible(true);
+            //renderer.setSeriesItemLabelsVisible(1, true);
+            renderer.setUseOutlinePaint(false);
+//            XYTextAnnotation annotation = new XYPointerAnnotation("Ahoj",new Month(2, 2006).getLastMillisecond(),2000,3.14);
+//            renderer.addAnnotation(annotation);
+            
+//            renderer.setStroke(new BasicStroke(2f));
+//            renderer.setSeriesStroke(1, new BasicStroke(4.0f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,6,0,6}, 0.0f));
+//            renderer.getPlot().setRenderer(1, r)getRenderer(1).setStroke();
+//            renderer.setStroke();
+            
+  //          renderer.setS
+        }
+        
+        
+    //    chart.getLegend().setPosition(RectangleEdge.RIGHT);
+
         return chart;
     }
 

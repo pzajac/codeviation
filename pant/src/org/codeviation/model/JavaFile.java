@@ -139,7 +139,7 @@ public final class JavaFile {
                 mr = (T) staticMetrics.get(type);
                 if (mr == null) {
                     // try create new
-                    mr = (T)StaticMetricFactory.getMetric(this,type);
+                    mr = StaticMetricFactory.getMetric(this,type);
                     if (mr != null) {
                         staticMetrics.put((Class<Metric>)type,mr);
                         if (mr instanceof StaticMetric) {

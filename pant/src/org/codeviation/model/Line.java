@@ -171,6 +171,9 @@ public final class Line {
            throw new IOException("Missing version : " + initLn + "," + newLn + "," + revision + "," + cvsRes.getJavaFile());
        }
        Diff diff = version.getDiff(); 
+       if (diff == null) {
+           throw new IOException("NUll diff : " + initLn + "," + newLn + "," + revision + "," + cvsRes.getJavaFile());           
+       }
        return diff.getLine(initLn,newLn);
     }
 }

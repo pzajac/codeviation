@@ -10,7 +10,7 @@ import org.codeviation.model.SourceRoot;
  *
  * @author pzajac
  */
-public final class GenericGraph implements Graph {
+public final class GenericGraph implements Graph<GenericGraph> {
     private JavaFileHandler handler;
     private int itemsCount;
     private JFreeChart chart;

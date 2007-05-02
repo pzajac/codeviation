@@ -16,7 +16,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,7 +51,10 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     private static  String CVS_TAGS_FILE_NANE = "cvstags.ser";
     
     private static final Logger log = Logger.getLogger(MetricUtil.LOGGER);
-    
+
+    // cached min and max date
+    private Date minDate;
+    private Date maxDate;
     /** packageName -> package */
     Map<String,Package> packages = null;
     /** Creates a new instance of SourceRoot 
@@ -293,20 +295,9 @@ public final  class SourceRoot implements Iterable<JavaFile> {
      * @return minimal tag date
      */
     public Date getMinTagDate() {    
-        Set<String> tags = getCvsTags();
-        Date usedTagDate = null; 
-        for (String tag : tags) {
-            Date tagDate = rep.getTagDate(tag);
-            if (usedTagDate == null || usedTagDate.compareTo(tagDate) < 0) {
-                usedTagDate = tagDate;
-            }
+        if (minDate != null) {
+            return minDate;
         }
-        return usedTagDate;
-    }
-    /** 
-     * @return maximal tag date
-     */
-    public Date getMaxTagDate() {
         Set<String> tags = getCvsTags();
         Date usedTagDate = null; 
         for (String tag : tags) {
@@ -314,7 +305,28 @@ public final  class SourceRoot implements Iterable<JavaFile> {
             if (usedTagDate == null || usedTagDate.compareTo(tagDate) > 0) {
                 usedTagDate = tagDate;
             }
+        }
+        log.info("minDate:" + usedTagDate);
+        minDate = usedTagDate;
+        return usedTagDate;
+    }
+    /** 
+     * @return maximal tag date
+     */
+    public Date getMaxTagDate() {        
+        if (maxDate != null) {
+            return maxDate;
+        }
+        Set<String> tags = getCvsTags();
+        Date usedTagDate = null; 
+        for (String tag : tags) {
+            Date tagDate = rep.getTagDate(tag);
+            if (usedTagDate == null || usedTagDate.compareTo(tagDate) < 0) {
+                usedTagDate = tagDate;
+            }
          }
+        log.info("maxDate:" + usedTagDate);
+        maxDate = usedTagDate;
          return usedTagDate;
     }
     

@@ -26,19 +26,32 @@ public final class CountsItem {
     private int enumConstants;
     private int exceptionParameters;
 
+    public static final RecordType RT_CLASSES = new RecordType("Classes",0,false);
+    public static final RecordType RT_INTERFACES = new RecordType("Interfaces",1,false);
+    public static final RecordType RT_ENUMS = new RecordType("Enums",2,false);
+    public static final RecordType RT_ANNOTATION = new RecordType("Annotations",3,false);
+    public static final RecordType RT_METHODS =  new RecordType("Methods",4,false);
+    public static final RecordType RT_CONSTRUCTORS = new RecordType("Constructors",5,false);
+    public static final RecordType RT_FIELDS = new RecordType("Fields",6,false);
+    public static final RecordType RT_PARAMETERS = new RecordType("Parameters",7,false);
+    public static final RecordType RT_VARIABLES = new RecordType("Variables",8,false);
+    public static final RecordType RT_STATIC_INIT = new RecordType("Static inits",9,false);
+    public static final RecordType RT_ENUM_CONST = new RecordType("Enum constants",10,false);
+    public static final RecordType RT_EXC_PAR = new RecordType("Exception Parameters",11,false);
+    
     public static final RecordType[] RECORD_TYPES = new RecordType[] {
-      new RecordType("Classes",0,false),
-      new RecordType("Interfaces",1,false),
-      new RecordType("Enums",2,false),
-      new RecordType("Annotations",3,false),
-      new RecordType("Methods",4,false),
-      new RecordType("Constructors",5,false),
-      new RecordType("Fields",6,false),
-      new RecordType("Parameters",7,false),
-      new RecordType("Variables",8,false),
-      new RecordType("Static inits",9,false),
-      new RecordType("Enum constants",10,false),
-      new RecordType("Exception Parameters",11,false)
+        RT_CLASSES,
+        RT_INTERFACES,
+        RT_ENUM_CONST,
+        RT_ANNOTATION,
+        RT_METHODS,
+        RT_CONSTRUCTORS,
+        RT_FIELDS,
+        RT_PARAMETERS,
+        RT_VARIABLES,
+        RT_STATIC_INIT,
+        RT_ENUM_CONST,
+        RT_EXC_PAR
     };
     public static enum Type {
         CLASSES,

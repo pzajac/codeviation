@@ -401,7 +401,7 @@ public class Version implements Comparable<Version> , Serializable {
     public static List<Version> filterVersions(List<Version> versions,Date minDate,Date maxDate) {
         List<Version> filteredVers = new ArrayList<Version>();
         for (Version v: versions) {
-            if (minDate.compareTo(v.getDate()) >= 0 && maxDate.compareTo(v.getDate()) <= 0) {
+            if (minDate.compareTo(v.getDate()) <= 0 && maxDate.compareTo(v.getDate()) >= 0) {
                 filteredVers.add(v);
             }
         }

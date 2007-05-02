@@ -126,6 +126,7 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
                         break;
                     case POSITION_RATIO:
                         rank = val.getRatio();
+                        break;
                     default:
                         throw new IllegalStateException (jf.getName());
                     }
@@ -210,7 +211,7 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
     }
         
     public ChartConf[] getChartConfs() {
-        ChartConf conf = new ChartConf("Issue Histogram for PageRank", 
+        ChartConf<GenericGraph> conf = new ChartConf<GenericGraph>("Issue Histogram for PageRank", 
              "Sorted classes by PageRank (from max to min)","Probability", "Probability of defects",
             Arrays.asList(PAGE_RANK_RECORD_TYPE,RATIO_PAGE_RANK_RECORD_TYPE), new IssuesPageRankStatHandler());
         conf.setGraphClass(GenericGraph.class);

@@ -19,7 +19,7 @@ import org.codeviation.tasks.PageRankMetric;
  * Statistics Handler for PageRankMetric
  * @author pzajac
  */
-public final class PageRankStatHandler implements JavaFileHandler<Statistics<String>>,ChartConfProvider{
+public final class PageRankStatHandler implements JavaFileHandler<Statistics<String>>,ChartConfProvider<Statistics<String>>{
     private Statistics<String> stats;
     private boolean initialized;
     private ChartConf conf;
@@ -106,10 +106,10 @@ public final class PageRankStatHandler implements JavaFileHandler<Statistics<Str
     }
     
     public ChartConf[] getChartConfs() {
-        return new ChartConf[] {new ChartConf("PageRank - value", 
+        return new ChartConf[] {new ChartConf<Statistics<String>>("PageRank - value", 
                 "Date", "Rank", "PageRank history",
                 Arrays.asList(PAGE_RANK_RECORD_TYPE), new PageRankStatHandler()),
-            new ChartConf("PageRank - position ", 
+            new ChartConf<Statistics<String>>("PageRank - position ", 
                 "Date", "Value", "PageRank history",
                 Arrays.asList(new RecordType[]{PAGE_RANK_MAX_POSITION,PAGE_RANK_MIN_POSITION,PAGE_RANK_AVG_POSITION}), new PageRankStatHandler())                
         };
