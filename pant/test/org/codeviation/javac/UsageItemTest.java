@@ -43,5 +43,11 @@ public class UsageItemTest extends TestCase {
         assertFalse(u5.equals(u1));
         assertFalse(u7.equals(u6));
     }
+    
+    public void testGetPackage() {
+        UsageItem u = new UsageItem("hello","org.netbeans.Ferda");
+        System.out.println(u.getClazz());
+        assertEquals("org.netbeans",u.getPackage());
+    }
 
 }

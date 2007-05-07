@@ -10,8 +10,12 @@
 package org.codeviation.model;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -33,6 +37,8 @@ public final class Repository {
     private final File cvsRoot;
     private final String name;
     private static final String SOURCE_ROOTS_LIST_FILE = "sourceroots.lst";
+    private static final String COMPILATION_STATUS_FILE = "CompilationStatus.ser";
+    
     private static final Logger logger = Logger.getLogger(PersistenceManager.class.getName());
     /** rel_path_in_cvs -> SourceRoot */
     private Map<String,SourceRoot> sourceRoots;
@@ -90,6 +96,10 @@ public final class Repository {
     }
     
     
+    /**
+     * Get repository folder in pant.cache folder.
+     * @return repository folder
+     */
     public File getCacheRoot() {
         return new File(PersistenceManager.getDefault().getFolder(),getName());
     }
@@ -167,8 +177,55 @@ public final class Repository {
         }
         return null;
     }
-    
+    /**
+     * Add info about compilation for source root
+     * @param srcRoot source root
+     * @param status compilation status 
+     * @param tagName cvs timestamp or tag name
+     */ 
+    public void addSourceRootCompilationStatus(SourceRoot srcRoot,boolean status,String tagName) {
+        if (tagName == null) {
+            logger.info("Null tagName for source root " + srcRoot.getRelPath());
+            return ;
+        }
+        CompilationStatus cs = getCompilationStatus();
+        cs.addSourceRootCompilationStatus(srcRoot.getRelPath(),status,tagName);
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File (getCacheRoot(),COMPILATION_STATUS_FILE)));
+            try {
+                oos.writeObject(cs);
+            } finally {
+                oos.close();
+            }
+        } catch (IOException ioe) {
+            logger.log(Level.SEVERE,"Compilation status storing error", ioe);
+        }
+        
+    }    
     public String toString() {
         return name;
+    }
+    
+    /**
+     * get compilation status for this repository
+     * @return compilation status
+     */
+    public CompilationStatus getCompilationStatus() {
+        File csFile = new File (getCacheRoot(),COMPILATION_STATUS_FILE);
+        if (csFile.exists()) {
+            try {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(csFile));
+                try {
+                    return (CompilationStatus) ois.readObject();
+                } finally {
+                    ois.close();
+                }
+            } catch (IOException ioe ) {
+                logger.log(Level.SEVERE,"CompilationStatus reading error.",ioe);
+            } catch (ClassNotFoundException cnfe) {
+                logger.log(Level.SEVERE,"CompilationStatus reading error.",cnfe);
+            }
+        } 
+        return new CompilationStatus();
     }
 }

@@ -24,6 +24,27 @@ public final class UsageItem  {
     public String toString() {
         return clazz + "." + method; 
     }
+    
+    /** XXX computes package from class name
+     */
+    public String getPackage() {
+        //default 
+       String pack = "" ;  
+       int index = -1;
+       int prevIndex = -1;
+       index = clazz.length() - 1;
+       while ((index = clazz.lastIndexOf('.', index)) != -1) {
+           if (index < clazz.length() && Character.isLowerCase(clazz.charAt(index + 1))) {
+               break;
+           }
+           prevIndex = index;
+           index--;
+       }
+       if (prevIndex != -1) {
+            pack = clazz.substring(0,prevIndex);
+       }
+       return pack;
+    }
     public boolean equals(Object object) {
         if (object instanceof UsageItem) {
             UsageItem u = (UsageItem)object;

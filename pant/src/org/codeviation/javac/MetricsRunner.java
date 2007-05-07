@@ -19,6 +19,7 @@ import javax.tools.JavaFileObject;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.codeviation.model.JavaFile;
 import org.codeviation.javac.MetricBuilder;
+import org.codeviation.model.SourceRoot;
 import org.openide.util.Lookup;
 
 /**
@@ -38,6 +39,7 @@ public class MetricsRunner implements TaskListener {
     private static Javac attributes;
     private static boolean initialized ;    
     private static JavaFile lastJavaFile; 
+    private static SourceRoot  lastSourceRoot; 
     
     private static List<MetricBuilder> metrics = new ArrayList<MetricBuilder>(); 
     
@@ -104,7 +106,8 @@ public class MetricsRunner implements TaskListener {
                 lastJavaFile = null;
                 lastJavaFile = getJavaFile(e.getTypeElement());
                 if (lastJavaFile != null) {
-                    lastJavaFile.getPackage().getSourceRoot().addCvsTag(cvsTag);
+                    lastSourceRoot = lastJavaFile.getPackage().getSourceRoot();
+                    lastSourceRoot.addCvsTag(cvsTag);
                     CVSVersionsByPant cvspant = lastJavaFile.getMetric(CVSVersionsByPant.class);
                     String version = lastJavaFile.getCVSVersionName();
                     if (version != null) {
@@ -162,6 +165,14 @@ public class MetricsRunner implements TaskListener {
             System.out.println( metric.getName() );
             System.out.println( metric );
         } 
+    }
+
+    public static SourceRoot getLastSourceRoot() {
+        return lastSourceRoot;
+    }
+
+    public static void setLastSourceRoot(SourceRoot lastSourceRoot) {
+        MetricsRunner.lastSourceRoot = lastSourceRoot;
     }
     
     static void initCvsTag() {

@@ -170,7 +170,6 @@ public final  class SourceRoot implements Iterable<JavaFile> {
                 } catch(ClassNotFoundException cnfe) {
                     log.log(Level.SEVERE,null,cnfe);
                 }
-
             } 
         }
         return results;        

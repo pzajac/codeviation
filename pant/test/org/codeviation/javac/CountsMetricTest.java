@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Set;
 import junit.framework.TestCase;
+import org.codeviation.model.CompilationStatus;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.PersistenceManager;
 import org.codeviation.model.SourceRoot;
@@ -187,6 +188,13 @@ public class CountsMetricTest extends TestCase {
         assertEquals("exceptionParameters",0,cm.getExceptionParameters());
         assertEquals("enumConstants",0,cm.getEnumConstants());
 
+        // test Compilation status
+        CompilationStatus status = srcRoot.getRepository().getCompilationStatus();
+        Set<String> allTags = status.getTags();
+        assertEquals("compilation status tags",3,allTags.size());
+        assertTrue("compilation status",allTags.contains("1"));
+        
+        assertTrue("compilation status source root",status.getSourceRootCompilationStatuses("1").get(srcRoot.getRelPath()));
         
 //        PrintWriter pw = new PrintWriter(new File("/tmp/counts2.txt"));
 //        generateAssert(metric,pw);

@@ -30,6 +30,7 @@ import org.apache.tools.ant.taskdefs.compilers.Javac13;
 import org.apache.tools.ant.types.Commandline;
 import org.codeviation.model.PersistenceManager;
 import org.codeviation.javac.MetricsRunner;
+import org.codeviation.model.SourceRoot;
 
 /**
  *
@@ -51,12 +52,13 @@ public final class MeasuringJavac extends Javac13 {
      * @exception BuildException if the compilation has problems.
      */
     public boolean execute() throws BuildException{
-        MetricsRunner.initCvsTag();
-        attributes.log("Using modern compiler", Project.MSG_VERBOSE);
+        MetricsRunner.setLastSourceRoot(null);
+        attributes.log("Using patched compiler compiler", Project.MSG_VERBOSE);
         String cvsProp = getProject().getProperty(CVS_TAG_PROP_NAME);
         if (cvsProp != null) {
             System.setProperty(CVS_TAG_PROP_NAME, cvsProp);
         }
+        MetricsRunner.initCvsTag();
         attributes.log("tag :" + cvsProp);
         attributes.log(PersistenceManager.PANT_CACHE_FOLDER + " :" + PersistenceManager.getDefault().getFolder(), Project.MSG_VERBOSE);
         // XXX rather customize target via property
@@ -87,7 +89,15 @@ public final class MeasuringJavac extends Javac13 {
             } catch(IOException ioe) {
                 throw new BuildException(ioe);
             }
-            return super.execute();
+            // XXX should check compilation status
+            //
+             boolean status = super.execute();
+             SourceRoot srcRoot = MetricsRunner.getLastSourceRoot();
+             if (srcRoot != null) {
+                 srcRoot.getRepository().addSourceRootCompilationStatus(srcRoot,status,System.getProperty(CVS_TAG_PROP_NAME));
+             }
+             return true;
+             
         } catch (IOException ioe) {
             throw new BuildException(ioe);
         } finally {
