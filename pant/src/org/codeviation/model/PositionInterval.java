@@ -27,6 +27,7 @@ public final class PositionInterval implements Serializable,Comparable<PositionI
     public PositionInterval(Position startPosition,Position endPosition) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
+        // XXX check the same version for both positions
     }
     
     public boolean equals(Object obj) {

@@ -37,10 +37,11 @@ public class PersistenceManagerTest extends TestCase {
         File testJavaFile = new File(pkgInRep,TEST_JAVA);
         manager.getOrCreateRepository(repository, TEST_REP);
         SourceRoot src = manager.getOrCreateSourceRoot(srcRoot1);
-        Package pack = src.getPackage(PKG_NAME);
+        Package pack = src.getPackage(PKG_NAME,true);
         File pkgFile = new File(pack.getCVSPath());
         assertNull(src.getMetric(PKG_NAME, TEST_JAVA,UsagesMetric.class));
         assertTrue(src.getMetricClasses(PKG_NAME, TEST_JAVA).isEmpty());
+        assertNull("package doesn't exist",src.getPackage("packagedoesntexist",false));
         
         // add a metric to the file 
         UsagesMetric result = new UsagesMetric();

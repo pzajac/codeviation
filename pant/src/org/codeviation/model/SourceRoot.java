@@ -86,17 +86,26 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     }
     /** @return cache folder for package
      */ 
-    File getPackageFile(String name) {
+    File getPackageFile(String name,boolean create) {
         File pkg =  new File(getCacheDir(),name + PACKAGE_EXT);        
+        if (!create && !pkg.isDirectory()) {
+            return null;
+        }
         pkg.mkdirs();
         return pkg;
     }
     
-    public Package getPackage(String name) {
+    /**
+     * Package for package name
+     * @param name package name
+     * @param create creates packages if the paclage doesn't exist
+     * @return return null when the package doesn't exist
+     */
+    public Package getPackage(String name,boolean create) {
         
         Package p = getPackagesMap().get(name);
         if (p == null) {
-            File pFile = getPackageFile(name);
+            File pFile = getPackageFile(name,create);
             if (pFile != null) {
                 p = new Package(this,name);
                     getPackagesMap().put(name,p);
@@ -137,7 +146,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     }  
     @SuppressWarnings("unchecked")
     public <T extends Metric> T getMetric(String packageName,String fileName,Class<T> clazz){
-        File pfile = getPackageFile(packageName);
+        File pfile = getPackageFile(packageName,true);
         File f = new File(pfile,fileName + "_" + clazz.getName() + JAVA_METRICS_EXT);
         log.fine("getMetric:" + f.getAbsolutePath());
         if (f.exists()) {
@@ -156,7 +165,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     }
     
     public Set<Class> getMetricClasses(String packageName,String file) {
-        File pfile = getPackageFile(packageName);
+        File pfile = getPackageFile(packageName,true);
         File metrics[] = pfile.listFiles();
         Set<Class> results = new HashSet<Class>();
         String prefix = file + "_";
@@ -176,7 +185,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     }
     
     public <T extends Metric> void setMetric(String packageName,String name, T mr) {
-           File pn = getPackageFile(packageName);
+           File pn = getPackageFile(packageName,true);
            File of = new File(pn,name + "_" + mr.getClass().getName() + JAVA_METRICS_EXT);
            log.fine("writeMetric: " + of );
            try {
@@ -305,7 +314,6 @@ public final  class SourceRoot implements Iterable<JavaFile> {
                 usedTagDate = tagDate;
             }
         }
-        log.info("minDate:" + usedTagDate);
         minDate = usedTagDate;
         return usedTagDate;
     }
@@ -324,7 +332,6 @@ public final  class SourceRoot implements Iterable<JavaFile> {
                 usedTagDate = tagDate;
             }
          }
-        log.info("maxDate:" + usedTagDate);
         maxDate = usedTagDate;
          return usedTagDate;
     }

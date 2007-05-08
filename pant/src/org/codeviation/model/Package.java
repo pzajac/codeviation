@@ -162,7 +162,7 @@ public final class Package implements Iterable<JavaFile>{
     }
 
     public File getCacheFolder() {
-        return sourceRoot.getPackageFile(getName());
+        return sourceRoot.getPackageFile(getName(),true);
     }
     private void storeJavaFileNames(Set<String> cachedNames) {
          try {

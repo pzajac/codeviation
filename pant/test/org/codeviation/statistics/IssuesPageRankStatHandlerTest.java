@@ -33,6 +33,7 @@ public class IssuesPageRankStatHandlerTest extends TestCase {
         super.tearDown();
     }
 
+    @SuppressWarnings("unchecked")
     public void testPageRank() {
         ChartConf confs[] = new IssuesPageRankStatHandler().getChartConfs();
         for (ChartConf conf : confs) {

@@ -57,7 +57,7 @@ public class PageRankProcessTest extends TestCase {
         process.execute(rep, env);
         
         SourceRoot srcRoot = rep.getSourceRoot(SRC_ROOT);
-        Package pack = srcRoot.getPackage("org.openide.filesystems");
+        Package pack = srcRoot.getPackage("org.openide.filesystems",true);
         JavaFile jf = pack.getJavaFile("FileObject.java");
         PageRankMetric prm = jf.getMetric(PageRankMetric.class);
         assertFalse("Not empty tags count", prm.getTags().isEmpty());

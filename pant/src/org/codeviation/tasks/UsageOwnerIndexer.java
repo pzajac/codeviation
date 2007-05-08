@@ -8,13 +8,18 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Line;
 import org.codeviation.model.Repository;
@@ -48,7 +53,9 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
      private Map<UsageItem,UsageItem> usages = new HashMap<UsageItem,UsageItem>();
      private Map<String,Map<UsageItem,Integer>> usagesOfUsers = new HashMap<String,Map<UsageItem,Integer>>();
      private File outDir;     
+     private static Matrix outMatrix[];
      
+     static final String MATRIX_FILE_NAME = "SimpleMatrix";
      /** for these users you want to generate diffs
       */  
      private static Set<String> diffUsers = new HashSet<String>();
@@ -106,7 +113,113 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
     protected boolean prepareFile(JavaFile jf) {
         return true;
     }
+    
+    public static void setOutMatrix(Matrix matrix[]) {
+        outMatrix = matrix;
+    }
+    public void generateMatrix(Map <UsageItem,Integer > usagesColumns,Map<String,Integer> userRows,String name) throws IOException {
+        int columns = 0;
+        for (Integer val : usagesColumns.values()) {
+            if (columns < val ) {
+                columns = val;
+            }
+        }
+        columns++;
+        
+        Matrix matrix = new FlexCompRowMatrix(userRows.size(),columns);
+        for (Map.Entry<String,Map<UsageItem,Integer>> userEntry : usagesOfUsers.entrySet()) {
+            int userRow = userRows.get(userEntry.getKey());
+            for (Map.Entry<UsageItem,Integer> usageEntry : userEntry.getValue().entrySet()) {
+                Integer column = usagesColumns.get(usageEntry.getKey());
+                if (column != null) {
+                    matrix.add(userRow, column, usageEntry.getValue());
+                }
+            }
+        }
+        
+        // store matrix to m-file
+        File matFile = new File(outDir,name);
+        File rowsFile = new File (outDir,name + ".rows");
+        File columnsFile = new File(outDir,name + ".columns");
+        
+        System.out.println(matFile);
+        PrintWriter matWriter = new PrintWriter(new FileWriter(matFile));
+        PrintWriter rowsWriter = new PrintWriter(new FileWriter(rowsFile));
+        PrintWriter columnsWriter = new PrintWriter(new FileWriter(columnsFile));
+        try {
+            matWriter.println("% rows: " +  matrix.numRows());
+            writeInversedMap(rowsWriter,userRows);
+            matWriter.println("% columns: " +  matrix.numColumns());
+            writeInversedMap(columnsWriter,usagesColumns);
 
+            for (int r = 0 ; r < matrix.numRows() ; r++) {
+               for (int c = 0 ; c < matrix.numColumns() ; c++) {
+                  double val = matrix.get(r, c);
+                  if (val != 0.0) {
+                      int ri = r + 1;
+                      int ci = c + 1;
+                      matWriter.println("mat(" + ri + "," + ci + ") = " + val + ";");
+                  }
+               } 
+               matWriter.println();
+            }
+        } finally {
+            matWriter.close();
+            rowsWriter.close();
+            columnsWriter.close();
+        }
+        if (outMatrix != null) {
+            outMatrix[0] = matrix;
+        }
+    }
+    
+    enum ColumnType {
+        CLASS,
+        PACKAGE,
+        METHOD
+    }
+    
+    static interface  UsageFilter {
+        public boolean match(UsageItem item) ;
+    }
+    private void preparaDate(Map <UsageItem,Integer > usagesColumns,Map<String,Integer> userRow,ColumnType type,UsageFilter filter) {
+//     private Map<UsageItem,UsageItem> usages = new HashMap<UsageItem,UsageItem>();
+//     private Map<String,Map<UsageItem,Integer>> usagesOfUsers = new HashMap<String,Map<UsageItem,Integer>>();
+        int row = 0;
+        for (String user : usagesOfUsers.keySet()) {
+            userRow.put(user, row++);
+        }
+        
+        int column = 0;
+        Map<String,Integer> usageValues = new HashMap<String,Integer>(); 
+        
+        for (UsageItem usage : usages.keySet()) {
+            if (filter == null || filter.match(usage)) {
+                boolean found = false;
+                String val = null;
+                switch (type) {
+                case CLASS:
+                    val = usage.getClazz();
+                    break;
+                case METHOD:
+                     val  = usage.getClazz() + "." + usage.getMethod();
+                    break;
+                case PACKAGE:
+                    val = usage.getPackage();
+                    break;
+                }
+                if (!usageValues.containsKey(val)) {
+                    int colVal = column++;
+                    usageValues.put(val,colVal);
+                    usagesColumns.put(usage,colVal);
+                } else {
+                    usagesColumns.put(usage,usageValues.get(val));
+                }
+            }
+        }
+        
+        
+    }
     public boolean execute(Repository repository, RepositoryProcessEnv env) {
         try {
            // initialize out dir 
@@ -115,6 +228,9 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
                    getName() + File.separator + repository.getName()));
            env.log(this, LogReason.START_PROCESS, repository.getName()); 
            for (SourceRoot srcRoot : repository.getSourceRoots()) {
+               if (env.getSourceRootFilter() != null && !env.getSourceRootFilter().accept(srcRoot)) {
+                   continue;
+               }
                System.out.println(srcRoot.getRelPath());
                env.log(this, LogReason.START_SOURCE_ROOT,srcRoot.getRelPath()); 
                for (Package pack : srcRoot.getPackages()) {
@@ -138,7 +254,19 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
            env.log(this, LogReason.END_SOURCE_ROOT, srcRoot.getRelPath());
            }
            storeUsages();
-        } catch (IOException ioe) {
+           
+           // XXX Matrix for Praks
+           Map <UsageItem,Integer >  usagesColumns = new HashMap<UsageItem, Integer>();
+           Map<String,Integer> userRow = new TreeMap<String, Integer>();
+           
+           preparaDate(usagesColumns,userRow,ColumnType.PACKAGE,new UsageFilter() {
+                public boolean match(UsageItem item) {
+                    return  item.getClazz().startsWith("java.") || item.getClazz().startsWith("javax.");
+                }
+           });
+           generateMatrix(usagesColumns, userRow, MATRIX_FILE_NAME);
+           
+        }  catch (IOException ioe) {
             logger.log(Level.SEVERE, ioe.getMessage(),ioe);
             return false;
         } finally {
@@ -209,5 +337,27 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
           }
 
        } // generate diffs
+    }
+    
+    
+    private <KEY,VALUE extends Comparable> void writeInversedMap(PrintWriter writer,Map<KEY,VALUE> map) {
+        List<Map.Entry<KEY,VALUE>> items = new ArrayList<Map.Entry<KEY, VALUE>>(map.entrySet());
+        Collections.sort(items,new Comparator<Map.Entry<KEY,VALUE>>() {
+            public int compare(Entry<KEY, VALUE> o1, Entry<KEY, VALUE> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        VALUE val = null;
+        for (Map.Entry<KEY,VALUE> item : items) {
+            if (val != null) {
+                if (val.equals(item.getValue())) {
+                    writer.print(" , ");
+                } else {
+                    writer.println();
+                }
+            }
+            val = item.getValue();
+            writer.print(item.getKey());
+        }
     }
 }

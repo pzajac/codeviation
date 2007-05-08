@@ -68,7 +68,7 @@ public class NbCvsTest extends TestCase {
         Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
         assertNotNull(rep);
         SourceRoot srcRoot = rep.getSourceRoot("apisupport/harness/jnlp-src");
-        Package pack = srcRoot.getPackage("org.netbeans.modules.apisupport.jnlplauncher");
+        Package pack = srcRoot.getPackage("org.netbeans.modules.apisupport.jnlplauncher",true);
         return  pack.getJavaFile("RuntimePolicy.java");
     }
     
@@ -90,7 +90,7 @@ public class NbCvsTest extends TestCase {
         Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
         assertNotNull(rep);
         SourceRoot srcRoot = rep.getSourceRoot("ant/debugger/src");
-        Package pack = srcRoot.getPackage("org.netbeans.modules.ant.debugger");
+        Package pack = srcRoot.getPackage("org.netbeans.modules.ant.debugger",true);
         JavaFile jf = pack.getJavaFile("ToolTipAnnotation.java");
         CVSMetric cvsm = jf.getCVSResultMetric();
         Version v = cvsm.getRootVersion();

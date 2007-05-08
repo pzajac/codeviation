@@ -293,7 +293,7 @@ public final class JavaFile {
             String path = file.getParentFile().getCanonicalPath(); 
             String rootPath = srcRoot.getCvsDir().getAbsolutePath(); 
             assert path.startsWith(rootPath);
-            return srcRoot.getPackage(packageName).getJavaFile(file.getName()); 
+            return srcRoot.getPackage(packageName,true).getJavaFile(file.getName()); 
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         }
