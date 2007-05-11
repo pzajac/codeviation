@@ -40,12 +40,25 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
     static boolean updateCVS = true;
     transient JavaFile javaFile;
 
-
+   /** count of bugs*/
     public static final RecordType BUGS_COUNT_TYPE = new RecordType("Bug Count",0,true);
+    /** ration of  all lines changes bugfixing / other lines */
     public static final RecordType BUGS_LINE_DENSITY = new RecordType("Bug Lines Density",1,false);
+    /** all changes of buggy lines - fixing bug
+     */
     public static final RecordType BUG_LINES =  new RecordType("Buggy Lines",2,true);
-    public static final RecordType NON_BUG_LINES =  new RecordType("Non Buggy Lines",2,true);
-    
+    /** all changes of all nonbuggy lines - feature
+     */
+    public static final RecordType NON_BUG_LINES =  new RecordType(" Other lines",3,true);
+    /** all itegratedlines which cause bug. They will be removed in future as bugfix  
+     */
+    public static final RecordType NEW_BUG_LINES = new RecordType("New Buggy Lines",4,true);  
+    /** BUG_LINES + NON_BUG_LINES
+     */
+    public static final RecordType ALL_LINES = new RecordType("All Lines",5,true);  
+    /** all real lines + added - removed + changed
+     */
+    public static final RecordType REAL_LINES = new RecordType("Real Lines",6,true);  
     /** useful for testing
      */
     public void setAllDiffs(Diff diffs[]) {

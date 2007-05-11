@@ -36,7 +36,11 @@ public final class Diff  {
            OTHER_CHANGED(3),
            OTHER_REMOVED(4),
            OTHER_ADDED(5),
-           BUG_COUNT(6);
+           CHANGED_NEW_BUG(6),
+           ADDED_NEW_BUG(7),
+           REMOVED_NEW_BUG(8),
+           BUG_COUNT(9);
+           
            int index;
            LnState(int index) {
                this.index = index;
@@ -471,17 +475,34 @@ public final class Diff  {
      * 
      */ 
     public Vector getVector() {
-        double data[] = new double[LnState.values().length];
+        // bugy lines, replaced lines, other lines
+        double data[] = new double[LnState.values().length + 3];
         if (getVersion2().getIssueType() == IssueType.DEFECT) {
             data[LnState.CHANGED_BUG.getIndex()] = getChangedLines();
             data[LnState.ADDED_BUG.getIndex()] = getAddedLines();
             data[LnState.REMOVED_BUG.getIndex()] = getRemovedLines();
         } else {
-           data[3] = getChangedLines();
-           data[4] = getRemovedLines();
-           data[5] = getAddedLines();
+           data[LnState.OTHER_CHANGED.getIndex()] = getChangedLines();
+           data[LnState.OTHER_REMOVED.getIndex()] = getRemovedLines();
+           data[LnState.OTHER_ADDED.getIndex()] = getAddedLines();
         }
-        
+        for (Line line : getLines()) {
+            Version replaceVer = line.getReplaceVersion();
+            if (replaceVer != null &&replaceVer.getDefectNumbers().length > 0) {
+               switch (line.getState()) {
+                  case CHANGED:
+                data[LnState.CHANGED_NEW_BUG.getIndex()]++;
+                    break;
+                  case REMOVED:
+                data[LnState.REMOVED_NEW_BUG.getIndex()]++;
+                    break;
+                  case CREATED:
+                data[LnState.ADDED_NEW_BUG.getIndex()]++;
+                    break;
+                }
+            }
+        }
+ 
         return new DenseVector(data);
 
     }
