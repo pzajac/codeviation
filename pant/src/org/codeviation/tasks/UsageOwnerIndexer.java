@@ -33,6 +33,7 @@ import org.codeviation.tasks.RepositoryProcessEnv;
 import org.codeviation.tasks.RepositoryProcessEnv.LogReason;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
+import org.codeviation.math.Matlab;
 
 /**
  * It scans UsageMetrics and files for all developer in work directory.  
@@ -142,29 +143,14 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
         File rowsFile = new File (outDir,name + ".rows");
         File columnsFile = new File(outDir,name + ".columns");
         
-        System.out.println(matFile);
-        PrintWriter matWriter = new PrintWriter(new FileWriter(matFile));
+        Matlab.toMFile(matrix, matFile);
         PrintWriter rowsWriter = new PrintWriter(new FileWriter(rowsFile));
         PrintWriter columnsWriter = new PrintWriter(new FileWriter(columnsFile));
         try {
-            matWriter.println("% rows: " +  matrix.numRows());
             writeInversedMap(rowsWriter,userRows);
-            matWriter.println("% columns: " +  matrix.numColumns());
             writeInversedMap(columnsWriter,usagesColumns);
 
-            for (int r = 0 ; r < matrix.numRows() ; r++) {
-               for (int c = 0 ; c < matrix.numColumns() ; c++) {
-                  double val = matrix.get(r, c);
-                  if (val != 0.0) {
-                      int ri = r + 1;
-                      int ci = c + 1;
-                      matWriter.println("mat(" + ri + "," + ci + ") = " + val + ";");
-                  }
-               } 
-               matWriter.println();
-            }
         } finally {
-            matWriter.close();
             rowsWriter.close();
             columnsWriter.close();
         }
