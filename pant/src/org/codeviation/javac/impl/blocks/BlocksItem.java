@@ -12,6 +12,7 @@ package org.codeviation.javac.impl.blocks;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.codeviation.statistics.RecordType;
 
 /**
  *A block item. Don't remove or change order of items. Because it
@@ -37,6 +38,16 @@ public enum BlocksItem {
         return BlocksItem.values()[index];
         
     }
+    
+    public int getIndex() {
+        BlocksItem vals[] = BlocksItem.values();
+        for (int i = 0 ; i <vals.length; i++) {
+            if (vals[i] == this) {
+                return i;
+            }
+        }
+        return -1;
+    }
     public void write(ObjectOutputStream oos) throws IOException {
         BlocksItem vals[] = BlocksItem.values();
         for (int i = 0 ; i < vals.length ;i++) {
@@ -46,4 +57,20 @@ public enum BlocksItem {
             }
         }
     }
+
+    public RecordType getRecordType() {
+        return getRecordTypes()[getIndex()];
+    }
+    private static RecordType records[];
+    
+    public static RecordType[] getRecordTypes() {
+       if (records == null) {
+         records = new RecordType[BlocksItem.values().length];
+         for (int i = 0 ; i < records.length ; i++) {
+            records[i] = new RecordType(BlocksItem.values()[i].toString(),i,false);
+         }
+       }
+       return records;
+    }
+            
 }

@@ -39,4 +39,7 @@ public final class RecordType {
         }
         return ret;
     } 
+    public String toString() {
+        return displayName + " ; " + id + " ; "  + supportAdditive;
+    }
 }

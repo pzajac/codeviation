@@ -65,20 +65,23 @@ public class IssuesPageRankProcess implements RepositoryProcess {
             conf.setTitle("Defects Probability Density");
             handler.initGraphPaint(conf);
             JFreeChart chart = graph.getChart(conf, false);
+            ChartUtils.makeSeriesChartPrintable(chart,0);
             ChartUtils.chartToFile(new File(env.getWorkDir(),"AllSrcRootIssuesDensity.png"),chart, XSIZE,YSIZE);
                     
             handler.setGraphType(Histogram.GraphType.PROBABILITY_DISTRIBUTION);
             conf.setTitle("Defects Probability Distribution");
             handler.initGraphPaint(conf);
             chart = graph.getChart(conf, false);
+            ChartUtils.makeSeriesChartPrintable(chart,0);
             ChartUtils.chartToFile(new File(env.getWorkDir(),"AllSrcRootIssuesDistribution.png"),chart, XSIZE,YSIZE);
             
-            handler.setMaxKey(6000);
+            handler.setMaxKey(8000);
 
-            conf.setTitle("Defects Probability Density - LReg  for class in  <0 - 6000> interval");
+            conf.setTitle("Defects Probability Density - LReg  for class in  <0 - 8000> interval");
             handler.setGraphType(Histogram.GraphType.REGRESSION);
             handler.initGraphPaint(conf);
             chart = graph.getChart(conf, false);
+            ChartUtils.makeSeriesChartPrintable(chart,0);
             ChartUtils.chartToFile(new File(env.getWorkDir(),"AllSrcRootIssuesLinearRegression.png"),chart, XSIZE,YSIZE);
             
         } catch  (IOException ioe) {

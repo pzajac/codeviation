@@ -62,7 +62,7 @@ public final class VersionInterval  {
         do {
           ret.add(v); 
           v = v.getNext();
-        } while (v != null );
+        } while (v != null && v != to);
         if (v == null && to != from) {
             throw new IllegalStateException("Invalid versions sequence: " + from +  "->" + to);
         }

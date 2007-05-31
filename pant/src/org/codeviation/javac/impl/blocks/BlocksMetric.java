@@ -4,19 +4,22 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Set;
+import no.uib.cipr.matrix.DenseVector;
+import no.uib.cipr.matrix.Vector;
 import org.codeviation.model.PositionInterval;
 import org.codeviation.model.PositionIntervalResult;
 import org.codeviation.model.PositionVersionIntervalResultContainer;
 import org.codeviation.model.Version;
 import org.codeviation.model.VersionInterval;
 import org.codeviation.model.VersionedMetric;
+import org.codeviation.model.VersionedVector;
 
 
 /**
  * This metrics persists versions of blocks
  * @author pzajac 
  */
-public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io.Serializable {
+public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io.Serializable,VersionedVector {
    private static final long serialVersionUID = 1;
    private PositionVersionIntervalResultContainer<String> classes = new PositionVersionIntervalResultContainer<String>();   
    private PositionVersionIntervalResultContainer<String> methods = new PositionVersionIntervalResultContainer<String>();   
@@ -119,5 +122,23 @@ public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io
             VersionInterval vi = methods.get(pir);
             vi.write(oos);
         }
+    }
+
+    public Vector getVector(Version vers) {
+        Vector vec = new DenseVector (BlocksItem.values().length);
+        
+        Set<PositionIntervalResult<BlocksItem>> bis = getStorage().getAllObjects();
+        for (PositionIntervalResult<BlocksItem> pir : bis ) {
+            VersionInterval vi = getStorage().get(pir);
+            if (vi.contains(vers)) {
+                int i = pir.getObject().getIndex();
+                vec.add(i, 1);
+            }
+        }
+        return vec;
+    }
+
+    public Set<Version> getVersions() {
+       return classes.getAllVersion();
     }
 }

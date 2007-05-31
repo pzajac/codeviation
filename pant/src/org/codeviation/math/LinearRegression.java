@@ -55,7 +55,27 @@ public final class LinearRegression {
         
         
     }
-    
+    /** solve linear regression square residual sum     
+     * y = b0 + b1*x
+     * @param xVec  x coords
+     * @param yVec  y coords
+     * @param b0 line param1
+     * @param b1 line param2
+     * @return S_R*S_R
+     */
+      public static double residuumSquareSum(Vector xVec,Vector yVec,double b0,double b1) {
+          double SrSr =  0;
+          for (int i = 0 ; i < xVec.size() ; i++) {
+              double x =  xVec.get(i);
+              double y = yVec.get(i);
+              double yy = b0 + b1*x;
+              SrSr += (yy - y)*(yy - y);
+          } 
+          return SrSr;
+    }
+    public static double residuum(double SrSr,int size ) {
+        return Math.sqrt(SrSr/size);
+    }
     private static double avg(Vector vec) {
         double sum = 0;
         for (int i = 0 ; i < vec.size() ; i++) {

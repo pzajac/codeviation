@@ -7,14 +7,16 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import no.uib.cipr.matrix.Vector;
 import org.codeviation.model.Metric;
 import org.codeviation.model.Version;
+import org.codeviation.model.VersionedVector;
 
 /**
  * Counts for all compiled versions (Version -> CountsItem)
  * @author pzajac
  */
-public class CountsMetric implements Metric,java.io.Serializable {
+public class CountsMetric implements Metric,VersionedVector,java.io.Serializable {
     private static final long serialVersionUID = 1;
     transient Map<Version,CountsItem> v2Counts = new HashMap<Version,CountsItem>();
     
@@ -32,6 +34,10 @@ public class CountsMetric implements Metric,java.io.Serializable {
     public CountsItem get(Version version) {
         return v2Counts.get(version);
     } 
+    public Vector getVector(Version vers) {
+        CountsItem ci = get(vers);
+        return (ci == null) ? null : ci.getVector();
+    }
     
     public void put(Version version,CountsItem item) {
         v2Counts.put(version, item);
@@ -62,5 +68,6 @@ public class CountsMetric implements Metric,java.io.Serializable {
             v2Counts.put(v,ci);
         } 
     }
+
     
 }

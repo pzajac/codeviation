@@ -32,8 +32,8 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author pzajac
  */
 public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericGraph>,ChartConfProvider{
-    public  static final RecordType  PAGE_RANK_RECORD_TYPE = new RecordType("Issues Page Rank Histogram",0,false);
-    public  static final RecordType  RATIO_PAGE_RANK_RECORD_TYPE = new RecordType("Fix/All Commits for Page Rank Histogram",0,false);
+    public  static final RecordType  PAGE_RANK_RECORD_TYPE = new RecordType("Issues ClassRank Histogram",0,false);
+    public  static final RecordType  RATIO_PAGE_RANK_RECORD_TYPE = new RecordType("Fix/All Commits for ClassRank Histogram",0,false);
     
     private Histogram bugsHistogram;
     private Histogram priorityBugsHistogram[];
@@ -194,7 +194,7 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
             }
         }
        
-        JFreeChart chart = ChartFactory.createXYLineChart(conf.getTitle(),
+        JFreeChart chart = ChartFactory.createXYLineChart(null,
                                                   conf.getXAxisTitle(), 
                                                   conf.getYAxisTitle(), 
                                                   allSeries,
@@ -211,8 +211,8 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
     }
         
     public ChartConf[] getChartConfs() {
-        ChartConf<GenericGraph> conf = new ChartConf<GenericGraph>("Issue Histogram for PageRank", 
-             "Sorted classes by PageRank (from max to min)","Probability", "Probability of defects",
+        ChartConf<GenericGraph> conf = new ChartConf<GenericGraph>("Issue Histogram for ClassRank", 
+             "Sorted classes by ClassRank (from max to min)","Probability", "Probability of defects",
             Arrays.asList(PAGE_RANK_RECORD_TYPE,RATIO_PAGE_RANK_RECORD_TYPE), new IssuesPageRankStatHandler());
         conf.setGraphClass(GenericGraph.class);
         return new ChartConf[] {conf};

@@ -1,17 +1,18 @@
 
 package org.codeviation.statistics;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import no.uib.cipr.matrix.Vector;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -21,12 +22,9 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Version;
-import org.jfree.chart.annotations.XYPointerAnnotation;
-import org.jfree.chart.annotations.XYTextAnnotation;
+import org.codeviation.model.Version.State;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.time.Month;
-import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
 /**
@@ -108,6 +106,45 @@ public final class Statistics<T> implements Graph<Statistics<T>> {
     }
     public Record getItemAt(int index) {
         return items[index]; 
+    }
+   public void addValues(Map<Version,Vector> values) {
+        Iterator<Map.Entry<Version,Vector>> entryIt = values.entrySet().iterator();
+        if (!entryIt.hasNext()) {
+            return ;
+        }
+        Map.Entry<Version,Vector> prev = entryIt.next();
+        while(entryIt.hasNext()) {
+                Map.Entry<Version,Vector> next = entryIt.next();
+                int nextRec = getIndex(next.getKey());
+                int prevRec =  -1 ;
+                    prevRec = nextRec;
+                    if (prev.getKey().getState() == State.DEAD) {
+                        continue;
+                    }
+                    if (prevRec == -1) {
+                        if (prev.getKey().getDate().compareTo(getFromDate()) < 0)  {
+                            prevRec = 0;
+                        } else {
+                            break;
+                        }
+                    }
+                    //nextVer = versions.get(i);
+                    nextRec = getIndex(next.getKey());
+                    if (nextRec == -1) {
+                        nextRec = getItemsCount() - 1;
+                        if (nextRec == prevRec) {
+                            break;
+                        }
+                    } else if (nextRec >= getItemsCount() - 1 || !entryIt.hasNext()) {
+                        nextRec = getItemsCount() ;
+                    }
+                    // fill all Records between <prevRec,nextRec>
+                    //
+                    Vector vec = prev.getValue();
+                    for (int rec = prevRec ; rec < nextRec ; rec++) {
+                        getItemAt(rec).add(vec);
+                    }
+            }        
     }
     public Record getItem(long time) {
         int index = getIndex(time);

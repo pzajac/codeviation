@@ -89,7 +89,7 @@ public class ChartConf <GRAPH extends Graph>{
         }
         return null;
     }
-
+    
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
