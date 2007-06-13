@@ -67,7 +67,7 @@
 
     -->
     <target name="-post-jar" >
-        <copy file="dist/pant.jar" todir="/home/pzajac/pant"/>
+<!--        <copy file="dist/pant.jar" todir="/home/pzajac/pant"/>-->
     </target>
     <target name="-do-test-run-single" if="have.tests" depends="init,compile-test,-pre-test-run-single">
         <fail unless="test.includes">Must select some files in the IDE or set test.includes</fail>
