@@ -1,7 +1,12 @@
 
 package org.codeviation.statistics;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
@@ -35,6 +40,10 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
     public  static final RecordType  PAGE_RANK_RECORD_TYPE = new RecordType("Issues ClassRank Histogram",0,false);
     public  static final RecordType  RATIO_PAGE_RANK_RECORD_TYPE = new RecordType("Fix/All Commits for ClassRank Histogram",0,false);
     
+    
+    private static final String BUGS_HISTOGRAM_FILE = "bugshistigram.ser"; 
+    private static final String PB_HISTOGRAM_FILE_PREFIX = "pb";
+    private static final String FILE_HISTOGRAM_FILE = "filehistogram.ser"; 
     private Histogram bugsHistogram;
     private Histogram priorityBugsHistogram[];
     private Histogram filesHistogram;
@@ -60,6 +69,20 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
      * rather use position
      */
     private PageRankValueType pageRankType = PageRankValueType.POSITION;
+
+
+    /** divide all histograms by number of all integrations. 
+     *  
+     */
+    public void normalizeCommits(int itemsCount) {
+       filesHistogram.setSteps(itemsCount);
+       bugsHistogram.divideByHistogram(filesHistogram); 
+       for (int i = 0 ; i < priorityBugsHistogram.length ; i++) {
+           priorityBugsHistogram[i].divideByHistogram(filesHistogram);
+       } 
+       filesHistogram.divideByHistogram(filesHistogram);
+    }
+
     
     public void setPageRankValueType(PageRankValueType pageRankType) {
         this.pageRankType = pageRankType;
@@ -137,34 +160,44 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
                     if (tagDate == null) {
                         throw new IllegalStateException("Null tagDate for : " + tag + jf.getPackage().getName() + "." + jf.getName());
                     }
+                    Version prevTag = null;
+                  
                     Version ver = cvs.getVersion(tagDate);   
-                    if (ver != null) {
-                        filesHistogram.addValue(rank, 1);
-                        if (ver.getDefectNumbers().length > 0) {
-                            bugsHistogram.addValue(rank, 1);
-                            if (!ignoreIssuesPriority ) {
-                                for (int bug : ver.getDefectNumbers()) {
-                                    // XXX  previous version should be better
-                                    try {
-                                        Issue issue = Issue.readIssue(bug);
-                                        // for example is not available connection
-                                        if (issue != null) {
-                                            priorityBugsHistogram[issue.getPriority().getPriority()].addValue(rank,1);
-                                        } else {
-                                            // xxx
-//                                            ignoreIssuesPriority = true;
+                    while (prevTag != ver) {
+                        if (prevTag == null) {
+                            prevTag = ver;
+                        } else {
+                            prevTag = ver.getNext();
+                        }
+                        if (prevTag != null) {
+                            filesHistogram.addValue(rank, 1);
+                            if (prevTag.getDefectNumbers().length > 0) {
+                                bugsHistogram.addValue(rank, 1);
+                                if (!ignoreIssuesPriority ) {
+                                    for (int bug : prevTag.getDefectNumbers()) {
+                                        // XXX  previous version should be better
+                                        try {
+                                            Issue issue = Issue.readIssue(bug);
+                                            // for example is not available connection
+                                            if (issue != null) {
+                                                int priority = issue.getPriority().getPriority();
+                                                priorityBugsHistogram[priority].addValue(rank,1);
+                                            } else {
+                                                // xxx
+    //                                            ignoreIssuesPriority = true;
+                                            }
+                                        } catch (IOException ioe) {
+                                            // probably connection doesn't exist
+                                            logger.log(Level.FINE,ioe.getMessage(),ioe);
+                                        } catch (SQLException sqe) {
+                                            // probably connection doesn't exist
+                                            logger.log(Level.FINE,sqe.getMessage(),sqe);
                                         }
-                                    } catch (IOException ioe) {
-                                        // probably connection doesn't exist
-                                        logger.log(Level.FINE,ioe.getMessage(),ioe);
-                                    } catch (SQLException sqe) {
-                                        // probably connection doesn't exist
-                                        logger.log(Level.FINE,sqe.getMessage(),sqe);
                                     }
                                 }
                             }
                         }
-                    }
+                   }
                 }
             }
         }
@@ -211,11 +244,70 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
     }
         
     public ChartConf[] getChartConfs() {
-        ChartConf<GenericGraph> conf = new ChartConf<GenericGraph>("Issue Histogram for ClassRank", 
-             "Sorted classes by ClassRank (from max to min)","Probability", "Probability of defects",
+        ChartConf<GenericGraph> conf = new ChartConf<GenericGraph>(null,"Classes", 
+             "Probability ",null,
             Arrays.asList(PAGE_RANK_RECORD_TYPE,RATIO_PAGE_RANK_RECORD_TYPE), new IssuesPageRankStatHandler());
         conf.setGraphClass(GenericGraph.class);
         return new ChartConf[] {conf};
     }
+
+    public void storeHistograms(File workDir) throws  IOException {
+        File f = new File(workDir,BUGS_HISTOGRAM_FILE);
+        writeHist(workDir,BUGS_HISTOGRAM_FILE,bugsHistogram);
+        writeHist(workDir,FILE_HISTOGRAM_FILE,filesHistogram);
+        for (int i = 0 ; i < priorityBugsHistogram.length ; i++) {
+            writeHist(workDir, PB_HISTOGRAM_FILE_PREFIX + i + ".ser", priorityBugsHistogram[i]);
+        }
+        
+    }
+    public void restoreHistograms(File workDir) throws IOException {
+        bugsHistogram = restoreHist(workDir,BUGS_HISTOGRAM_FILE);
+        filesHistogram = restoreHist(workDir,FILE_HISTOGRAM_FILE);
+        for (int i = 0 ; i < priorityBugsHistogram.length ; i++) {
+            priorityBugsHistogram[i] = restoreHist(workDir, PB_HISTOGRAM_FILE_PREFIX + i + ".ser" );
+        }
+    }
+
+    private Histogram restoreHist(File workDir, String fileName) throws IOException {
+        File file = new File(workDir,fileName);
+        if (file.isFile()) {
+            FileInputStream fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            try {
+               return (Histogram) ois.readObject();
+            } catch (ClassNotFoundException cnfe) {
+               logger.log(Level.SEVERE, cnfe.getMessage(), cnfe); 
+            } finally {
+                ois.close();
+            }  
+        }
+        return null;
+    }
+
+    private void writeHist(File workDir, String fileName, Histogram hist) throws IOException {
+        if (hist != null) {
+            FileOutputStream fos = new FileOutputStream(new File(workDir,fileName));
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            try {
+                oos.writeObject(hist);
+            } finally {
+                oos.close();
+            }  
+        }
+    }
+
+    public Histogram getBugsHistogram() {
+        return bugsHistogram;
+    }
+
+    public Histogram getFilesHistogram() {
+        return filesHistogram;
+    }
+
+    public Histogram[] getPriorityBugsHistogram() {
+        return priorityBugsHistogram;
+    }
+
+    
 }
 

@@ -3,8 +3,9 @@ package org.codeviation.javac;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public final class UsageItem  {
+public final class UsageItem  implements Serializable {
     private String method;
     private String clazz;
     
@@ -61,11 +62,14 @@ public final class UsageItem  {
         }
         return false;
     }
-    
+ 
+    /** saving disk space
+     */
     public  static UsageItem read(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         return new UsageItem((String)ois.readObject(),(String)ois.readObject());
     }
-    
+    /** saving disk space
+     */
     public  void write(ObjectOutputStream oos) throws IOException {
         oos.writeObject(method);
         oos.writeObject(clazz);

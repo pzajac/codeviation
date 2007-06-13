@@ -38,7 +38,8 @@ public class PageRankProcessTest extends TestCase {
         ExamplesSetup.initNbCvsTestingCache();
     }
 
-    public void testOpenideFs() throws ParseException {
+    @SuppressWarnings("unchecked")
+public void testOpenideFs() throws ParseException {
         final String SRC_ROOT = "openide/fs/src";
         Repository rep =  PersistenceManager.getDefault().getRepository("nbcvs");
         Set<String> tags = rep.getSourceRoot(SRC_ROOT).getCvsTags();
@@ -80,6 +81,7 @@ public class PageRankProcessTest extends TestCase {
         handler.init(stats);
         stats.setJavaFileHandler(handler);
         stats.addJavaFiles(srcRoot);
+        @SuppressWarnings("unchecked")
         JFreeChart chart = stats.getChart(chartConf, false);
         assertNotNull(chart);
         

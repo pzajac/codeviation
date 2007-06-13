@@ -4,6 +4,7 @@ import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.Vector;
+import org.jfree.data.xy.XYSeries;
 
 /**
  *
@@ -25,7 +26,7 @@ public final class LinearRegression {
         at.mult(v, ab);
         Vector result = new DenseVector(size);
         return aa.solve(ab, result);
-    }
+    }   
 
  
     // Statistics of Bris, chapter 11.4
@@ -55,6 +56,19 @@ public final class LinearRegression {
         
         
     }
+    /** Convert series to two vectors.
+     * @param series series with points in 2d
+     * @return array {x,y} coords
+     */ 
+    public static Vector[] convertSeriesToVectors (XYSeries series) {
+            Vector xCoords = new DenseVector(series.getItemCount());
+            Vector yCoords = new DenseVector(series.getItemCount());
+            for (int i = 0 ; i < series.getItemCount() ; i++) {
+                xCoords.set(i,series.getX(i).doubleValue());
+                yCoords.set(i,series.getY(i).doubleValue());
+            }
+            return  new Vector[]{xCoords,yCoords};
+    }
     /** solve linear regression square residual sum     
      * y = b0 + b1*x
      * @param xVec  x coords
@@ -76,7 +90,7 @@ public final class LinearRegression {
     public static double residuum(double SrSr,int size ) {
         return Math.sqrt(SrSr/size);
     }
-    private static double avg(Vector vec) {
+    static double avg(Vector vec) {
         double sum = 0;
         for (int i = 0 ; i < vec.size() ; i++) {
             sum += vec.get(i); 

@@ -8,15 +8,21 @@ import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.Vector;
 import org.codeviation.math.LinearRegression;
+import org.codeviation.math.PolynomialLinearRegression;
 import org.jfree.data.xy.XYSeries;
 
 /**
  *Generates histogram from x -> y values.
  * @author pzajac
  */
-public final class Histogram {
+public final class Histogram implements java.io.Serializable{
+   private static final long serialVersionUID = 2;
+
     
-    public enum GraphType {
+    /**
+     * Type of graph shown in FreeChart.
+     */
+    public enum GraphType  {
         /** probability density function
          */ 
         PROPABILITY_DENSITY,
@@ -39,9 +45,16 @@ public final class Histogram {
     double groups[];
     final static int DEFAULT_STEPS = 50;
 
+    transient int regressionDeg;
+    
+    // on not null groups /= divideGroups
+    transient double divideGroups[];
     //XXX
     static final double EPSILON = 1e-10;
+    // total number of elements
+    int counts;
     public void addValue(double x,double y) {
+        counts++;
         keys.add(x);
         values.add(y);
         computed = false;
@@ -88,7 +101,11 @@ public final class Histogram {
             } 
             groups[groupI]+= val;
         }
-        
+        if (divideGroups != null) {
+            for (int i = 0 ; i < groups.length ; i++) {
+               groups[i] /= divideGroups[i];
+            }
+        }
         // normalize values
         if (normalize) {
             double sum = 0;
@@ -121,6 +138,9 @@ public final class Histogram {
         return series;
     }
     
+    public void divideByHistogram(Histogram hist) {
+        divideGroups = hist.generate(true);
+    }
     /** generate series for ratio h1/h2
      * XXX not finished and testesd
      * @param normalized - normalize histogram
@@ -163,15 +183,23 @@ public final class Histogram {
         if (steps < 1) {
             steps = DEFAULT_STEPS;
         }        
+
         generate(normalized);
+        if (getMin() > minKey) {
+            minKey = getMin();
+        }
+        if (getMax() < maxKey) {
+            maxKey = getMax();
+        }        
         XYSeries series = new XYSeries(name);
         double delta = (getMax() - getMin()) /steps;
         double value = 0;
-        for (int g = 0 ; g < groups.length ; g++ ) {
-            double x = getMin() + g * delta;
+        double x = 0;
+        for (int g = 0 ; g < groups.length && x < maxKey ; g++ ) {
+            x = getMin() + g * delta;
             if (type != GraphType.PROBABILITY_DISTRIBUTION) {
                 value = 0;
-            }
+            }            
             if (x >= minKey && x <= maxKey) {
                 value += groups[g];
                 series.add(x,value);
@@ -179,24 +207,28 @@ public final class Histogram {
         }
         // linear regression
         if (type == GraphType.REGRESSION && series.getItemCount() > 0)  {
-            // y = p[0]*x + p[1]
-            Matrix matrix = new DenseMatrix(series.getItemCount(),2);
             Vector xCoords = new DenseVector(series.getItemCount());
             Vector yCoords = new DenseVector(series.getItemCount());
             for (int i = 0 ; i < series.getItemCount() ; i++) {
                 xCoords.set(i,series.getX(i).doubleValue());
                 yCoords.set(i,series.getY(i).doubleValue());
             }
-            double coefs[] = LinearRegression.solve(xCoords, yCoords);
             series.clear();
-            if (getMin() > minKey) {
-                minKey = getMin();
+            if (regressionDeg < 2 ) {
+            // y = p[0]*x + p[1]
+                double coefs[] = LinearRegression.solve(xCoords, yCoords);
+                series.add(minKey, coefs[0] + coefs[1]*minKey);
+                series.add(maxKey, coefs[0] + coefs[1]*maxKey);
+            } else {
+                PolynomialLinearRegression plr = new PolynomialLinearRegression(regressionDeg,xCoords,yCoords);
+                double xdelta = (maxKey - minKey)/30; //XXXX 
+                
+                for (x = minKey ; x <= maxKey ; x += xdelta) {
+                    double y = plr.getAproximatedValue(x);
+                    series.add(x,y);
+                }
+                
             }
-            if (getMax() < maxKey) {
-                maxKey = getMax();
-            }
-            series.add(minKey, coefs[0] + coefs[1]*minKey);
-            series.add(maxKey, coefs[0] + coefs[1]*maxKey);
         }
         return series;
     }
@@ -217,5 +249,22 @@ public final class Histogram {
             }
         }
     }
+    
+       /**
+        * @return number of added items
+        */
+       public int getCounts() {
+           return counts;
+ 
+    }
+       
+    public double[] getGroups() {
+        return groups;
+    }
+    
+    public void setRegressionDeg(int deg) {
+        this.regressionDeg = deg;       
+    }
+ 
 }
 

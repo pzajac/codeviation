@@ -1,11 +1,13 @@
 
 package org.codeviation.tasks;
 
+import java.awt.Event;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,6 +35,7 @@ import org.codeviation.tasks.RepositoryProcessEnv;
 import org.codeviation.tasks.RepositoryProcessEnv.LogReason;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
+import org.codeviation.math.AnotatedMatrix;
 import org.codeviation.math.Matlab;
 
 /**
@@ -49,12 +52,14 @@ import org.codeviation.math.Matlab;
  * xx - number of usages 
  * @author pzajac
  */
-public class UsageOwnerIndexer implements  RepositoryProcess {
+public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
+     private static final long serialVersionUID = 1;
+     
      static Logger logger = Logger.getLogger(UsageOwnerIndexer.class.getName());
      private Map<UsageItem,UsageItem> usages = new HashMap<UsageItem,UsageItem>();
      private Map<String,Map<UsageItem,Integer>> usagesOfUsers = new HashMap<String,Map<UsageItem,Integer>>();
      private File outDir;     
-     private static Matrix outMatrix[];
+//     private static Matrix outMatrix[];
      
      static final String MATRIX_FILE_NAME = "SimpleMatrix";
      /** for these users you want to generate diffs
@@ -115,10 +120,7 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
         return true;
     }
     
-    public static void setOutMatrix(Matrix matrix[]) {
-        outMatrix = matrix;
-    }
-    public void generateMatrix(Map <UsageItem,Integer > usagesColumns,Map<String,Integer> userRows,String name) throws IOException {
+    public AnotatedMatrix<String,ArrayList<UsageItem>>  generateMatrix(Map <UsageItem,Integer > usagesColumns,Map<String,Integer> userRows,String name) throws IOException {
         int columns = 0;
         for (Integer val : usagesColumns.values()) {
             if (columns < val ) {
@@ -127,7 +129,7 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
         }
         columns++;
         
-        Matrix matrix = new FlexCompRowMatrix(userRows.size(),columns);
+        FlexCompRowMatrix matrix = new FlexCompRowMatrix(userRows.size(),columns);
         for (Map.Entry<String,Map<UsageItem,Integer>> userEntry : usagesOfUsers.entrySet()) {
             int userRow = userRows.get(userEntry.getKey());
             for (Map.Entry<UsageItem,Integer> usageEntry : userEntry.getValue().entrySet()) {
@@ -154,9 +156,31 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
             rowsWriter.close();
             columnsWriter.close();
         }
-        if (outMatrix != null) {
-            outMatrix[0] = matrix;
+        
+        // create annotated matrix
+        //
+        List<ArrayList<UsageItem>> listColumns = new ArrayList<ArrayList<UsageItem>>(matrix.numColumns());
+        for (int c = 0 ; c < matrix.numColumns(); c++) {
+            listColumns.add(new ArrayList<UsageItem>());
         }
+        for (Map.Entry<UsageItem, Integer> usageEntry : usagesColumns.entrySet()) {
+            int val = usageEntry.getValue();
+            if (val < matrix.numColumns()){
+                listColumns.get(val).add(usageEntry.getKey());
+            }
+        }
+        List<String> listUsers = new ArrayList<String>(userRows.size());
+        for (int r = 0 ; r < matrix.numRows() ; r++) {
+            listUsers.add("?");
+        }
+        for (Map.Entry<String, Integer> userEntry : userRows.entrySet()) {
+            int val = userEntry.getValue();
+            if (val < matrix.numRows()) {
+                listUsers.set(val,userEntry.getKey());
+            }
+        }
+        return new AnotatedMatrix<String,ArrayList<UsageItem>>(matrix,listUsers,listColumns);
+       
     }
     
     enum ColumnType {
@@ -250,7 +274,8 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
                     return  item.getClazz().startsWith("java.") || item.getClazz().startsWith("javax.");
                 }
            });
-           generateMatrix(usagesColumns, userRow, MATRIX_FILE_NAME);
+           AnotatedMatrix<String,ArrayList<UsageItem>> am = generateMatrix(usagesColumns, userRow, MATRIX_FILE_NAME);
+           env.performRepositoryAction(this, new RepositoryProcessEnv.Event<AnotatedMatrix<String,ArrayList<UsageItem>>>(am));
            
         }  catch (IOException ioe) {
             logger.log(Level.SEVERE, ioe.getMessage(),ioe);
@@ -326,9 +351,10 @@ public class UsageOwnerIndexer implements  RepositoryProcess {
     }
     
     
-    private <KEY,VALUE extends Comparable> void writeInversedMap(PrintWriter writer,Map<KEY,VALUE> map) {
+    private <T,KEY,VALUE extends Comparable> void writeInversedMap(PrintWriter writer,Map<KEY,VALUE> map) {
         List<Map.Entry<KEY,VALUE>> items = new ArrayList<Map.Entry<KEY, VALUE>>(map.entrySet());
         Collections.sort(items,new Comparator<Map.Entry<KEY,VALUE>>() {
+            @SuppressWarnings("unchecked")
             public int compare(Entry<KEY, VALUE> o1, Entry<KEY, VALUE> o2) {
                 return o1.getValue().compareTo(o2.getValue());
             }
