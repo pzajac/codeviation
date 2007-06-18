@@ -40,6 +40,9 @@ public class PolynomialLinearRegressionTest extends TestCase{
         Vector coefs = plr.getCoefs();
         assertEquals(-2.3221476510067163,coefs.get(0),1e-8);
         assertEquals(14.738255033557047,coefs.get(1),1e-8);
+        plr.getDeterminanceIndex();
+        plr = new PolynomialLinearRegression(2,xVec,yVec);
+        plr.getDeterminanceIndex();
 //  
     }
     

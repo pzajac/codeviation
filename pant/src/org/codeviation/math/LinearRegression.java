@@ -17,7 +17,6 @@ public final class LinearRegression {
      */
     public static Vector solve (Matrix a,Vector v) {
         int size = a.numColumns();
-        System.out.println(size);
         Matrix aa = new DenseMatrix(size,size);
         Matrix at = new DenseMatrix(a.numColumns(),a.numRows());
         a.transpose(at);

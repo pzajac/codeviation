@@ -3,12 +3,11 @@ package org.codeviation.statistics.math;
 
 import java.util.ArrayList;
 import java.util.List;
-import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
-import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.Vector;
 import org.codeviation.math.LinearRegression;
 import org.codeviation.math.PolynomialLinearRegression;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 
 /**
@@ -45,7 +44,14 @@ public final class Histogram implements java.io.Serializable{
     double groups[];
     final static int DEFAULT_STEPS = 50;
 
+    //XXX - remove transient after computing of RQR2007 data 
     transient int regressionDeg;
+    /** if is > 0:
+     *    XYSeries will contains points with this distance 
+     */ 
+    transient double twoPointsDistance;
+    transient double xFactor;
+    transient double yFactor;
     
     // on not null groups /= divideGroups
     transient double divideGroups[];
@@ -135,6 +141,7 @@ public final class Histogram implements java.io.Serializable{
         for (int g = 0 ; g < groups.length ; g++ ) {
             series.add(getMin() + g * delta,groups[g]);
         }
+        filterSeries(series);
         return series;
     }
     
@@ -221,7 +228,7 @@ public final class Histogram implements java.io.Serializable{
                 series.add(maxKey, coefs[0] + coefs[1]*maxKey);
             } else {
                 PolynomialLinearRegression plr = new PolynomialLinearRegression(regressionDeg,xCoords,yCoords);
-                double xdelta = (maxKey - minKey)/30; //XXXX 
+                double xdelta = (maxKey - minKey)/steps;  
                 
                 for (x = minKey ; x <= maxKey ; x += xdelta) {
                     double y = plr.getAproximatedValue(x);
@@ -230,6 +237,7 @@ public final class Histogram implements java.io.Serializable{
                 
             }
         }
+        filterSeries(series);
         return series;
     }
     
@@ -265,6 +273,30 @@ public final class Histogram implements java.io.Serializable{
     public void setRegressionDeg(int deg) {
         this.regressionDeg = deg;       
     }
- 
+
+   
+
+    public void setTwoPointsDistance(double twoPointsDistance,double xFactor,double yFactor) {
+        this.twoPointsDistance = twoPointsDistance;
+        this.xFactor = xFactor;
+        this.yFactor = yFactor;
+    }    
+    
+    private void filterSeries(XYSeries series) {
+        if (twoPointsDistance > 0) {
+            for (int i = 1  ; i < series.getItemCount() - 1 ;) {
+                XYDataItem current = series.getDataItem(i);
+                XYDataItem prev = series.getDataItem(i - 1);
+                double xDiff = current.getX().doubleValue() - prev.getX().doubleValue();
+                double yDiff = current.getY().doubleValue() - prev.getY().doubleValue();
+                double dist = Math.sqrt(xDiff*xDiff*xFactor*xFactor + yDiff*yDiff*yFactor*yFactor);
+                if (dist < twoPointsDistance) {
+                    series.remove(i);
+                } else {
+                    i++;
+                }
+            }
+        }
+    }
 }
 

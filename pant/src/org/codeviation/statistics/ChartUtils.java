@@ -38,21 +38,22 @@ public final class ChartUtils {
     }
     
     public static void makeSeriesChartPrintable(JFreeChart chart,int series) {
+            float width = 3.0f;    
             BasicStroke strokes[] = new BasicStroke[] {
-            new BasicStroke(4.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{4,4}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{10,4}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{16,6}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{16,4,4,4}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{12,4,4,4,4,4}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{4,4,12,4,12,4}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{12,2,12,2,2,2}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{8,2,8,2}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{4,4,1}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{1,1}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,2,0,2,0,6}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,2,0,2,0,6}, 0.0f),
-            new BasicStroke(4.0f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,2,0,2,0,6}, 0.0f)
+            new BasicStroke(width),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{4,4}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{10,4}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{16,6}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{16,4,4,4}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{12,4,4,4,4,4}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{4,4,12,4,12,4}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{12,2,12,2,2,2}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_BUTT, BasicStroke.CAP_BUTT, 2.0f, new float[]{8,2,8,2}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{4,4,1}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{1,1}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,2,0,2,0,6}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,2,0,2,0,6}, 0.0f),
+            new BasicStroke(width,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{0,2,0,2,0,6}, 0.0f)
         };
         Paint[] defaultPaints = new Paint[]{
           ChartColor.GREEN, 

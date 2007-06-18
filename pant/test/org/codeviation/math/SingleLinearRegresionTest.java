@@ -7,7 +7,6 @@
 
 package org.codeviation.math;
 
-import JSci.maths.statistics.TDistribution;
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;

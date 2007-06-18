@@ -7,9 +7,12 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.NotConvergedException;
+import no.uib.cipr.matrix.VectorEntry;
+import no.uib.cipr.matrix.sparse.SparseVector;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.math.AnotatedMatrix;
 import org.codeviation.math.LSI;
+import org.codeviation.math.RowComparator;
 import org.codeviation.model.PersistenceManager;
 import org.codeviation.model.Repository;
 import org.codeviation.model.SourceRoot;
@@ -48,8 +51,8 @@ public class UsageOwnerIndexerTest extends TestCase {
         //UsageOwnerIndexer.setOutMatrix(matrix);
         env.setSourceRootFilter(new SourceRootFilter() {
             public boolean accept(SourceRoot srcRoot) {
- //                 return true;
-                return (srcRoot.getRelPath().startsWith("core")) ;
+                  return true;
+ //               return (srcRoot.getRelPath().startsWith("core")) ;
             }
        });
        indexer.execute(rep,env);    
@@ -65,16 +68,26 @@ public class UsageOwnerIndexerTest extends TestCase {
        for(String row : matrix.getRows()) {
            System.out.println(row);
        }
+       System.out.println(matrix.getRows().get(25) + " (25)");
+        SparseVector row = matrix.getMatrix().getRow(25);
+        for (VectorEntry entry: row) {
+            System.out.println(entry.get() + entry.index() );
+        }
        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("/tmp/develmatrix.ser"));
        oos.writeObject(am[0]);
        oos.close();       
        LSI<String,ArrayList<String>> lsi = new LSI<String,ArrayList<String>>(matrix);
- 
+       lsi.setRank(10);
+       lsi.setRowComparator(RowComparator.Type.EUCLIDIAN);
+       lsi.normalizeRows();
+//       lsi.tfidf();
+       lsi.compute();
+       
        for (double s : lsi.getSvd().getS() ) {
           System.out.println(s);
        }
 
-       lsi.plotSVD(matrix.getRows());
+       lsi.plotSVD();
     }
   
 }

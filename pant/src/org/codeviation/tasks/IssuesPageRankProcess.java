@@ -1,8 +1,6 @@
 
 package org.codeviation.tasks;
 
-import com.sun.org.apache.xerces.internal.impl.xs.util.SimpleLocator;
-import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -21,7 +19,6 @@ import org.codeviation.statistics.ChartConf;
 import org.codeviation.statistics.ChartUtils;
 import org.codeviation.statistics.GenericGraph;
 import org.codeviation.statistics.IssuesPageRankStatHandler;
-import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.data.xy.XYSeries;
 
 /**
@@ -83,9 +80,17 @@ public class IssuesPageRankProcess implements RepositoryProcess {
                     handler.restoreHistograms(workdir);
                 }
 //                handler.normalizeCommits(items[i]);
-                handler.setMaxKey(8000);
+                handler.setMaxKey(11000);
+                
 
                 conf.setTitle("Defects Probability Density");
+                // set x and y factors
+                setFactor(handler.getBugsHistogram());
+                setFactor(handler.getFilesHistogram());
+                for (Histogram hist : handler.getPriorityBugsHistogram()) {
+                    setFactor(hist);
+                }
+                
                 handler.initGraphPaint(conf);
                 JFreeChart chart = graph.getChart(conf, false);
                 ChartUtils.makeSeriesChartPrintable(chart,7);
@@ -99,7 +104,7 @@ public class IssuesPageRankProcess implements RepositoryProcess {
                 ChartUtils.chartToFile(new File(workdir,"AllSrcRootIssuesDistribution.png"),chart, XSIZE,YSIZE);
 
                 handler.setMaxKey(10000);
-                int deg = 4;
+                int deg = 8;
                 handler.getBugsHistogram().setRegressionDeg(deg);
                 handler.getFilesHistogram().setRegressionDeg(deg);
                 for (Histogram hist : handler.getPriorityBugsHistogram()) {
@@ -135,19 +140,19 @@ public class IssuesPageRankProcess implements RepositoryProcess {
        return "Maps PageRank to issues";
     }
     
-    private  void printResiduum (IssuesPageRankStatHandler handler,int polyNomDef) {
+    private  void printResiduum (IssuesPageRankStatHandler handler,int polyNomDeg) {
         System.out.println();
         Histogram hist = handler.getBugsHistogram();
-        printResiduum(hist,"All bugs",polyNomDef);
+        printResiduum(hist,"All bugs",polyNomDeg);
         
         hist = handler.getFilesHistogram();
 //        series = hist.getXYSeries(true,"All files", 0, 8000, Histogram.GraphType.PROPABILITY_DENSITY);
-        printResiduum(hist,"All files",polyNomDef);
+        printResiduum(hist,"All files",polyNomDeg);
         
         for (int i = 0 ; i < handler.getPriorityBugsHistogram().length ; i ++ ) {
             hist = handler.getPriorityBugsHistogram()[i];
   //          series = hist.getXYSeries(true,"P" + (i + 1),0,8000,Histogram.GraphType.PROPABILITY_DENSITY);
-            printResiduum(hist,"P" + (i + 1),polyNomDef);
+            printResiduum(hist,"P" + (i + 1),polyNomDeg);
         }
     }
 
@@ -167,5 +172,9 @@ public class IssuesPageRankProcess implements RepositoryProcess {
              + "Determinance Index: " +  slr.getDeterminanceIndex() + ", Total integrations:" + hist.getCounts());
         }
              
+    }
+    
+    private void setFactor(Histogram hist) {
+        hist.setTwoPointsDistance(15, 1.0/25, 1.0/1e4);
     }
 }

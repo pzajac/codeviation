@@ -16,12 +16,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SVD;
+import no.uib.cipr.matrix.Vector;
 import no.uib.cipr.matrix.VectorEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import no.uib.cipr.matrix.sparse.SparseVector;
+import org.codeviation.math.RowComparator.Type;
 import org.codeviation.statistics.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -38,20 +42,19 @@ public class LSI<ROW extends Serializable ,COLUMN extends Serializable> {
     private SVD svd;
     private int rank ;
     private static int DEFAULT_RANK = 0;
+    private RowComparator.Type rowComparator ;
+    private Logger logger = Logger.getLogger(LSI.class.getName());
     
     public LSI(AnotatedMatrix<ROW,COLUMN> am) throws NotConvergedException {
-        this.am = am;
-
-//        normalizeRows(am.getMatrix());
-        centerColumns(am.getMatrix());
- //       tfidf();
-        
-        svd = SVD.factorize(am.getMatrix());
-        rank =  (svd.getS().length < DEFAULT_RANK ) ? svd.getS().length :
-            DEFAULT_RANK;
-        
+        this.am = am;        
     }
     
+    public void compute() throws NotConvergedException {
+        svd = SVD.factorize(am.getMatrix());
+       if  (svd.getS().length < rank ) {
+           rank = svd.getS().length;
+       }
+    }
 
     /** 
      * A_ji = f_ji log(n/n_i)
@@ -86,7 +89,38 @@ public class LSI<ROW extends Serializable ,COLUMN extends Serializable> {
            }
         }
     }
-    static void centerColumns(FlexCompRowMatrix sparseMatrix) {
+
+    public Vector query(Vector q) {
+       // u*s*vt*q
+      DenseMatrix vt = svd.getVt();
+      DenseVector result = new DenseVector(q.size());
+      
+      // s*vt*q
+      double s[] = svd.getS();
+      for (int row = 0 ; row < getRank() ; row++) {
+          double sum = 0;
+          for (int col = 0 ; col < vt.numColumns() ; col++) {
+              sum += vt.get(row, col) * q.get(col);
+          }
+          result.set(row,sum*s[row]);
+      } 
+      
+      
+      // u*s*vt*q
+      DenseMatrix u = svd.getU();
+   
+      DenseVector result2 = new DenseVector(q.size());
+      for (int row = 0 ; row < u.numRows() ; row++) {
+          double sum = 0;
+          for (int col = 0 ; col < getRank() ; col++) {
+              sum += u.get(row, col) * result.get(col);
+          }
+          result2.set(row,sum);
+      } 
+      return result2;
+    }
+    public  void centerColumns() {
+        FlexCompRowMatrix sparseMatrix = am.getMatrix();
         double colsSum[] = new double[sparseMatrix.numColumns()];
         int colsCount[] = new int[sparseMatrix.numColumns()];
         double colsAvg[] = new double[sparseMatrix.numColumns()];
@@ -111,25 +145,32 @@ public class LSI<ROW extends Serializable ,COLUMN extends Serializable> {
         }
     }
 
-     static void normalizeRows(FlexCompRowMatrix matrix) {
-        for (int i = 0 ; i < matrix.numRows() ; i++ ) {
-           SparseVector row = matrix.getRow(i);
+/** make sum of squares to 1
+*/
+     public void normalizeRows() {
+        for (int i = 0 ; i < am.getMatrix().numRows() ; i++ ) {
+           SparseVector row = am.getMatrix().getRow(i);
            double  sum = 0;
+           int count = 0;
            for (VectorEntry ve :row) {
                sum += ve.get();
+               count++;
            }
            // XXXX
-           if (sum < 1.0) {
-               System.out.println("Null Sum!!!!!!!!!!!!!!!!!!!!!");
-           }
-           for (VectorEntry ve :row) {
-               ve.set(ve.get()/sum);
+           if (sum < 1e-5) {
+               logger.info(" empty row"); 
+           } else {
+                // 6 
+               for (VectorEntry ve :row) {
+                   ve.set(Math.sqrt(ve.get()/sum));
+               }
            }
         }
     }
      /** XXX experimental
       */
-    public void plotSVD (List<String> rows) throws IOException {
+    public void plotSVD () throws IOException {
+        List<ROW> rows = am.getRows();
         int size = rows.size();
         float data[][] = new float[2][size];
         DenseMatrix u = svd.getU();
@@ -168,10 +209,10 @@ public class LSI<ROW extends Serializable ,COLUMN extends Serializable> {
             for (int i = 0 ; i < rows.size(); i++) {
                 indexes[i] = i;
             }
-            RowComparator comparator = new RowComparator(u,rank,r,svd.getS(),RowComparator.Type.DOT_PRODUCT);
+            RowComparator comparator = new RowComparator(u,rank,r,svd.getS(),getRowComparatorType());
             Arrays.sort(indexes,comparator);
             for (int i = 0 ; i < 10 ; i++) {
-                System.out.print(rows.get(indexes[i]) + comparator.product(r, indexes[i]) +":");
+                System.out.print("" + rows.get(indexes[i]) + comparator.product(r, indexes[i]) +":");
             }
             System.out.println("");
         }
@@ -190,8 +231,15 @@ public class LSI<ROW extends Serializable ,COLUMN extends Serializable> {
     }
 
     public void setRank(int rank) {
-        if (rank > svd.getS().length ) {
-            throw new IllegalArgumentException("Too big rank");
-        }
+        this.rank = rank;
     }
+    public RowComparator.Type getRowComparatorType() {
+        return (rowComparator == null) ? 
+            RowComparator.Type.DOT_PRODUCT : rowComparator ;
+    }
+
+    public void setRowComparator(Type rowComparator) {
+        this.rowComparator = rowComparator;
+    }
+    
 }

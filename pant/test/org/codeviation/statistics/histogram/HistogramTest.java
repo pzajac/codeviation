@@ -72,4 +72,35 @@ public class HistogramTest extends TestCase {
         assertEquals(0.1 + 2*(3 - 0.1)/3.,series.getX(2).doubleValue(), EPSILON);
 
     }          
+    public void testHistogramDistributionDensityFunction() {
+        Histogram hist = new Histogram();
+        hist.setSteps(30);
+        for (int i = 0 ; i < 100 ; i++) {
+            hist.addValue(Math.random()*20,Math.random()*15);
+        }
+        XYSeries xYSeries = hist.getXYSeries(true, "test",0,20,Histogram.GraphType.PROBABILITY_DISTRIBUTION);
+        assertEquals("test max value of distribution function", 1,1,1e-8);
+    }
+    
+    public void testFilterSeries() {
+        Histogram hist = new Histogram();
+        hist.setSteps(50);
+    
+        double x = 0;
+        double y = 0;
+        for (int i = 0 ; i < 100 ; i++) {
+            x += 0.1;
+            y += 0.2;
+            hist.addValue(x,y);
+        }
+        XYSeries ser1 = hist.getXYSeries(true, "ahoj");
+        assertEquals(50,ser1.getItemCount(),50); 
+        
+        hist.setTwoPointsDistance(2,1,1);
+        ser1 = hist.getXYSeries(true, "ahoj");
+        double xd =  ser1.getX(0).doubleValue() - ser1.getX(1).doubleValue();
+        double yd =  ser1.getY(0).doubleValue() - ser1.getY(1).doubleValue();
+        double diff = Math.sqrt(xd*xd + yd*yd);
+        assertTrue( diff >=  2);
+    }
 }

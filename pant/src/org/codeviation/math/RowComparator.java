@@ -24,7 +24,7 @@ public class RowComparator implements Comparator<Integer> {
     double s[];
     Type type;
     
-    enum Type {
+   public  enum Type {
         EUCLIDIAN,
         DOT_PRODUCT
     }

@@ -10,7 +10,6 @@
 package org.codeviation.math;
 
 import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
 
 /**
@@ -70,6 +69,7 @@ public final class PolynomialLinearRegression {
            double mr = yCoords.get(i) - yAvg;
            realSum += mr*mr;
         }
-        return modelSum/realSum;
+        double di =  modelSum/realSum;
+        return (di - (1 - di) *(deg+1)/(xCoords.size() - deg + 1));
     }
 }
