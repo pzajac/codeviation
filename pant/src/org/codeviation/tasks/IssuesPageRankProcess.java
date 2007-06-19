@@ -175,6 +175,8 @@ public class IssuesPageRankProcess implements RepositoryProcess {
     }
     
     private void setFactor(Histogram hist) {
-        hist.setTwoPointsDistance(15, 1.0/25, 1.0/1e4);
+        if (hist != null) {
+            hist.setTwoPointsDistance(15, 1.0/25, 1.0/1e4);
+        }
     }
 }
