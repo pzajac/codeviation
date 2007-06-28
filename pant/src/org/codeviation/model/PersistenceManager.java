@@ -61,10 +61,10 @@ public class PersistenceManager implements Serializable{
                         }
                         File file = new File(fileName);
                         if (!file.exists()) {
-                            throw new IllegalStateException("CVSROOT for repository + " + name + " doesn't exist.");
+                            logger.log(Level.SEVERE,"CVSROOT for repository " + name + " and folder " + fileName + "doesn't exist.");
+                        } else {
+                            repositories.put(file, new Repository(file,name));
                         }
-                        
-                        repositories.put(file, new Repository(file,name));
                     }
                 } finally {
                     reader.close();
