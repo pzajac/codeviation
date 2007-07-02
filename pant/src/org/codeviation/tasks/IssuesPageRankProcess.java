@@ -52,7 +52,7 @@ public class IssuesPageRankProcess implements RepositoryProcess {
         
        int items[] = new int[]{20,50,400};
  //       int items[] = new int []{50};
-        boolean createHistograms = false;
+        boolean createHistograms = true;
         
         for (int i = 0 ; i < items.length ; i++) {
             IssuesPageRankStatHandler handler = new IssuesPageRankStatHandler();
