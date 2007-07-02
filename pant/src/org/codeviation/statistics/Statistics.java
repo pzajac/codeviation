@@ -112,39 +112,37 @@ public final class Statistics<T> implements Graph<Statistics<T>> {
         if (!entryIt.hasNext()) {
             return ;
         }
-        Map.Entry<Version,Vector> prev = entryIt.next();
+        Map.Entry<Version,Vector> next = null;
+        int nextRec = -1;
         while(entryIt.hasNext()) {
-                Map.Entry<Version,Vector> next = entryIt.next();
-                int nextRec = getIndex(next.getKey());
-                int prevRec =  -1 ;
-                    prevRec = nextRec;
-                    if (prev.getKey().getState() == State.DEAD) {
-                        continue;
-                    }
-                    if (prevRec == -1) {
-                        if (prev.getKey().getDate().compareTo(getFromDate()) < 0)  {
-                            prevRec = 0;
-                        } else {
-                            break;
-                        }
-                    }
-                    //nextVer = versions.get(i);
-                    nextRec = getIndex(next.getKey());
-                    if (nextRec == -1) {
-                        nextRec = getItemsCount() - 1;
-                        if (nextRec == prevRec) {
-                            break;
-                        }
-                    } else if (nextRec >= getItemsCount() - 1 || !entryIt.hasNext()) {
-                        nextRec = getItemsCount() ;
-                    }
-                    // fill all Records between <prevRec,nextRec>
-                    //
-                    Vector vec = prev.getValue();
-                    for (int rec = prevRec ; rec < nextRec ; rec++) {
-                        getItemAt(rec).add(vec);
-                    }
-            }        
+            Map.Entry<Version,Vector> prev = next;
+            int prevRec = nextRec;
+            next = entryIt.next();
+   
+            nextRec = getIndex(next.getKey());
+            if (prev == null || prev.getKey().getState() == State.DEAD) {
+                continue;
+            }
+            //nextVer = versions.get(i);
+            if (prevRec == -1 && next.getKey().getDate().compareTo(getFromDate()) < 0) {
+                prevRec = 0;
+            }
+            if (nextRec == -1 && next.getKey().getDate().compareTo(getFromDate()) < 0) {
+                nextRec = getItemsCount() ;
+            } 
+            // fill all Records between <prevRec,nextRec>
+            //
+            Vector vec = prev.getValue();
+            for (int rec = prevRec ; rec < nextRec ; rec++) {
+                getItemAt(rec).add(vec);
+            }
+        }
+        if (next != null && next.getKey().getState() != State.DEAD) {
+            Vector vec = next.getValue();
+            for (int rec = getIndex(next.getKey()) ; rec != -1 && rec < getItemsCount() ; rec++) {
+                getItemAt(rec).add(vec);
+            }
+        }        
     }
     public Record getItem(long time) {
         int index = getIndex(time);

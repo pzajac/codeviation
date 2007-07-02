@@ -91,7 +91,7 @@ public class LSI<ROW extends Serializable ,COLUMN extends Serializable> {
     }
 
     public Vector query(Vector q) {
-       // u*s*vt*q
+       // s*vt*q
       DenseMatrix vt = svd.getVt();
       DenseVector result = new DenseVector(q.size());
       

@@ -14,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
+import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.VectorEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import no.uib.cipr.matrix.sparse.SparseVector;
@@ -83,4 +84,14 @@ public class AnotatedMatrix<ROW extends Serializable,COLUMN extends Serializable
         }
     }
     
+
+    /** replaces rows and columns
+     */
+    AnotatedMatrix<COLUMN,ROW> getTransposedMatrix() {
+        FlexCompRowMatrix newMat = new FlexCompRowMatrix(matrix.numColumns(),matrix.numRows());
+        for (MatrixEntry me : matrix) {
+            newMat.set(me.column(), me.row(), me.get());
+        }
+        return new AnotatedMatrix<COLUMN,ROW>(newMat,columns,rows);        
+    }    
 }

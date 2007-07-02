@@ -269,11 +269,14 @@ public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
            Map <UsageItem,Integer >  usagesColumns = new HashMap<UsageItem, Integer>();
            Map<String,Integer> userRow = new TreeMap<String, Integer>();
            
-           preparaDate(usagesColumns,userRow,ColumnType.PACKAGE,new UsageFilter() {
+           preparaDate(usagesColumns,userRow,ColumnType.CLASS,new UsageFilter() {
                 public boolean match(UsageItem item) {
-                    return  item.getClazz().startsWith("java.") || item.getClazz().startsWith("javax.");
+                    // XXX
+//                    return  item.getClazz().startsWith("java.") || item.getClazz().startsWith("javax.");
+                    return true;
                 }
            });
+           // create matrix for datamining (LSI)
            AnotatedMatrix<String,ArrayList<UsageItem>> am = generateMatrix(usagesColumns, userRow, MATRIX_FILE_NAME);
            env.performRepositoryAction(this, new RepositoryProcessEnv.Event<AnotatedMatrix<String,ArrayList<UsageItem>>>(am));
            

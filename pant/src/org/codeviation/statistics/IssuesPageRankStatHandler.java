@@ -210,13 +210,13 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
             if (count > 0) {
                 bugsHistogram.setSteps(count);
             }
-            allSeries.addSeries(bugsHistogram.getXYSeries(true,"All Defects",minKey,maxKey,graphType));
+            allSeries.addSeries(bugsHistogram.getXYSeries(true,"All Bugs",minKey,maxKey,graphType));
         }
         if (!filesHistogram.isEmpty()) {
             if (count > 0) {
                 filesHistogram.setSteps(count);
             }
-            allSeries.addSeries(filesHistogram.getXYSeries(true,"Java Files",minKey,maxKey,graphType));
+            allSeries.addSeries(filesHistogram.getXYSeries(true,"All Changes",minKey,maxKey,graphType));
         }
         for (int i = 0 ; i < priorityBugsHistogram.length ; i++) {
             if (!priorityBugsHistogram[i].isEmpty()) {
