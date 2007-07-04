@@ -18,7 +18,10 @@ import org.openide.util.Lookup;
  * @author pzajac
  */
 public class RunAllProcesses {
-    
+    static String DEFAULT_REPOSITORY="nbcvs";
+    /** System property name for repository name
+     */
+    public static final String REPOSITORY_NAME_PROPERTY="pant.repository.name";
     public static void main(String args[]) {
         Set<String> filters = new HashSet<String>();
         CVSMetric.setUpdateCVS(false);
@@ -46,7 +49,12 @@ public class RunAllProcesses {
         
         // execute processes
         //
-        Repository rep =  PersistenceManager.getDefault().getRepository("nbcvs");
+        
+        String repName = System.getProperty(REPOSITORY_NAME_PROPERTY);
+        if (repName == null) {
+            repName = DEFAULT_REPOSITORY;
+        }
+        Repository rep =  PersistenceManager.getDefault().getRepository(repName);
         Set<String> tags = rep.getAllTags();
         
         System.out.println("Tags:\n");
@@ -75,6 +83,8 @@ public class RunAllProcesses {
     private static void help() {
         System.out.println("Invalid count of parameters.");
         System.out.println("Usage: RunAllProcesses <workdir> [<filter1> [<filterN]]" );
+        System.out.println("Repository with nbcvs name is processed at default. The repository name can " +
+            "be changed in pant.repository name property.");
         System.out.println("\nPosible filters:");
         for (RepositoryProcess process :  Lookup.getDefault().lookupAll(RepositoryProcess.class)) {
             System.out.println('"' + process.getName() + '"' + " - " + process.getDescription() + "\n" );
