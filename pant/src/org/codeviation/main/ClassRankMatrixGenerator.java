@@ -54,6 +54,7 @@ public class ClassRankMatrixGenerator {
             this.pack = pack;
         }
         
+        @Override
         public boolean equals(Object o) {
             if (o == null)
                 return false;
@@ -61,7 +62,7 @@ public class ClassRankMatrixGenerator {
                 return false;
             final ClassItem test = (ClassItem) o;
 
-            if (this.className != test.className && this.className != null &&
+            if ( this.className != null &&
                 !this.className.equals(test.className))
                 return false;
             return true;
