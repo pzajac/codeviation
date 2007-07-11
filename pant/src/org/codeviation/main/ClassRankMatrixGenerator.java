@@ -9,20 +9,17 @@ import java.util.List;
 import java.util.Map;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
-import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.Vector;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import no.uib.cipr.matrix.sparse.SparseVector;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Package;
-import org.codeviation.model.PersistenceManager;
 import org.codeviation.model.PositionIntervalResult;
 import org.codeviation.model.Repository;
 import org.codeviation.model.SourceRoot;
 import org.codeviation.model.Version;
 import org.codeviation.tasks.PageRankMetric;
 import org.codeviation.tasks.SourceRootFilter;
-import org.codeviation.model.vcs.CVSMetric;
 import org.codeviation.javac.CVSVersionsByPant;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
@@ -269,14 +266,12 @@ public class ClassRankMatrixGenerator {
        for (int i = 0 ; i < usedClasses.size() ; i++ ) {
             vec.set(i, value);
        }
-       long startTime = System.currentTimeMillis();
        if (usedClasses.isEmpty()) {
            throw new IllegalStateException("No class for pageRank");
        }
        if (compute(vec) == -1 ) {
            throw new IllegalStateException("Convergence problem");
        }
-       long endTime = System.currentTimeMillis();
        return vec;
     }
     
@@ -317,36 +312,36 @@ public class ClassRankMatrixGenerator {
        }
               
     } 
-    public static void main(String args[]) throws NotConvergedException {
-        if (System.getProperty(PersistenceManager.PANT_CACHE_FOLDER) == null) {
-           // XXX
-            System.setProperty(PersistenceManager.PANT_CACHE_FOLDER, "/cvss/pantcache");
-       }
-       CVSMetric.setUpdateCVS(false);
-       System.out.println("Creating matrix");
-       Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
-       List<SourceRoot> roots = new ArrayList<SourceRoot>();
-       for (SourceRoot root : rep.getSourceRoots()) {
-           roots.add(root);
-       }
-//       roots.add(rep.getSourceRoot("openide/fs/src"));
-//       roots.add(rep.getSourceRoot("openide/masterfs/src"));
-//       roots.add(rep.getSourceRoot("openide/loaders/src"));
-//       roots.add(rep.getSourceRoot("openide/nodesop/src"));
-//       roots.add(rep.getSourceRoot("openide/explorer/src"));
-//       roots.add(rep.getSourceRoot("editor/src"));
-//       roots.add(rep.getSourceRoot("apisupport/project/src"));
-    
-       ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator();
-       Vector vec = generator.compute(roots);
-       
-       // sort 
-       List<ClassItem> allItems = new ArrayList<ClassItem>(generator.usedClasses.values());
-       Collections.sort(allItems);
-
-       for (ClassItem item : allItems) {
-           System.out.println(item.className + ", " + item.getRank() + " " );
-       }
-       System.out.println("total classes:" + allItems.size());
-    }
+//    public static void main(String args[]) throws NotConvergedException {
+//        if (System.getProperty(PersistenceManager.PANT_CACHE_FOLDER) == null) {
+//           // XXX
+//            System.setProperty(PersistenceManager.PANT_CACHE_FOLDER, "/cvss/pantcache");
+//       }
+//       CVSMetric.setUpdateCVS(false);
+//       System.out.println("Creating matrix");
+//       Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
+//       List<SourceRoot> roots = new ArrayList<SourceRoot>();
+//       for (SourceRoot root : rep.getSourceRoots()) {
+//           roots.add(root);
+//       }
+////       roots.add(rep.getSourceRoot("openide/fs/src"));
+////       roots.add(rep.getSourceRoot("openide/masterfs/src"));
+////       roots.add(rep.getSourceRoot("openide/loaders/src"));
+////       roots.add(rep.getSourceRoot("openide/nodesop/src"));
+////       roots.add(rep.getSourceRoot("openide/explorer/src"));
+////       roots.add(rep.getSourceRoot("editor/src"));
+////       roots.add(rep.getSourceRoot("apisupport/project/src"));
+//    
+//       ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator();
+//       Vector vec = generator.compute(roots);
+//       
+//       // sort 
+//       List<ClassItem> allItems = new ArrayList<ClassItem>(generator.usedClasses.values());
+//       Collections.sort(allItems);
+//
+//       for (ClassItem item : allItems) {
+//           System.out.println(item.className + ", " + item.getRank() + " " );
+//       }
+//       System.out.println("total classes:" + allItems.size());
+//    }
 }

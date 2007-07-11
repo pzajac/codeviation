@@ -71,18 +71,18 @@ public class UpdateIssues implements RepositoryProcess{
            addRecursiveIssue(pack,ver.getNext());
        }
    }
-   public static void main(String arg[]) throws SQLException, IOException {
-       if (System.getProperty(PersistenceManager.PANT_CACHE_FOLDER) == null) {
-           // XXX
-        System.setProperty(PersistenceManager.PANT_CACHE_FOLDER, "/cvss/pantcache");
-       }
-       UpdateIssues ui = new UpdateIssues();
-       Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
-       UpdateIssues uissues = new UpdateIssues();
-       RepositoryProcessEnv env = new RepositoryProcessEnv();
-       env.setWorkDir(new File("/tmp"));
-       uissues.execute( rep, env);
-   }    
+//   public static void main(String arg[]) throws SQLException, IOException {
+//       if (System.getProperty(PersistenceManager.PANT_CACHE_FOLDER) == null) {
+//           // XXX
+//        System.setProperty(PersistenceManager.PANT_CACHE_FOLDER, "/cvss/pantcache");
+//       }
+//       UpdateIssues ui = new UpdateIssues();
+//       Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
+//       UpdateIssues uissues = new UpdateIssues();
+//       RepositoryProcessEnv env = new RepositoryProcessEnv();
+//       env.setWorkDir(new File("/tmp"));
+//       uissues.execute( rep, env);
+//   }    
    public  void addIssue(Package pack,Version ver) throws SQLException, IOException {
         for (int id :ver.getDefectNumbers()) {
             Issue issue = Issue.readIssue(id);
