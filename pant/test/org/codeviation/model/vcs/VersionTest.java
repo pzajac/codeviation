@@ -28,7 +28,6 @@ import org.codeviation.model.Version.State;
  * @author  pz97949
  */
 public class VersionTest extends TestCase {
-    private static String CVSROOT = "/home/pzajac/cvss/cvsrel/";
     private static final String COMMENT = ("fasdfsad 456 dsfsadf 435345 dfasdfas 534534");
     private Version version = new Version ("3.4.5.4", COMMENT,new Date(234234234),USER,Version.State.EXP);
     private static String USER = "zajo";

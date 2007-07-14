@@ -69,7 +69,12 @@ public class CVSMetricTest extends TestCase {
         //branches:  1.24.30.1.16;
         //Forgotten CDDL changes for xml
         //----------------------------   
-        doFile("CatalogNode.java");
+        CVSMetric cvs = doFile("CatalogNode.java");
+//        Version v = cvs.getRootVersion();
+//        do {
+//            System.out.println(v.getRevision() + " " + v.getUser() + " " + v.getDate() + " " + v.getComment());
+//        } while ((v = v.getNext()) != null);
+
     }
     /** file commited with -kb paramater
      */
@@ -89,7 +94,7 @@ public class CVSMetricTest extends TestCase {
         TestUtil.assertFile(lines, jf.getCVSFile());
     }
 
-    private void doFile(String name) throws IOException {
+    private CVSMetric doFile(String name) throws IOException {
         File javaMainFile = new File(prj,"src/testj2seexample/" + name);
         JavaFile jf = JavaFile.getJavaFile(javaMainFile, "testj2seexample");
         // read and persists all diffs
@@ -101,6 +106,7 @@ public class CVSMetricTest extends TestCase {
         CVSMetric cvs2 = jf.getCVSResultMetric();
         
         assertEquals(cvs, cvs2);
+        return cvs;
     }
     
 }

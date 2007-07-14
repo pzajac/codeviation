@@ -66,7 +66,8 @@ public class CvsUtil {
         }
         Version root =  Version.sortVersions(versions);
         if (root.getState() != Version.State.DEAD) { 
-            versions.add(new Version("1.0","" , new Date(), "?",Version.State.DEAD));
+            // create imaginary revision
+            versions.add(new Version("1.0","" , new Date(root.getDate().getTime() - 500), "?",Version.State.DEAD));
             root = Version.sortVersions(versions);
         }
         return  root; 
@@ -120,12 +121,21 @@ public class CvsUtil {
             
         //----------------------------
         line = breader.readLine();
+        Date prevDate = null;
         while ((line != null)) {
              if (line.startsWith("--------------") == false) {
                  throw new IllegalStateException("revisions must begin with ---");
              }
-            //revision 1.32
             line = breader.readLine();
+            // sometimes there are two lines
+            if (line.startsWith("--------------")) {
+                line = breader.readLine();
+            }
+            if (line == null) {
+                break;
+            }
+            //revision 1.32
+            
             if (line.startsWith("revision ")) {
                 int revIndex = "revision ".length();
                 revString = line.substring(revIndex);
@@ -172,8 +182,14 @@ public class CvsUtil {
             if (date == null) {
                 Logger.getLogger(CvsUtil.class.getName()).log(Level.SEVERE,"null date for log: " + line);
                 // XXX fake
-                date = new Date();
+                if (prevDate != null) {
+                    date = new Date(prevDate.getTime() + 10);
+                } else {       
+                    date = new Date();
+                }       
             }
+            prevDate = date;
+          
             revisions.add(new Version(revString,comment.toString(),date,user,Version.State.parse(state)));
         } // revision
         return revisions;
