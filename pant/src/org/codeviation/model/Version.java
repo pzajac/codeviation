@@ -376,6 +376,8 @@ public class Version implements Comparable<Version> , Serializable {
         return result;
     }
     
+    /** @return Version for revision vers
+     */
     public Version getVersion(String vers) {
         if (getRevision().equals(vers)) {
             return this;

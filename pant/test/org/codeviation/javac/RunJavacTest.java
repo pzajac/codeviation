@@ -39,6 +39,7 @@ import org.codeviation.model.PositionIntervalResult;
 import org.codeviation.model.VersionInterval;
 import org.codeviation.model.PositionVersionIntervalResultContainer;
 import org.codeviation.model.PositionInterval;
+import org.codeviation.model.Version;
 
 /**
  *
@@ -248,7 +249,38 @@ diff -r1.1 -r1.2
         assertUsage(it,"1.1","1.2","java.util.List","add(E)","list",ur,cvs); 
         assertFalse(it.hasNext());
         
-    }
+        // test addded, removed and unchanged result
+        Version v12 = cvs.getRootVersion().getVersion("1.2");
+        Set<PositionIntervalResult<UsageItem>> addedPIR = storage.getAddedPIR(v12);
+        assertEquals("only one was added in revision 1.2",1,addedPIR.size());
+        it = addedPIR.iterator();
+        PositionIntervalResult<UsageItem> pir = it.next();
+        UsageItem ui = pir.getObject();
+        assertEquals("java.io.PrintStream", ui.getClazz());
+
+    
+        // test unchanged
+        Set<PositionIntervalResult<UsageItem>> unchangedPIR = storage.getUnchangedPIR(v12);
+        assertEquals("unchanged usages in v1.2",3,unchangedPIR.size());
+
+        // test removed
+        Version v13 = cvs.getRootVersion().getVersion("1.3");
+        Set<PositionIntervalResult<UsageItem>> removedPIR = storage.getRemovedPIR(v13);
+        assertEquals("only one was removed in revision 1.3",1,removedPIR.size());
+        it = removedPIR.iterator();
+        pir = it.next();
+        ui = pir.getObject();
+        assertEquals("java.util.List", ui.getClazz());
+        
+        Version v11 = cvs.getRootVersion().getVersion("1.1");
+        removedPIR = storage.getRemovedPIR(v11);
+        assertTrue(removedPIR.isEmpty());
+        
+        unchangedPIR = storage.getUnchangedPIR(v11);
+        assertTrue(unchangedPIR.isEmpty());
+        
+        
+   }
 //    public void testMoreFiles() throws IOException, InterruptedException {
 //       testPrjF = ExamplesSetup.getPantProject();
 //       System.out.println(testPrjF.getAbsolutePath());

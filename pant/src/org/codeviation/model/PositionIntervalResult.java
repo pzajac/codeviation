@@ -11,7 +11,8 @@ package org.codeviation.model;
 import java.io.Serializable;
 
 /**
- *A metric result for PositionInterval
+ *A metric result for PositionInterval. T needs to have unique hashcode and equals
+ * implementation.
  * @author pzajac
  */
 public final class PositionIntervalResult<T> implements Serializable {
