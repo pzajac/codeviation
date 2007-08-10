@@ -45,14 +45,18 @@ public final class MatrixUtil {
         if (maxb >= b.size() ) {
             maxb = b.size() - 1;
         }
+        int prevIaVal = -1;
+        int prevIbVal = -1;
         while (ia <=  maxa && ib <= maxb) {
-            if (iaVal == ibVal) {
+            if (iaVal == ibVal && iaVal > prevIaVal && ibVal > prevIbVal) {
                 result += a.get(iaVal)*b.get(ibVal);
                 ++ia;
                 ++ib;
                 if (ia > maxa || ib > maxb) {
                     return result;
                 }
+                prevIaVal = iaVal;
+                prevIbVal = ibVal;
                 iaVal = ias[ia];
                 ibVal = ibs[ib];
             } else {
