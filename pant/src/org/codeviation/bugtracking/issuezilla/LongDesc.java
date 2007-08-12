@@ -53,25 +53,25 @@ public class LongDesc {
     
     public LongDesc(String who, String theText, Timestamp when) {
         this.who = who;
-        //        this.text = theText;
+        this.text = theText;
         this.when = when;
         
         // format text
-        StringBuffer sb = new StringBuffer(theText.length()) ;
-        for (int i = 0, column = 0 ; i < theText.length() ; i++ ) {
-            char ch = theText.charAt(i);
-            column++;
-            if (ch == '\n' || column == 67) {
-                int spaceChar = searchSpaceChar(theText,i);
-                sb.append(theText.substring(i,spaceChar));
-                sb.append('\n');
-                i = spaceChar;
-                column = 0;
-            } else {
-                sb.append(ch);
-            }
-        }
-        text = sb.toString();
+//        StringBuffer sb = new StringBuffer(theText.length()) ;
+//        for (int i = 0, column = 0 ; i < theText.length() ; i++ ) {
+//            char ch = theText.charAt(i);
+//            column++;
+//            if (ch == '\n' || column == 67) {
+//                int spaceChar = searchSpaceChar(theText,i);
+//                sb.append(theText.substring(i,spaceChar));
+//                sb.append('\n');
+//                i = spaceChar;
+//                column = 0;
+//            } else {
+//                sb.append(ch);
+//            }
+//        }
+//        text = sb.toString();
     }
     
     private static int searchSpaceChar(String theText,int i) {

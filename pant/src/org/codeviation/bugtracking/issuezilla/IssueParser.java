@@ -6,12 +6,14 @@
 
 package org.codeviation.bugtracking.issuezilla;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,6 +22,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -47,10 +52,22 @@ public class IssueParser {
      */ 
     private static int [] getIntArray(Element issueElement,String subElementName) { 
        NodeList list = issueElement.getElementsByTagName(subElementName);
-       int ints [] = new int[list.getLength()]; 
+       List<Integer> intList = new ArrayList<Integer>( list.getLength() );
        for (int it = 0 ; it < list.getLength() ; it++) {
-           ints[it] = Integer.parseInt(list.item(it).getFirstChild().getNodeValue());
+           try {
+              intList.add(Integer.parseInt(list.item(it).getFirstChild().getNodeValue()));              
+           }
+           catch (NumberFormatException e ) {
+               // Skip
+           }
        }
+       
+       int ints [] = new int[intList.size()];
+       int i = 0;
+       for (Integer integer : intList) {
+           ints[i++] = integer;
+       }
+
        return ints;
     }
     
@@ -78,7 +95,8 @@ public class IssueParser {
         NodeList list = element.getElementsByTagName(subElementName);
         String  values [] = new String [list.getLength()];
         for (int i = 0 ; i < list.getLength() ; i++ ) {
-            values[i] = list.item(i).getFirstChild().getNodeValue();
+            Node firstChild = list.item(i).getFirstChild(); 
+            values[i] = firstChild == null ? "" : firstChild.getNodeValue(); // XXX
         }
         return values;
     }
@@ -113,7 +131,18 @@ public class IssueParser {
      */
     public static Collection parseXml(InputStream xmlStream) throws SAXException,IOException,IllegalStateException,ParserConfigurationException  {
        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();   
+       //dbf.setExpandEntityReferences(false);
+       dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
        DocumentBuilder builder = dbf.newDocumentBuilder();
+       builder.setEntityResolver(new EntityResolver() {
+
+            public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                InputStream is = new ByteArrayInputStream(new byte[0]);
+                return new InputSource(is);
+                //return new InputSource("");
+            }
+           
+       });
        Document doc = builder.parse(xmlStream);
        
 //    <!ELEMENT issuezilla (issue+)>
@@ -171,9 +200,58 @@ public class IssueParser {
               }
               issue.setLongDescs(longDescs);
 
+              //    <!ELEMENT long_desc (who, issue_when, thetext)>
+              NodeList isDuplicateNodes = issueElement.getElementsByTagName("is_duplicate");              
+              if (isDuplicateNodes.getLength() > 0) {
+                  IsDuplicate isDuplicate = new IsDuplicate();
+                  Element node = (Element)isDuplicateNodes.item(0);
+                  isDuplicate.who = getValueOfElement(node, "who");
+                  String textWhen = getValueOfElement(node, "when");                    
+                  isDuplicate.when = textWhen == null ?  null : parseTimeStamp(textWhen);
+                  String textId = getValueOfElement(node, "issue_id");                    
+                  isDuplicate.issueId = textId == null ? 0 : Integer.parseInt(textId);                  
+                  issue.setIsDuplicate(isDuplicate);
+              }
+              else {
+                  issue.setIsDuplicate(null);
+              }
+                  
+                  
+              NodeList activityNodes = issueElement.getElementsByTagName("activity");              
+              Activity activity[] = new Activity[activityNodes.getLength()];
+              for (int itA = 0 ; itA < activityNodes.getLength() ; itA++) {
+                  Element aElement = (Element) activityNodes.item(itA);
+                  activity[itA] = new Activity();
+                  activity[itA].user = getValueOfElement(aElement, "user");
+                  activity[itA].when =  parseTimeStamp(getValueOfElement(aElement, "when"));
+                  activity[itA].fieldName = getValueOfElement(aElement, "field_name");
+                  activity[itA].fieldDesc = getValueOfElement(aElement, "field_desc");
+                  activity[itA].oldValue = getValueOfElement(aElement, "oldvalue");
+                  activity[itA].newValue = getValueOfElement(aElement, "newvalue");
+              }
+              issue.setActivities(activity);
 
               //attachment* [ignored]
 
+              NodeList attachmentNodes = issueElement.getElementsByTagName("attachment");
+              Attachment attachments [] = new Attachment[attachmentNodes.getLength()];
+              for (int itAT = 0 ; itAT < attachmentNodes.getLength() ; itAT++) {
+                  Element lsElement = (Element) attachmentNodes.item(itAT);
+                  String mimetype = getValueOfElement(lsElement, "mimetype");
+                  String attachid = getValueOfElement(lsElement, "attachid"); 
+                  Timestamp date = Timestamp.valueOf(getValueOfElement(lsElement, "date"));
+                  String desc = getValueOfElement(lsElement, "desc");
+                  String ispatch = getValueOfElement(lsElement, "ispatch");
+                  String filename = getValueOfElement(lsElement, "filename");
+                  String submitter_id = getValueOfElement(lsElement, "submitter_id");
+                  String data = getValueOfElement(lsElement, "data"); 
+                  String attachment_iz_url = getValueOfElement(lsElement, "attachment_iz_url");
+
+                  Attachment a = new Attachment(mimetype, attachid, date, desc, ispatch, filename, submitter_id, data, attachment_iz_url);
+                  attachments[itAT] = a;
+              }
+              issue.setAttachments(attachments);
+              
               //attributes of issue
     //    <!ATTLIST issue error (NotFound|NotPermitted) #IMPLIED>
               String attr = issueElement.getAttribute("error");
@@ -182,13 +260,13 @@ public class IssueParser {
               }
 
     //    <!ATTLIST issue issue_status
-              issue.setStatus(Status.findStatus(issueElement.getAttribute("issue_status")));
+              issue.setStatus(Status.findStatus(getValueOfElement(issueElement, "issue_status").toUpperCase()));
     //    <!ATTLIST issue priority (P1|P2|P3|P4|P5) #REQUIRED>
-              issue.setPriority(Priority.valueOf(issueElement.getAttribute("priority")));
+              issue.setPriority(Priority.valueOf(getValueOfElement(issueElement, "priority").toUpperCase()));
   
     //    <!ATTLIST issue resolution
     //        (FIXED|INVALID|WONTFIX|LATER|REMIND|DUPLICATE|WORKSFORME|MOVED) #IMPLIED>
-              issue.setResolution(Resolution.findResolution(issueElement.getAttribute("resolution")));          
+              issue.setResolution(Resolution.findResolution(getValueOfElement(issueElement, "resolution")));          
     //
     //
     //    <!-- Data pertaining to attachments.  NOTE - some of these fields    -->

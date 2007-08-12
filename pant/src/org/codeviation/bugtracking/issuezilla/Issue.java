@@ -89,13 +89,16 @@ public class Issue {
     private int votes;
     private String opSys;
     private String shortDesc;
-    private String keyword;
+    private String keyword;    
     /** array of dependend issue_ids 
      */ 
     private int dependsOn[];
     private LongDesc longDescs[] ;
     private String blocks[];
     private String CCs[];
+    private Attachment attachments[];
+    private Activity activities[];
+    private IsDuplicate isDuplicate;
     
 // temporary data
 //    
@@ -874,6 +877,23 @@ public class Issue {
         this.dependsOn = depsOn;
         bReadDependsOn = true;
     }
+    
+    public Activity[] getActivities() {
+        return activities;
+    }
+
+    public void setActivities(Activity[] activities) {
+        this.activities = activities;
+    }
+
+    public IsDuplicate getIsDuplicate() {
+        return isDuplicate;
+    }
+
+    public void setIsDuplicate(IsDuplicate isDuplicate) {
+        this.isDuplicate = isDuplicate;
+    }
+    
     /** parse keyword delimed by ','
      */
     private Enumeration enumerateKeywords(String keyword) {
@@ -953,6 +973,15 @@ public class Issue {
         }
         return ret;
     } //equals
+
+    public Attachment[] getAttachments() {
+        return attachments == null ? new Attachment[0] : attachments;
+    }
+
+    public void setAttachments(Attachment[] attachments) {
+        this.attachments = attachments;
+    }
+    
     
     public static void setIgnoreLongDesc (boolean newIgnoreLongDesc) {
         ignoreLongDesc = newIgnoreLongDesc;
