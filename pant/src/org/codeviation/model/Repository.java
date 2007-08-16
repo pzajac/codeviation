@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 import org.codeviation.main.PrepareNbTags;
 
 /**
- *
+ *  It represents whole cvs repository.
  * @author pzajac
  */
 public final class Repository {
@@ -106,9 +106,12 @@ public final class Repository {
     public String getName() {
         return name;
     }
+    @Override
     public int hashCode() {
         return cvsRoot.hashCode();        
     }
+    
+    @Override
     public boolean equals (Object obj) {
         return (obj instanceof Repository) ?
             getCvsRoot().equals(((Repository)obj).getCacheRoot()) : false;
