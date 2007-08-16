@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -34,6 +36,7 @@ import org.codeviation.main.PrepareNbTags;
  * @author pzajac
  */
 public final class Repository {
+    public static final String CONFIGURATION_FILE = "configuration.properties";
     private final File cvsRoot;
     private final String name;
     private static final String SOURCE_ROOTS_LIST_FILE = "sourceroots.lst";
@@ -44,6 +47,7 @@ public final class Repository {
     private Map<String,SourceRoot> sourceRoots;
     /** last modification of SOURCE_ROOTS_LIST_FILE*/
     private long sourceRootsModification;
+    Properties properties;
     /** Creates a new instance of Repository */
     Repository(File cvsRoot,String name) {
         this.cvsRoot = cvsRoot;
@@ -101,7 +105,11 @@ public final class Repository {
      * @return repository folder
      */
     public File getCacheRoot() {
-        return new File(PersistenceManager.getDefault().getFolder(),getName());
+        File f = new File(PersistenceManager.getDefault().getFolder(),getName());
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
     }
     public String getName() {
         return name;
@@ -205,6 +213,7 @@ public final class Repository {
         }
         
     }    
+    @Override
     public String toString() {
         return name;
     }
@@ -231,4 +240,62 @@ public final class Repository {
         } 
         return new CompilationStatus();
     }
+    
+    /** Get property value of configuration
+     * @return property value
+     */
+    public String getProperty(String name ) {
+        return getProperties().getProperty(name);
+    }
+
+    /** Add or replace persistent property 
+     */
+    public void setProperty(String name,String value) {
+        FileWriter writer = null;
+        try {
+            Properties props = getProperties();
+            props.setProperty(name, value);
+            writer = new FileWriter(new File(getCacheRoot(), CONFIGURATION_FILE));
+            props.store(writer, "");
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, ex.getMessage(),ex);
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, ex.getMessage(),ex);
+            }
+        }
+        
+    }
+    
+    
+    private Properties getProperties() {
+        if (properties == null) {
+            properties = new Properties();
+            File propertiesFile = new File (getCacheRoot(),CONFIGURATION_FILE);
+            if (propertiesFile.exists()) {
+                FileReader reader = null ;
+                try {
+                    reader = new FileReader(propertiesFile);
+                    properties.load(reader);
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, ex.getMessage(),ex);
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException ex2) {
+                            logger.log(Level.SEVERE, ex2.getMessage(),ex2);
+                        }
+                    }
+                    
+                }
+            }
+        }
+        return properties;
+    }
 }
+
