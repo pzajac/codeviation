@@ -129,7 +129,7 @@ public class IssueParser {
     /** 
      *@throws IllegalStateException when exists attribute  issue error (NotFound|NotPermitted) 
      */
-    public static Collection parseXml(InputStream xmlStream) throws SAXException,IOException,IllegalStateException,ParserConfigurationException  {
+    public static Collection<Issue> parseXml(InputStream xmlStream) throws SAXException,IOException,IllegalStateException,ParserConfigurationException  {
        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();   
        //dbf.setExpandEntityReferences(false);
        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -239,7 +239,7 @@ public class IssueParser {
                   Element lsElement = (Element) attachmentNodes.item(itAT);
                   String mimetype = getValueOfElement(lsElement, "mimetype");
                   String attachid = getValueOfElement(lsElement, "attachid"); 
-                  Timestamp date = Timestamp.valueOf(getValueOfElement(lsElement, "date"));
+                  Timestamp date = IssuezillaUtil.parseDate(getValueOfElement(lsElement, "date"));
                   String desc = getValueOfElement(lsElement, "desc");
                   String ispatch = getValueOfElement(lsElement, "ispatch");
                   String filename = getValueOfElement(lsElement, "filename");

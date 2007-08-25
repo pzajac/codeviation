@@ -28,12 +28,19 @@ public class IssueTest extends TestCase {
     
     public void testVersionIssues() throws SQLException, IOException, ParseException{
         Issue issue = Issue.readIssue(65352);
+        assertTrue(issue.getActivities().length > 0);
         Version version = new Version("1.22",
                                      "#65352 - do not set ",getDate("2005/09/27 15:09:13"),"rondruska",State.EXP);
         int issues[] = version.getDefectNumbers();
         assertEquals(1,issues.length);
         assertEquals(65352,issues[0]);
         assertEquals("Fix of defect",Version.IssueType.DEFECT, version.getIssueType());
+ 
+        version = new Version("1.22",
+                                     "#65352 - do not set ",getDate("2006/09/27 15:09:13"),"rondruska",State.EXP);
+        issues = version.getDefectNumbers();
+        assertEquals(0,issues.length);
+ 
     }
     
     static private Date getDate(String value) throws ParseException {

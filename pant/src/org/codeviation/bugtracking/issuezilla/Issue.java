@@ -29,6 +29,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 /**
@@ -389,7 +390,7 @@ public class Issue {
         }
         int dependsOn[] = new int[vec.size()];
         for (int i = 0 ; i < vec.size() ; i++ ) {
-            dependsOn[i] =((Integer) vec.elementAt(i)).intValue();
+            dependsOn[i] =(vec.elementAt(i)).intValue();
         }
         bReadDependsOn = true;
         stmt.close();
@@ -555,8 +556,25 @@ public class Issue {
      */
     
     public static Issue readIssue(int issue_id) throws SQLException,IOException {
-        Issue issue = new Issue(issue_id);
-        return issue.readFromLocalDb() ? issue : null;
+        try {
+            switch (IssuezillaUtil.getStorageType()) {
+                case ISSUEZILLA_REPLICA_DB:
+                    Issue issue = new Issue(issue_id);
+                    return issue.readFromLocalDb() ? issue : null;
+                case ISSUEZILLA_XML:
+                    return readIssueFromIssuezilla(issue_id);
+                case ISSUE_CACHE:
+                    return IssueCache.getIssue(issue_id);
+                default:
+                    throw new IllegalStateException("Not supported storage type: " + IssuezillaUtil.getStorageType());
+            }
+        } catch (SAXException ex) {
+            IssuezillaUtil.logSevere(ex,"issue : " + issue_id);
+            throw new IllegalStateException(ex);
+        } catch (ParserConfigurationException ex) {
+            IssuezillaUtil.logSevere(ex,"issue : " + issue_id);
+            throw new IllegalStateException(ex);
+        }
     }
     /** read issue from xml defined by issuezila DTD 
      */
@@ -879,7 +897,15 @@ public class Issue {
     }
     
     public Activity[] getActivities() {
+        if (activities == null) {
+             Issue issue = Issue.readIssueFromDbXml(issueId);    
+             if (issue == null ) {
+                 throw new IllegalStateException("Issue #" + issueId + " doesn't exist.");
+             }
+             activities = issue.getActivities();
+        }
         return activities;
+        
     }
 
     public void setActivities(Activity[] activities) {
@@ -901,7 +927,6 @@ public class Issue {
             keyword = "";
         }
         final StringTokenizer tokenizer = new StringTokenizer(keyword,",");
-        Enumeration en;
         
         return new Enumeration () {
             public boolean hasMoreElements() {
@@ -930,6 +955,7 @@ public class Issue {
         this.blocks = blocks;
     }
 
+    @Override
     public boolean equals(Object object) {
         boolean ret = true; 
         try {
@@ -974,6 +1000,11 @@ public class Issue {
         return ret;
     } //equals
 
+    @Override
+    public int hashCode() {
+        return this.issueId;
+    }
+
     public Attachment[] getAttachments() {
         return attachments == null ? new Attachment[0] : attachments;
     }
@@ -989,5 +1020,40 @@ public class Issue {
     
     public static boolean getIgnoreLongDesc() {
         return ignoreLongDesc;
+    }
+    
+    
+    public static Issue readIssueFromDbXml(int issueId) {
+        Issue issue = null;
+        Statement stmt = null;
+        try {
+            stmt = IssuezillaUtil.getStatement();
+            ResultSet rs = stmt.executeQuery("select xml from xmlissue where id=" + issueId);
+            if (rs.next()) {
+                Collection<Issue> issues = IssueParser.parseXml(rs.getAsciiStream(1));
+                Iterator<Issue> it = issues.iterator();
+                if (it.hasNext()) {
+                    issue = it.next();
+                }
+            }
+            
+        } catch (SAXException ex) {
+            IssuezillaUtil.logSevere(ex, "Id = " + issueId);
+        } catch (IOException ex) {
+            IssuezillaUtil.logSevere(ex, "Id = " + issueId);
+        } catch (IllegalStateException ex) {
+            IssuezillaUtil.logSevere(ex, "Id = " + issueId);
+        } catch (ParserConfigurationException ex) {
+            IssuezillaUtil.logSevere(ex, "Id = " + issueId);
+        } catch (SQLException ex) {
+            Exceptions.printStackTrace(ex);
+        } finally {
+           try {
+            if (stmt != null) {
+                stmt.close();
+            }
+           } catch (SQLException sqe) {}
+        }
+        return issue;
     }
 }

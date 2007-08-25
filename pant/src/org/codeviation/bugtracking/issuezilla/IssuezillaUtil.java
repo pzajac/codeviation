@@ -19,6 +19,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -30,15 +33,26 @@ import javax.xml.transform.stream.StreamSource;
  *
  * @author  pz97949
  */
-public class IssuezillaUtil {
+public final class IssuezillaUtil {
     static Statement stmt;
     static Connection connection;
+    private static StorageType storageType = StorageType.ISSUEZILLA_REPLICA_DB;
     private static boolean initializedProxy = false;
     /** enable. disable http proxy 
      **/
     private static String proxySet = "true";
     private static String proxyHost = "webcache.czech.sun.com";
     private static String proxyPort = "8080";
+
+    static Timestamp parseDate(String date) {
+        Timestamp ts = Timestamp.valueOf(date);
+        long time = ts.getTime();
+        // + 7 hours
+        time += 7*1000*3600;
+        ts.setTime(time);
+        return ts;
+    }
+
     /** Entity resolver for Issues.dtd
      */ 
 
@@ -57,6 +71,24 @@ public class IssuezillaUtil {
             System.getProperties().put( "proxyPort", proxyPort );
         }
     }
+    public static void disableProxy() {
+        Properties props = System.getProperties();
+        props.remove("proxySet");
+        props.remove("proxyHost");
+        props.remove("proxyPort");
+        // ignore proxy initialization
+        initializedProxy = true;
+    }
+
+    public static StorageType getStorageType() {
+        return storageType;
+    }
+
+    public static void setStorageType(StorageType storageTyp) {
+        IssuezillaUtil.storageType = storageTyp;
+    }
+    
+   
     public static synchronized Connection getConnection() throws SQLException{
         if (connection == null ) {
             try {
@@ -160,5 +192,9 @@ public class IssuezillaUtil {
     }
     public static Timestamp fromPacificTime(Timestamp ts) {
         return new Timestamp(ts.getTime() + 1000*3600*9);
+    }
+    
+    static void logSevere(Exception ex, String msg) {
+        Logger.getLogger(IssuezillaUtil.class.getName()).log(Level.SEVERE, msg, ex);
     }
 }
