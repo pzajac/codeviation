@@ -7,12 +7,20 @@
 
 package org.codeviation.math;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
+import no.uib.cipr.matrix.LowerSymmDenseMatrix;
 import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
+import org.codeviation.javac.UsageItem;
 
 /**
  *
@@ -50,7 +58,7 @@ public class SVDTest extends TestCase {
         ret.transpose(b);
 
         mat.add(b);
-        assertZeroMatrix(mat, 1.0E-10);
+        assertZeroMatrix(mat, 1.0E-6);
     }
 
     
@@ -92,7 +100,7 @@ public class SVDTest extends TestCase {
 //        System.out.print("A = ");
 //        LogsUtil.printMatrix(mat);
        
-        SVD svd = SVD.factorize(mat, 1);
+        SVD svd = SVD.factorize(mat, 2);
         DenseVector s = svd.getS();
 //        System.out.println("s = " + s );
         DenseMatrix vt = svd.getVt();
@@ -121,6 +129,30 @@ public class SVDTest extends TestCase {
         checkOrtogonality(ut);
         computeA(mat,vt, u, s);    
         
+    }
+    
+    public void testPackagesMatrix() throws NotConvergedException, IOException, ClassNotFoundException {
+        FlexCompRowMatrix mat = getPackagesMatrix();
+        
+        LowerSymmDenseMatrix multAAt = org.codeviation.math.MatrixUtil.multAAt(mat);
+        Matrix check = new DenseMatrix(multAAt).scale(-1.);
+       
+        check.rank1(mat);        
+        assertEquals("norm = 0",0.0, check.norm(Matrix.Norm.Frobenius),1e-8 );
+        System.out.println("Dim " + mat.numColumns() + "," + mat.numRows());
+        SVD svd = SVD.factorize(mat, 159);
+        DenseVector s = svd.getS();
+        System.out.println(s.toString());
+//        System.out.println("s = " + s );
+        DenseMatrix vt = svd.getVt();
+        DenseMatrix u = svd.getU();
+//        System.out.print("u = ");
+//        LogsUtil.printMatrix(u);
+        DenseMatrix ut = new DenseMatrix(u.numColumns(),u.numRows());
+        checkOrtogonality(vt);
+        u.transpose(ut);
+        checkOrtogonality(ut);
+        computeA(mat,vt, u, s);    
     }
     public void testBiggerRanked() throws NotConvergedException {
         FlexCompRowMatrix mat = createBiggerMatrix();
@@ -157,7 +189,7 @@ public class SVDTest extends TestCase {
                     for (int k = 0 ; k < u.numColumns() ;k++) {
                         val += u.get(i, k)*u.get(j,k);
                     }
-                    assertEquals(0,val,1e-5);
+                    assertEquals(0,val,1e-4);
                 }
             }
         }
@@ -177,5 +209,57 @@ public class SVDTest extends TestCase {
         mat.set(2, 3, 4.);
         return mat;
     }
+    
+    public void testTransposedMatrix() throws NotConvergedException {
+        // transpose matrix
+        FlexCompRowMatrix matt = createBiggerMatrix();
+        FlexCompRowMatrix matrix = new FlexCompRowMatrix(matt.numColumns(), matt.numRows());
+        for (MatrixEntry me : matt) {
+            matrix.set(me.column(), me.row(), me.get());
+        }
 
+        SVD svd = SVD.factorize(matrix, 3);
+        DenseVector s = svd.getS();
+//        System.out.println("s = " + s );
+        DenseMatrix vt = svd.getVt();
+        DenseMatrix u = svd.getU();
+//        System.out.print("u = ");
+//        LogsUtil.printMatrix(u);
+        DenseMatrix ut = new DenseMatrix(u.numColumns(), u.numRows());
+        checkOrtogonality(vt);
+        u.transpose(ut);
+        checkOrtogonality(ut);
+
+        SVD svd2 = SVD.factorize(matt, 3);
+        System.out.println("u1:" );
+        LogsUtil.printMatrix(u);
+        System.out.println("u2:" );
+        LogsUtil.printMatrix(svd2.getU());
+        System.out.println("v1:" );
+        LogsUtil.printMatrix(vt);
+        System.out.println("v2:" );
+        LogsUtil.printMatrix(svd2.getVt());
+
+        computeA(matrix, vt, u, s);
+    }
+
+    private FlexCompRowMatrix getPackagesMatrix() throws IOException, ClassNotFoundException {
+        File dataFolder = new File("/home/pzajac/skola/prakssvd/data");
+        File file = new File(dataFolder, "matrix_package.ser");
+        System.out.println("read");
+        FileInputStream fis = new FileInputStream(file);
+        try {
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            try {
+                @SuppressWarnings(value = "unchecked")
+                AnotatedMatrix<String, ArrayList<UsageItem>> am = (AnotatedMatrix<String, ArrayList<UsageItem>>) ois.readObject();
+                System.out.println("computing ...");
+                return am.getMatrix();
+            } finally {
+                ois.close();
+            }
+        } finally {
+            fis.close();
+        }
+    }
 }

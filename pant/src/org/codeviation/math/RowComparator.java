@@ -10,7 +10,9 @@
 package org.codeviation.math;
 
 import java.util.Comparator;
+import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.Vector;
 
 /**
  *Compares of rows R1,R - R2,R  of matrix. Used by LSI.
@@ -22,9 +24,11 @@ public class RowComparator implements Comparator<Integer> {
     
     Matrix matrix;
     int rank;
-    int row;
+//    int row;
+    
     double s[];
     Type type;
+    private Vector refRow;
     
    public  enum Type {
         EUCLIDIAN,
@@ -40,61 +44,60 @@ public class RowComparator implements Comparator<Integer> {
  *  
  */
     public RowComparator(Matrix matrix, int rank, int row,double s[],Type type) {
-        System.out.println("Rank:" + rank + "," + s.length);
         this.matrix = matrix;
         this.rank = rank;
-        this.row = row;
+//        this.row = row;
+        refRow = new DenseVector(matrix.numColumns());
+        for (int col = 0 ; col < refRow.size() ; col++) {
+            refRow.set(col,matrix.get(row,col));
+        }
+        this.s = s;
+        this.type = type;
+    }
+    public RowComparator(Matrix matrix,int rank, Vector refRow,double s[],Type type) {
+        this.matrix = matrix;
+        this.rank = rank;
+//        this.row = row;
+        this.refRow = refRow;
         this.s = s;
         this.type = type;
     }
     
     
     public int compare(Integer row1, Integer row2) {
-        double res = product(row1,row2);
-        if (Math.abs(res) < TOLERANCE) {
-            return 0;
-        }
-        return (res) > 0 ? 1 : -1;
+        double res1 = product(row1);
+        double res2 = product(row2);
+        return (res1 -res2) > 0 ? 1 : -1;
     }
     
-    public double product(Integer row1, Integer row2) {
+    public double product(Integer row1) {
         int r1 = row1;
-        int r2 = row2;
         double v1 = 0;
-        double v2 = 0;
-
+ 
         if (type.equals(Type.EUCLIDIAN)) {
             for (int i = 0 ; i < rank ; i++) {
-                double x = matrix.get(row, i);
+                double x = refRow.get(i);
                 double x1 = matrix.get(r1,i) - x ;
-                double x2 = matrix.get(r2,i) - x;
                 double ss = s[i];
                 v1 += x1*x1*ss*ss;
-                v2 += x2*x2*ss*ss;
             }
         } else if (type.equals(Type.DOT_PRODUCT)) {
             double ratio1 = 0;
             double ratio2 = 0;
             for (int i = 0 ; i < rank ; i++) {
-                double x = matrix.get(row, i);
+                double x = refRow.get(i);
                 double x1 = matrix.get(r1,i)  ;
-                double x2 = matrix.get(r2,i) ;
                 double ss = s[i];
-                //ss *= ss;
+                ss *= ss;
                 v1 += x1*x*ss;
-                v2 += x2*x*ss;
-                ratio1 += x1*x1;
-                ratio2 += x2*x2;
+                ratio1 += x1*x1*ss;
+                ratio2 += x*x*ss;
                 
             }
-            v1 /= ratio1;
-            v2 /= ratio2;
+            v1 /= Math.sqrt(ratio1*ratio2);
         } else {
             throw new IllegalStateException("Invalid norm type:" + type);
         }
-        return v1 - v2;
+        return Math.abs(v1);
     }
 }
-
-
-

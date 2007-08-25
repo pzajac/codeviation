@@ -9,7 +9,13 @@
 
 package org.codeviation.math;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import no.uib.cipr.matrix.AbstractMatrix;
 import no.uib.cipr.matrix.LowerSymmDenseMatrix;
+import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import no.uib.cipr.matrix.sparse.SparseVector;
 
@@ -88,5 +94,63 @@ public final class MatrixUtil {
         return result;
     }
 
+    /** write all entries of matrix
+     */
+    public static void writeMatrix(Matrix mat,ObjectOutputStream oos) throws IOException {
+        for (MatrixEntry entry : mat) {
+            oos.writeInt(entry.row());
+            oos.writeInt(entry.column());
+            oos.writeDouble(entry.get());
+        }
+        oos.writeInt(-1);
+    }
+
+    /** read all entries of matrix
+    */
+    public static void readMatrix(Matrix mat,ObjectInputStream ois) throws IOException {
+        int row ;
+        while ((row = ois.readInt()) != -1) {
+            int col = ois.readInt();
+            double val = ois.readDouble();
+            mat.set(row,col,val);
+        }
+    }
+    /** Matrix header for serialization of Matrices
+    */
+    public static final class MatrixHeader {
+        int numRows;
+        int numColumns;
+
+        public MatrixHeader(int numRows, int numColumns) {
+            this.numRows = numRows;
+            this.numColumns = numColumns;
+        }
+
+        public int getNumColumns() {
+            return numColumns;
+        }
+
+        public int getNumRows() {
+            return numRows;
+        }
+    }
+   public static void writerMatrixHeader(Matrix mat,ObjectOutputStream oos) throws IOException {
+        if (mat == null) {
+            oos.writeInt(-1);
+        } else {
+            oos.writeInt(mat.numRows());
+            oos.writeInt(mat.numColumns());
+        }
+    }
+
+ 
+    public static MatrixHeader readMatrixHeader (ObjectInputStream ois) throws IOException {
+        int numRows = ois.readInt();
+        if (numRows == -1) {
+            return null;
+        } else {
+            return new MatrixHeader(numRows,ois.readInt());
+        }
+    }
     
 }

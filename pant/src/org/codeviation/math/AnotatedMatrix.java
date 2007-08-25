@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.VectorEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
@@ -40,6 +42,22 @@ public class AnotatedMatrix<ROW extends Serializable,COLUMN extends Serializable
         
     }
 
+    public Map<COLUMN,Integer> getColumnToNumberMap() {
+        Map<COLUMN,Integer> map = new HashMap<COLUMN, Integer>();
+        for (int i = 0 ; i < columns.size() ; i++) {
+            map.put(columns.get(i),i);
+        }
+        return map;
+    }
+    
+    public Map<ROW,Integer> getRowToNumberMap() {
+        Map<ROW,Integer> map = new HashMap<ROW, Integer>();
+        for (int i = 0 ; i < rows.size() ; i++) {
+            map.put(rows.get(i),i);
+        }
+        return map;
+    }
+        
     public List<COLUMN> getColumns() {
         return columns;
     }

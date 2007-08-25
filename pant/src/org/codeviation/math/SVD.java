@@ -10,12 +10,12 @@
 package org.codeviation.math;
 
 import java.util.Arrays;
-import java.util.Arrays;
 import java.util.Comparator;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.LowerSymmDenseMatrix;
 import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SymmDenseEVD;
 import no.uib.cipr.matrix.Vector;
@@ -35,10 +35,21 @@ public class SVD {
     private DenseMatrix vt;
     private DenseMatrix u;
     
+    private boolean transposed;
+    
     private SVD(FlexCompRowMatrix matrix, int rank) {
-        this.matrix = matrix;
+        if (matrix.numColumns() < matrix.numRows()) {
+            // transpose matrix;
+              this.matrix = new FlexCompRowMatrix(matrix.numColumns(),matrix.numRows());
+              for (MatrixEntry me : matrix) {
+                 this.matrix.set(me.column(), me.row(), me.get());
+              }
+              transposed = true;
+        } else {
+            this.matrix = matrix;
+        }
         this.rank = rank;
-        if (rank >= matrix.numColumns()) {
+        if (rank >= this.matrix.numColumns()) {
             throw new IllegalArgumentException(" rank :" + rank + " >= " + matrix.numColumns());
         }
     }
@@ -59,12 +70,29 @@ public class SVD {
      /** @return U vector of factrorization, do not modify returned value! 
      */
     public DenseMatrix getVt() throws NotConvergedException {
-        computeSingularValues();
-        return vt;
+       if (transposed) {
+           if (u == null) {
+                computeU();
+                DenseMatrix ut = new DenseMatrix(u.numColumns(),u.numRows());
+                u.transpose(ut);
+                u = ut;
+           }
+           return u;
+       } else {
+            computeSingularValues();
+            return vt;
+       }
     }
     public DenseMatrix getU() throws NotConvergedException {
-        computeU();
-        return u;
+        if (transposed) {
+            computeSingularValues();
+            DenseMatrix uu = new DenseMatrix(vt.numColumns(), vt.numRows());
+            vt.transpose(uu);
+            return uu;
+        } else {
+            computeU();
+            return u;
+        }
     }
     
     private void computeSingularValues() throws NotConvergedException {
@@ -88,7 +116,11 @@ public class SVD {
             s = new DenseVector(rank);
             vt = sdevd.getEigenvectors();
             for (int i = 0; i < s.size(); i++) {
-                s.set(i, Math.sqrt(eigs[order[i]]));
+                double eigv = eigs[order[i]];
+                if (eigv < 0 ) {
+                    eigv = 0;
+                }
+                s.set(i, Math.sqrt(eigv));
                 swapURows(i,order[i],vt);
             }
             // set the correct rank
@@ -118,13 +150,13 @@ public class SVD {
         if (u == null)  {
             computeSingularValues();
             
-            u = new DenseMatrix(matrix.numColumns(),getVt().numRows());
+            u = new DenseMatrix(matrix.numColumns(),vt.numRows());
             // XXX this row should be optimized
             matrix.transABmult(vt, u);
             
             for (int c = 0 ; c < rank ; c++) {
                 double sr = s.get(c);
-                if (sr < MIN_SINGULAR_VALUE) {
+                if (Math.abs(sr) < MIN_SINGULAR_VALUE) {
                     sr = 0;
                 } else {
                     sr = 1./sr;
@@ -151,7 +183,7 @@ public class SVD {
         DenseVector vecPinvS = new DenseVector(rank);
         for (int c = 0 ; c < rank ; c++) {
             double sr = sLoc.get(c);
-            if (sr < MIN_SINGULAR_VALUE) {
+            if (Math.abs(sr) < MIN_SINGULAR_VALUE) {
                 sr = 0;
             } else {
                 sr = 1./sr;

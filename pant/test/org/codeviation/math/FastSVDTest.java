@@ -28,7 +28,6 @@ public class FastSVDTest extends TestCase {
     public void testSimple() throws NotConvergedException {
         int k = 20;
         FlexCompRowMatrix mat = new FlexCompRowMatrix(500,k);
-        double val = 1;
         Random random = new Random(1003); 
         for (int i = 0; i < mat.numRows() ; i++) {
             for (int j = 0 ; j < mat.numColumns() ; j++) {
