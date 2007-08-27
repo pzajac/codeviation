@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Line;
@@ -241,6 +243,12 @@ public class VersionTest extends TestCase {
         results.contains(v2);
         results.contains(v3);
     }
+    
+    public void testParseDate() {
+        Date parseDate = CvsUtil.parseDate("2007-02-24 04:27:00");
+        Calendar calendar = new GregorianCalendar(2007, 1, 24,4,27);
+        assertEquals(calendar.getTime(),parseDate);
+    }
     public static void compareLogs(InputStream is1,InputStream is2) throws IOException {
         assertNotNull(is1);
         assertNotNull(is2);
@@ -282,6 +290,7 @@ public class VersionTest extends TestCase {
         }
     }
        
+    
     public static void main (String args[]) {
     junit.textui.TestRunner.run(new VersionTest("testAddDir"));
     }

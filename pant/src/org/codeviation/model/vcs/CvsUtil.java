@@ -348,10 +348,10 @@ public class CvsUtil {
         return new CvsUtil(folder, getCVSExecutable());
     }
     
-    private static Date parseDate(String date) {
+    static Date parseDate(String date) {
         StringTokenizer tokenizer = new StringTokenizer(date,"-:;/. ");
         int year = Integer.parseInt(tokenizer.nextToken().trim());
-        int month = Integer.parseInt(tokenizer.nextToken().trim());
+        int month = Integer.parseInt(tokenizer.nextToken().trim()) - 1;
         int day = Integer.parseInt(tokenizer.nextToken().trim());
         int hour = Integer.parseInt(tokenizer.nextToken().trim());
         int minutes = Integer.parseInt(tokenizer.nextToken().trim());
