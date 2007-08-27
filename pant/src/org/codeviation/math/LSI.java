@@ -134,7 +134,7 @@ public final class LSI<ROW extends Serializable ,COLUMN extends Serializable> im
           } 
           // u*(s*vt*q)
           // replace with row comparator
-          RowComparator rcom = new RowComparator(u,getRank(),result,s,Type.DOT_PRODUCT);
+          RowComparator rcom = new RowComparator(u,getRank(),result,s,getRowComparatorType());
           for (int r = 0 ; r < result2.size() ; r++) {
               result2.set(r, rcom.product(r));
 
@@ -197,6 +197,7 @@ public final class LSI<ROW extends Serializable ,COLUMN extends Serializable> im
         }
     }
      /** XXX experimental
+      * @throws java.io.IOException 
       */
     public void plotSVD () throws IOException {
         List<ROW> rows = am.getRows();

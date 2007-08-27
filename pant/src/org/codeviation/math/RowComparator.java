@@ -20,7 +20,7 @@ import no.uib.cipr.matrix.Vector;
  */
 
 public class RowComparator implements Comparator<Integer> {
-    public double TOLERANCE = 1e-8;
+    public static final double TOLERANCE = 1e-8;
     
     Matrix matrix;
     int rank;
@@ -32,7 +32,8 @@ public class RowComparator implements Comparator<Integer> {
     
    public  enum Type {
         EUCLIDIAN,
-        DOT_PRODUCT
+        DOT_PRODUCT,
+        NOT_NORMALIZED_DOT_PRODUCT
     }
     
 /**
@@ -74,14 +75,17 @@ public class RowComparator implements Comparator<Integer> {
         int r1 = row1;
         double v1 = 0;
  
-        if (type.equals(Type.EUCLIDIAN)) {
+        switch (type) {
+        case EUCLIDIAN:
             for (int i = 0 ; i < rank ; i++) {
                 double x = refRow.get(i);
                 double x1 = matrix.get(r1,i) - x ;
                 double ss = s[i];
                 v1 += x1*x1*ss*ss;
             }
-        } else if (type.equals(Type.DOT_PRODUCT)) {
+            break;
+        case DOT_PRODUCT:
+        case NOT_NORMALIZED_DOT_PRODUCT:
             double ratio1 = 0;
             double ratio2 = 0;
             for (int i = 0 ; i < rank ; i++) {
@@ -94,10 +98,13 @@ public class RowComparator implements Comparator<Integer> {
                 ratio2 += x*x*ss;
                 
             }
-            v1 /= Math.sqrt(ratio1*ratio2);
-        } else {
+            if (type == Type.DOT_PRODUCT) {
+                v1 /= Math.sqrt(ratio1*ratio2);
+            }
+            break;
+        default:
             throw new IllegalStateException("Invalid norm type:" + type);
-        }
+        }  
         return Math.abs(v1);
     }
 }

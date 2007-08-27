@@ -21,6 +21,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.codeviation.bugtracking.issuezilla.Activity;
 import org.codeviation.model.vcs.CVSMetric;
 import org.codeviation.model.vcs.Diff;
 import org.codeviation.bugtracking.issuezilla.Issue;
@@ -58,6 +59,9 @@ public class Version implements Comparable<Version> , Serializable {
     /** cvs user name
      */
     private String user;
+    /** permitted difference between time of revision and time of bug
+     */
+    private static float bugCommitDiff = 1000*3600*24;
     
     public static enum IssueType {
         // not analyzed 
@@ -167,7 +171,7 @@ public class Version implements Comparable<Version> , Serializable {
                  stack.push(v1);
                  v1  = v1.branch = v2;
              } else {
-                 v1 = (Version) stack.pop();
+                 v1 = stack.pop();
                  i--;
              }
         }
@@ -246,7 +250,8 @@ public class Version implements Comparable<Version> , Serializable {
         if (issueType == IssueType.UNKNOW) {
             List<Integer> issueIds = parseIssues();
             try {
-                Collection<Issue> issues = Issue.readIssues(issueIds); 
+                Collection<Issue> issues = Issue.readIssues(issueIds);
+                issues = filterIssues(issues);
                 for (Issue issue : issues) {
                        if (issue != null ) {
                            String typeString = issue.getIssueType();
@@ -344,10 +349,12 @@ public class Version implements Comparable<Version> , Serializable {
         return allVers.contains(new Version(v,"",new Date(),"",State.EXP));
     }
     
+    @Override
     public boolean equals(Object obj) {
         return (obj instanceof Version ) && ((Version)obj).revision.equals(revision);
     }
     
+    @Override
     public int hashCode() {
         return revision.hashCode();
     }
@@ -408,6 +415,7 @@ public class Version implements Comparable<Version> , Serializable {
         }
         return filteredVers;
     }
+    @Override
     public String toString() {
         return getRevision();
     }
@@ -421,9 +429,9 @@ public class Version implements Comparable<Version> , Serializable {
                 }
             }
         }  catch (IOException ex) {
-             getJavaFile().logger.log(java.util.logging.Level.SEVERE,
+             JavaFile.logger.log(java.util.logging.Level.SEVERE,
                                                              ex.getMessage(), ex);
-        };
+        }
         return null;        
     }
     
@@ -438,6 +446,32 @@ public class Version implements Comparable<Version> , Serializable {
     
     public State getState() {
         return state;
+    }
+
+    /** NetBeans cvs and issuezill is probably in different timezome 
+     * add issues  with +- 12 hours to revision date
+     */
+    Collection<Issue> filterIssues(Collection<Issue> iss) {
+        List<Issue> filterIssues = new ArrayList<Issue>();
+        long time = getDate().getTime();
+ //       System.out.println(getJavaFile().getPackage().getSourceRoot() + "/" + getJavaFile().getPackage()  + "." + getJavaFile().getClassName() );
+        for (Issue issue : iss) {
+            Activity acts[] = issue.getActivities() ;
+            boolean ok = false;
+            for (Activity act: acts) {
+                if ("resolution".equals(act.fieldName) && "FIXED".equals(act.newValue)) {
+                   long diffTime = (  time - act.when.getTime());
+   //                System.out.println("Date: " + act.when + " " + getDate() +  " : " + diffTime); 
+                   if (Math.abs(diffTime) < bugCommitDiff ) {
+                       filterIssues.add(issue);
+                       ok = true;
+                   }
+                }
+            }
+  //          System.out.println("Issue: " + issue.getIssueId() + ", "  + ok);
+            
+        }
+        return filterIssues;
     }
 }
  

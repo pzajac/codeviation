@@ -1,7 +1,6 @@
 
 package org.codeviation.tasks;
 
-import java.awt.Event;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -20,7 +19,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Line;
@@ -30,8 +28,6 @@ import org.codeviation.model.Package;
 import org.codeviation.model.PositionIntervalResult;
 import org.codeviation.model.Version;
 import org.codeviation.model.VersionInterval;
-import org.codeviation.tasks.RepositoryProcess;
-import org.codeviation.tasks.RepositoryProcessEnv;
 import org.codeviation.tasks.RepositoryProcessEnv.LogReason;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
@@ -55,6 +51,7 @@ import org.codeviation.math.Matlab;
 public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
      private static final long serialVersionUID = 1;
      
+     ColumnType columnType;
      static Logger logger = Logger.getLogger(UsageOwnerIndexer.class.getName());
      private Map<UsageItem,UsageItem> usages = new HashMap<UsageItem,UsageItem>();
      private Map<String,Map<UsageItem,Integer>> usagesOfUsers = new HashMap<String,Map<UsageItem,Integer>>();
@@ -183,10 +180,27 @@ public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
        
     }
     
-    enum ColumnType {
+    public static enum ColumnType {
         CLASS,
         PACKAGE,
-        METHOD
+        METHOD;
+                
+        public String getValue(UsageItem usage) {
+            String val = null;
+            switch (this) {
+                    case CLASS:
+                        val = usage.getClazz();
+                        break;
+                    case METHOD:
+                         val  = usage.getClazz() + "." + usage.getMethod();
+                        break;
+                    case PACKAGE:
+                        val = usage.getPackage();
+                        break;
+            }
+            return val;
+        }
+
     }
     
     static interface  UsageFilter {
@@ -206,18 +220,7 @@ public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
         for (UsageItem usage : usages.keySet()) {
             if (filter == null || filter.match(usage)) {
                 boolean found = false;
-                String val = null;
-                switch (type) {
-                case CLASS:
-                    val = usage.getClazz();
-                    break;
-                case METHOD:
-                     val  = usage.getClazz() + "." + usage.getMethod();
-                    break;
-                case PACKAGE:
-                    val = usage.getPackage();
-                    break;
-                }
+                String val = type.getValue(usage);
                 if (!usageValues.containsKey(val)) {
                     int colVal = column++;
                     usageValues.put(val,colVal);
@@ -269,7 +272,7 @@ public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
            Map <UsageItem,Integer >  usagesColumns = new HashMap<UsageItem, Integer>();
            Map<String,Integer> userRow = new TreeMap<String, Integer>();
            
-           preparaDate(usagesColumns,userRow,ColumnType.CLASS,new UsageFilter() {
+           preparaDate(usagesColumns,userRow,getColumnType(),new UsageFilter() {
                 public boolean match(UsageItem item) {
                     // XXX
 //                    return  item.getClazz().startsWith("java.") || item.getClazz().startsWith("javax.");
@@ -375,4 +378,13 @@ public class UsageOwnerIndexer implements  RepositoryProcess,Serializable {
             writer.print(item.getKey());
         }
     }
+
+
+    public void setColumnType(ColumnType columnType) {
+        this.columnType = columnType;
+    }
+    public  ColumnType getColumnType() {
+        return (columnType != null ) ? columnType : ColumnType.CLASS;
+    }
+
 }
