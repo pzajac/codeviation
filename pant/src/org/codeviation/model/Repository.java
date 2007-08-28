@@ -280,16 +280,16 @@ public final class Repository {
             properties = new Properties();
             File propertiesFile = new File (getCacheRoot(),CONFIGURATION_FILE);
             if (propertiesFile.exists()) {
-                FileReader reader = null ;
+                FileInputStream is = null ;
                 try {
-                    reader = new FileReader(propertiesFile);
-                    properties.load(reader);
+                    is = new FileInputStream(propertiesFile);
+                    properties.load(is);
                 } catch (IOException ex) {
                     logger.log(Level.SEVERE, ex.getMessage(),ex);
                 } finally {
-                    if (reader != null) {
+                    if (is != null) {
                         try {
-                            reader.close();
+                            is.close();
                         } catch (IOException ex2) {
                             logger.log(Level.SEVERE, ex2.getMessage(),ex2);
                         }

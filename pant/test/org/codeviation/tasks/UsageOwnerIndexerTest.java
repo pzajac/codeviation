@@ -12,6 +12,7 @@ import no.uib.cipr.matrix.sparse.SparseVector;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.math.AnotatedMatrix;
 import org.codeviation.math.LSI;
+import org.codeviation.math.Matlab;
 import org.codeviation.math.RowComparator;
 import org.codeviation.model.PersistenceManager;
 import org.codeviation.model.Repository;
@@ -30,14 +31,41 @@ public class UsageOwnerIndexerTest extends TestCase {
         super(testName);
     }
     
+    public static File getOutDir() {
+        File file = new File (TestUtil.getWorkDir(),"fastsvdmatrix");
+        file.mkdirs();
+        return file;
+    }
     public void test1() throws NotConvergedException, IOException {
         ExamplesSetup.initNbCvsTestingCache();
+
+       File folder = getOutDir(); 
+       assertTrue("folder exists",folder.isDirectory());
+       genMatric(UsageOwnerIndexer.ColumnType.CLASS,folder,"matrix_class.ser","matrix_class.m");
+       genMatric(UsageOwnerIndexer.ColumnType.PACKAGE,folder,"matrix_package.ser","matrix_package.m");
+       genMatric(UsageOwnerIndexer.ColumnType.METHOD,folder,"matrix_method.ser","matrix_method.m");
+
+       
+//       LSI<String,ArrayList<String>> lsi = new LSI<String,ArrayList<String>>(matrix);
+//       lsi.setRank(10);
+//       lsi.setRowComparator(RowComparator.Type.EUCLIDIAN);
+//       lsi.normalizeRows();
+////       lsi.tfidf();
+//       lsi.compute();
+//       
+//       for (double s : lsi.getSvd().getS() ) {
+//          System.out.println(s);
+//       }
+//
+//       lsi.plotSVD();
+    }
+    public AnotatedMatrix<String,ArrayList<String>> genMatric(UsageOwnerIndexer.ColumnType columnType,File folder,String serMatrixFile,String matlabMatrixFile ) throws IOException {
         final UsageOwnerIndexer indexer = new UsageOwnerIndexer();
+        indexer.setColumnType(columnType);
         indexer.setOutDir(TestUtil.getTmpFolder("usagemetricsIndexer"));
         Repository rep = PersistenceManager.getDefault().getRepository("nbcvs");
         RepositoryProcessEnv env = new RepositoryProcessEnv();
         env.setWorkDir(TestUtil.getTmpFolder("UsageOwnerIndexer"));
-        
         final AnotatedMatrix[] am = new AnotatedMatrix[1];
         env.addListener(new RepositoryProcessEnv.ProcessListener<AnotatedMatrix<String,ArrayList<UsageItem>>>(){
 
@@ -59,35 +87,17 @@ public class UsageOwnerIndexerTest extends TestCase {
        assertTrue("non empty matrix file",new File(indexer.getOutDir(),UsageOwnerIndexer.MATRIX_FILE_NAME).length() > 0);
        assertTrue("non empty matrix's rows file",new File(indexer.getOutDir(),UsageOwnerIndexer.MATRIX_FILE_NAME + ".rows").length() > 0);
        assertTrue("non empty matrix's columns file",new File(indexer.getOutDir(),UsageOwnerIndexer.MATRIX_FILE_NAME + ".columns").length() > 0);
-       
-       
-       // try svd
-        @SuppressWarnings("unchecked")
-        AnotatedMatrix<String,ArrayList<String>> matrix = am[0];
-       System.out.println(matrix.getRows().size());
-       for(String row : matrix.getRows()) {
-           System.out.println(row);
-       }
-       System.out.println(matrix.getRows().get(25) + " (25)");
-        SparseVector row = matrix.getMatrix().getRow(25);
-        for (VectorEntry entry: row) {
-            System.out.println(entry.get() + entry.index() );
-        }
-       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("/tmp/develmatrix.ser"));
-       oos.writeObject(am[0]);
-       oos.close();       
-       LSI<String,ArrayList<String>> lsi = new LSI<String,ArrayList<String>>(matrix);
-       lsi.setRank(10);
-       lsi.setRowComparator(RowComparator.Type.EUCLIDIAN);
-       lsi.normalizeRows();
-//       lsi.tfidf();
-       lsi.compute();
-       
-       for (double s : lsi.getSvd().getS() ) {
-          System.out.println(s);
-       }
 
-       lsi.plotSVD();
+        @SuppressWarnings("unchecked")
+       AnotatedMatrix<String,ArrayList<String>> matrix = am[0];
+       
+       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(folder,serMatrixFile)));
+       oos.writeObject(matrix);
+       oos.close();      
+       System.out.println("Columns: " + matrix.getMatrix().numRows());
+       System.out.println("Rows:" + matrix.getMatrix().numColumns());
+       Matlab.toMFile(matrix.getMatrix(), new File(folder,matlabMatrixFile));
+       
+       return  matrix;
     }
-  
 }
