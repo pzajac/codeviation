@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -251,7 +252,7 @@ public final class Repository {
     /** Add or replace persistent property 
      */
     public void setProperty(String name,String value) {
-        FileWriter writer = null;
+        Writer writer = null;
         try {
             Properties props = getProperties();
             props.setProperty(name, value);
