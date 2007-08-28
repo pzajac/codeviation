@@ -15,8 +15,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.ParseException;
@@ -252,18 +254,18 @@ public final class Repository {
     /** Add or replace persistent property 
      */
     public void setProperty(String name,String value) {
-        Writer writer = null;
+        OutputStream  os = null;
         try {
             Properties props = getProperties();
             props.setProperty(name, value);
-            writer = new FileWriter(new File(getCacheRoot(), CONFIGURATION_FILE));
-            props.store(writer, "");
+            os = new FileOutputStream(new File(getCacheRoot(), CONFIGURATION_FILE));
+            props.store(os, "");
         } catch (IOException ex) {
             logger.log(Level.SEVERE, ex.getMessage(),ex);
         } finally {
             try {
-                if (writer != null) {
-                    writer.close();
+                if (os != null) {
+                    os.close();
                 }
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, ex.getMessage(),ex);
