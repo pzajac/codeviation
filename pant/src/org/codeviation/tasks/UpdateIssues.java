@@ -1,19 +1,27 @@
 package org.codeviation.tasks;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.codeviation.bugtracking.issuezilla.IssuezillaUtil;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Package;
 import org.codeviation.model.Repository;
@@ -98,7 +106,44 @@ public class UpdateIssues implements RepositoryProcess{
                 comp.addIssue(id);
             }
         }
-   } 
+   }
+
+   /** log components for exception reporter
+    */
+   static void logComponents(File file) throws  IOException {
+        try {
+            Connection connection = IssuezillaUtil.getConnection();
+            Statement stmt = connection.createStatement();
+            PreparedStatement pstmt = connection.prepareStatement("select distinct(subcomponent) from issue where component = ?");
+            Properties props = new Properties();
+            ResultSet rs = stmt.executeQuery("select distinct(component) from issue");
+            StringBuilder subcomponents = new StringBuilder();
+            while (rs.next()) {
+                subcomponents.setLength(0);
+                String component = rs.getString(1);
+                pstmt.setString(1,component );
+                ResultSet rs2 = pstmt.executeQuery();
+                while (rs2.next()) {
+                    if (subcomponents.length() != 0) {
+                        subcomponents.append(",");
+                    }
+                    subcomponents.append(rs2.getString(1));
+                }
+                props.put(component, subcomponents.toString());
+             }
+            
+            FileOutputStream fos = new FileOutputStream(file);
+            PrintStream ps  = new PrintStream(fos);
+            try {
+                props.store(ps,null);
+            } finally {
+                ps.close();
+            }
+        } catch (SQLException ex) {
+            // rather ignore exceptions
+            logger.log(Level.INFO, "Generation components list",ex);
+        }
+    }
 
    private  void logPackagesMapping(File outFile) throws IOException {
         PrintWriter writer = new PrintWriter(new FileWriter(outFile));
@@ -144,6 +189,7 @@ public class UpdateIssues implements RepositoryProcess{
            // log mapping package -> issuezilla's component + subcomponent for Sedek's Excpetions
            // project
            logPackagesMapping(new File(env.getWorkDir(),"componentMappings.txt"));
+           logComponents(new File(env.getWorkDir(),"components.properties"));
         } catch (IOException ioe) {
             logger.log(Level.SEVERE, ioe.getMessage(),ioe);
             
