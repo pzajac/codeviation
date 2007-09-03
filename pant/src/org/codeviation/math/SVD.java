@@ -49,8 +49,9 @@ public class SVD {
             this.matrix = matrix;
         }
         this.rank = rank;
-        if (rank >= this.matrix.numColumns()) {
-            throw new IllegalArgumentException(" rank :" + rank + " >= " + matrix.numColumns());
+        int maxRank = Math.min(matrix.numColumns(),matrix.numRows());
+        if (rank >= maxRank) {
+            throw new IllegalArgumentException(" rank :" + rank + " >= " + maxRank);
         }
     }
     

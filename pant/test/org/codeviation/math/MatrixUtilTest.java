@@ -44,6 +44,19 @@ public class MatrixUtilTest extends TestCase {
         check.rank1(matA);        
         assertEquals("norm = 0",0.0, check.norm(Matrix.Norm.Frobenius),1e-8 );
     }
+    
+    public void testEmptyRow() {
+        FlexCompRowMatrix matA = new FlexCompRowMatrix(2,3);
+        matA.set(1, 1, 3.);
+        matA.set(1, 0, 4.);
+        matA.set(1, 2, 5.);
+        LowerSymmDenseMatrix multAAt = org.codeviation.math.MatrixUtil.multAAt(matA);
+        Matrix check = new DenseMatrix(multAAt).scale(-1.);
+       
+        check.rank1(matA);        
+        assertEquals("norm = 0",0.0, check.norm(Matrix.Norm.Frobenius),1e-8 );
+        
+    }
 
     public void testPersistence() throws IOException {
         Matrix mat = new DenseMatrix(2,3);

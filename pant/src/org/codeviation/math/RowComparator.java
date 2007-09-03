@@ -99,7 +99,12 @@ public class RowComparator implements Comparator<Integer> {
                 
             }
             if (type == Type.DOT_PRODUCT) {
-                v1 /= Math.sqrt(ratio1*ratio2);
+                double ratN2 = ratio1*ratio2;
+                if (ratN2 < TOLERANCE) {
+                    v1 = 0;
+                } else {
+                    v1 /= Math.sqrt(ratN2);
+                }
             }
             break;
         default:

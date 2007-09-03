@@ -39,6 +39,9 @@ public final class MatrixUtil {
     private static double dotSparseVec(SparseVector a, SparseVector b) {
         int ias[] = a.getIndex();
         int ibs[] = b.getIndex();
+        if (ias.length == 0 || ibs.length == 0) {
+            return 0;
+        }
         int ia = 0,iaVal = ias[0];
         int ib = 0, ibVal = ibs[0];
         double result = 0;

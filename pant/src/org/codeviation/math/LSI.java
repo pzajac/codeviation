@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -29,6 +31,7 @@ import no.uib.cipr.matrix.VectorEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import no.uib.cipr.matrix.sparse.SparseVector;
 import org.codeviation.math.LSI.Engine;
+import org.codeviation.math.LSI.Result;
 import org.codeviation.math.MatrixUtil.MatrixHeader;
 import org.codeviation.math.RowComparator.Type;
 import org.codeviation.statistics.ChartUtils;
@@ -114,6 +117,58 @@ public final class LSI<ROW extends Serializable ,COLUMN extends Serializable> im
         }
     }
 
+    /** Result item with simolarity factor
+     */
+    public  class Result implements Comparable<Result> {
+        ROW item;
+        float value;
+
+         Result(ROW item, float value) {
+            this.item = item;
+            this.value = value;
+        }
+
+        public ROW getItem() {
+            return item;
+        }
+
+        public float getValue() {
+            return value;
+        }
+
+        public int compareTo(Result o) {
+            float diff =  o.getValue() - getValue() ;
+            return (diff > 0 ) ? 1 : -1;
+         }
+    }
+
+    
+    /**
+     * LSI query with norm of LSI. 
+     * @param q query vector
+     * @param numResults number of results, ignored on -1
+     * @return sorted results
+     */
+    public List<Result> query(Vector q, int numResults) {
+        Vector resultVector = query(q);
+        List<Result> results = new ArrayList<Result>(resultVector.size());
+        for (int rIt = 0 ; rIt < resultVector.size() ; rIt++) {
+            results.add(new Result(getAm().getRows().get(rIt),(float)resultVector.get(rIt)));
+        }
+        Collections.sort(results);
+        
+        if (numResults == -1 ) {
+            return results;
+        }
+        if (resultVector.size() < numResults ) {
+            numResults = resultVector.size();
+        }
+        List<Result> filterRes = new ArrayList<Result> (numResults);
+        for (int rIt = 0 ; rIt < numResults  ; rIt++) {
+            filterRes.add(results.get(rIt));
+        }
+        return filterRes;
+    }
     public Vector query(Vector q) {
        // s*vt*q
       DenseMatrix vt = getVt();
@@ -395,5 +450,5 @@ public final class LSI<ROW extends Serializable ,COLUMN extends Serializable> im
         }
         
     }
-
+        
 }
