@@ -53,15 +53,15 @@ public class ClassRankMatrixGenerator {
         
         @Override
         public boolean equals(Object o) {
-            if (o == null)
+            if (o == null || getClass() != o.getClass()) {
                 return false;
-            if (getClass() != o.getClass())
-                return false;
+            }
             final ClassItem test = (ClassItem) o;
 
             if ( this.className != null &&
-                !this.className.equals(test.className))
+                !this.className.equals(test.className)) {
                 return false;
+            }
             return true;
         }
         public JavaFile getJavaFile() {
@@ -73,6 +73,7 @@ public class ClassRankMatrixGenerator {
              return pack.getJavaFile(name + ".java");
         }
         
+        @Override
         public int hashCode() {
             return  className.hashCode();
         }
