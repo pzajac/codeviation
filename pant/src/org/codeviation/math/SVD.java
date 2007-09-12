@@ -50,7 +50,7 @@ public class SVD {
         }
         this.rank = rank;
         int maxRank = Math.min(matrix.numColumns(),matrix.numRows());
-        if (rank >= maxRank) {
+        if (rank > maxRank) {
             throw new IllegalArgumentException(" rank :" + rank + " >= " + maxRank);
         }
     }

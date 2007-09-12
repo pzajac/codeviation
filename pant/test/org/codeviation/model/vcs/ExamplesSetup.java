@@ -38,8 +38,19 @@ public class ExamplesSetup {
        return System.getProperty("pant.cache.folder");
         
     }
+    public static String getDataDir() {
+       final String propName = "test.pant.datadir";
+       String pantCacheFolder = System.getProperty(propName);
+       if (pantCacheFolder == null) {
+            System.setProperty(propName,"/cvss/testpantdatadir");
+       }
+       File f = new File (System.getProperty(propName));
+       f.mkdirs();
+       return System.getProperty(propName);
+    }
+
     public static String getCvsRoot() {
-        String pantCacheFolder = getPantCacheFolder();
+        getPantCacheFolder();
         String cvsRoot = System.getProperty("test.cvsroot"); 
         if (cvsRoot == null) {
             // initialize deafautl cvsroot 

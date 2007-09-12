@@ -17,6 +17,8 @@ import no.uib.cipr.matrix.LowerSymmDenseMatrix;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SymmDenseEVD;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
+import org.codeviation.model.TestUtil;
+import org.codeviation.model.vcs.ExamplesSetup;
 import org.codeviation.tasks.UsageOwnerIndexerTest;
 
 /**
@@ -35,7 +37,7 @@ public class DevelopersFastSVDTest extends TestCase {
     }
 
     public void testDevelopersMatrix() throws  IOException, ClassNotFoundException, NotConvergedException {
-        FileInputStream fis = new FileInputStream(new File(UsageOwnerIndexerTest.getOutDir(),"develmatrix.ser"));
+        FileInputStream fis = new FileInputStream(new File(ExamplesSetup.getDataDir(),"develmatrix.ser"));
         ObjectInputStream ois = new ObjectInputStream(fis);
         AnotatedMatrix am = (AnotatedMatrix) ois.readObject();
         FlexCompRowMatrix tm = am.getMatrix();

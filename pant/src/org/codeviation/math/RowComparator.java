@@ -68,7 +68,11 @@ public class RowComparator implements Comparator<Integer> {
     public int compare(Integer row1, Integer row2) {
         double res1 = product(row1);
         double res2 = product(row2);
-        return (res1 -res2) > 0 ? 1 : -1;
+        double diff = res1 -res2 ;
+        if (Math.abs(diff) < TOLERANCE) {
+            return 0;
+        }
+        return (diff) > 0 ? 1 : -1;
     }
     
     public double product(Integer row1) {
