@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.codeviation.model.Line;
 import org.codeviation.model.Version;
@@ -52,6 +53,9 @@ public final class VersionInterval  {
         return from.compareTo(version) <= 0 && to.compareTo(version) >= 0;
     }
     
+    public boolean contains (Date date) {
+        return from.getDate().compareTo(date) <= 0 && to.getDate().compareTo(date) >= 0;
+    }
     public List<Version> getAllVersions() {
         List<Version> ret = new ArrayList<Version>();
         Version v = from;
