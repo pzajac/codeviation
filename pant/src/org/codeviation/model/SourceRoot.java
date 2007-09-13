@@ -151,11 +151,16 @@ public final  class SourceRoot implements Iterable<JavaFile> {
         log.fine("getMetric:" + f.getAbsolutePath());
         if (f.exists()) {
             try {
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+                FileInputStream fis = new FileInputStream(f);
                 try {
-                  return (T)ois.readObject();  
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+                    try {
+                      return (T)ois.readObject();  
+                    } finally {
+                        ois.close();
+                    }
                 } finally {
-                    ois.close();
+                    fis.close();
                 }
             } catch (Exception e) {
                 log(e);
@@ -228,6 +233,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     }
     
     /** get all cvs tags processed by path
+     * @return set of tags (timestamps) names
      */
      @SuppressWarnings("unchecked")
     public Set<String> getCvsTags() {
@@ -235,15 +241,20 @@ public final  class SourceRoot implements Iterable<JavaFile> {
         try {
             File tagsFile = new File(getCacheDir(),CVS_TAGS_FILE_NANE);
             if (tagsFile.exists()) {
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tagsFile ));
+                FileInputStream fis = new FileInputStream(tagsFile );
                 try {
-                    tags =  (Set<String>) ois.readObject();
-                    if (tags.contains(null)) {
-                        log.log(Level.SEVERE,"null tags " + getRelPath());
-                        tags = null;
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+                    try {
+                        tags =  (Set<String>) ois.readObject();
+                        if (tags.contains(null)) {
+                            log.log(Level.SEVERE,"null tags " + getRelPath());
+                            tags = null;
+                        }
+                    } finally{
+                        ois.close();
                     }
-                } finally{
-                    ois.close();
+                } finally {
+                    fis.close();
                 }
             } 
             
@@ -265,8 +276,11 @@ public final  class SourceRoot implements Iterable<JavaFile> {
                 }
                 try {
                     ObjectOutputStream oos  = new ObjectOutputStream(new FileOutputStream( new File(getCacheDir(),CVS_TAGS_FILE_NANE)));
-                    oos.writeObject(tags);
-                   oos.close();
+                    try {
+                        oos.writeObject(tags);
+                    } finally {
+                        oos.close();
+                    }
                 } catch (IOException ioe) {
                      log.log(Level.SEVERE, ioe.getMessage(), ioe);
                 }

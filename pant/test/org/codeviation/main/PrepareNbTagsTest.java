@@ -44,8 +44,11 @@ public class PrepareNbTagsTest extends TestCase {
             PrepareNbTags.main(args);
             byte bytes [] = new byte[(int)outFile.length()];
             FileInputStream fis = new FileInputStream(outFile);
-            fis.read(bytes);
-            fis.close();
+            try {
+                fis.read(bytes);
+            } finally {
+                fis.close();
+            }
             String outStr = new String(bytes);
             String refStr = "BLD200602011032\n" +
                     "BLD200602261900\n" +
@@ -87,12 +90,15 @@ public class PrepareNbTagsTest extends TestCase {
         FileOutputStream fos = new FileOutputStream(file);
         try {
             InputStream is  = getClass().getResourceAsStream("build.xml.log");
-            byte buff[] = new byte[100000];
-            int size = -1;
-            while ((size = is.read(buff) ) != -1) {
-                fos.write(buff, 0, size);
+            try {
+                byte buff[] = new byte[100000];
+                int size = -1;
+                while ((size = is.read(buff) ) != -1) {
+                    fos.write(buff, 0, size);
+                }
+            } finally {
+                is.close();
             }
-            is.close();
         } finally {
             fos.close();
         }

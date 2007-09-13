@@ -33,8 +33,11 @@ public final class ChartUtils {
      */
     public static void chartToFile(File file, JFreeChart chart,int xSize,int ySize) throws IOException {
             FileOutputStream fos = new FileOutputStream(file);
-            ChartUtilities.writeChartAsPNG(fos,chart,xSize,ySize);
-            fos.close();
+            try {
+                ChartUtilities.writeChartAsPNG(fos,chart,xSize,ySize);
+            } finally {
+                fos.close();
+            }
     }
     
     public static void makeSeriesChartPrintable(JFreeChart chart,int series) {

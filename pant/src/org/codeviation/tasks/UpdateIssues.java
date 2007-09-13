@@ -147,22 +147,26 @@ public class UpdateIssues implements RepositoryProcess{
 
    private  void logPackagesMapping(File outFile) throws IOException {
         PrintWriter writer = new PrintWriter(new FileWriter(outFile));
-        for (String pack :  packageToComponent.keySet()) {
-            writer.write(pack + ";");
-            Map<Component,Component> components = packageToComponent.get(pack);
-            int totalIssue = 0;
-            for (Component comp : components.values()) {
-                totalIssue += comp.getIssuesSize();
+        try {
+            for (String pack :  packageToComponent.keySet()) {
+                writer.write(pack + ";");
+                Map<Component,Component> components = packageToComponent.get(pack);
+                int totalIssue = 0;
+                for (Component comp : components.values()) {
+                    totalIssue += comp.getIssuesSize();
+                }
+                List<Component> sortedComps = new ArrayList<Component>(components.values());
+                Collections.sort(sortedComps,new ComponentComparator());
+                writer.append(totalIssue + ";");
+                for (Component comp : sortedComps) {
+                    writer.print(comp.getComponent() + ";" + comp.getSubComponent() + ";" + comp.getIssuesSize() + ";");
+                }
+                writer.println("");
             }
-            List<Component> sortedComps = new ArrayList<Component>(components.values());
-            Collections.sort(sortedComps,new ComponentComparator());
-            writer.append(totalIssue + ";");
-            for (Component comp : sortedComps) {
-                writer.print(comp.getComponent() + ";" + comp.getSubComponent() + ";" + comp.getIssuesSize() + ";");
-            }
-            writer.println("");
+        } finally {
+            writer.close();
+
         }
-        writer.close();
     }
 
     public boolean execute(Repository rep, RepositoryProcessEnv env) {

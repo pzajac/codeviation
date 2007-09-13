@@ -255,9 +255,12 @@ public final class JavaFile {
             byte data[] = null;
             try {
                 InputStream fis = new FileInputStream(getCVSFile());
-                 data = new byte[(int)getCVSFile().length()];
-                fis.read(data);
-                fis.close();
+                data = new byte[(int)getCVSFile().length()];
+                try {
+                    fis.read(data);
+                } finally {
+                    fis.close();
+                }
  
                 int size = data.length - 1;
                 for (int i  = 0 ; i <  size ; i++) {

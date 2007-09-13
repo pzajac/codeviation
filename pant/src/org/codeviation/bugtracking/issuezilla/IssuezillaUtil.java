@@ -8,7 +8,6 @@ package org.codeviation.bugtracking.issuezilla;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -157,9 +156,6 @@ public final class IssuezillaUtil {
             ps.println("</issuezilla>");
             ps.close();
 
-            // debug
-            FileOutputStream fos = new FileOutputStream("/tmp/test.xml");
-            fos.write(baos.toByteArray());
             // debug
             try { 
                ByteArrayInputStream bais  = new ByteArrayInputStream( baos.toByteArray());

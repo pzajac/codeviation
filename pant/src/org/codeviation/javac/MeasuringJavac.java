@@ -39,6 +39,7 @@ import org.codeviation.model.SourceRoot;
 public final class MeasuringJavac extends Javac13 {
     public static final String CVS_TAG_PROP_NAME = "pant.cvs.tag";
     private StreamHandler handler;
+   
     /** log file for exceptions from MetricBuilder
      */ 
     public static final String LOG_FILE_SYSTEM_PROPERTY_NAME = "pant.log.file";
@@ -119,4 +120,13 @@ public final class MeasuringJavac extends Javac13 {
          handler.setLevel(Level.INFO);
          Logger.getLogger("org.codeviation").addHandler(handler);
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if (handler != null) {
+            handler.close();
+        }
+    }
+    
 }

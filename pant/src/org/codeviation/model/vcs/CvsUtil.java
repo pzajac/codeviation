@@ -325,15 +325,18 @@ public class CvsUtil {
         assert f.isDirectory();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(new File(f,"Entries")));
-            String line = null;
-            String prefix = "/" + fileName + "/";
-            while ((line = reader.readLine()) != null ) {
-                if (line.startsWith(prefix)) {
-                    line = line.substring(prefix.length());
-                    return line.substring(0,line.indexOf("/"));
+            try {
+                String line = null;
+                String prefix = "/" + fileName + "/";
+                while ((line = reader.readLine()) != null ) {
+                    if (line.startsWith(prefix)) {
+                        line = line.substring(prefix.length());
+                        return line.substring(0,line.indexOf("/"));
+                    }
                 }
+            } finally {
+                reader.close();
             }
-            reader.close();
         } catch (IOException ioe) {
             CvsUtil.error(ioe);
         } 

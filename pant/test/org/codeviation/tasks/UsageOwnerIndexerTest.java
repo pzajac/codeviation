@@ -91,13 +91,17 @@ public class UsageOwnerIndexerTest extends TestCase {
         @SuppressWarnings("unchecked")
        AnotatedMatrix<String,ArrayList<String>> matrix = am[0];
        
-       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(folder,serMatrixFile)));
-       oos.writeObject(matrix);
-       oos.close();      
-       System.out.println("Columns: " + matrix.getMatrix().numRows());
-       System.out.println("Rows:" + matrix.getMatrix().numColumns());
-       Matlab.toMFile(matrix.getMatrix(), new File(folder,matlabMatrixFile));
-       
+       FileOutputStream fos = new FileOutputStream(new File(folder,serMatrixFile));
+       try {
+           ObjectOutputStream oos = new ObjectOutputStream(fos);
+           oos.writeObject(matrix);
+           oos.close();      
+           System.out.println("Columns: " + matrix.getMatrix().numRows());
+           System.out.println("Rows:" + matrix.getMatrix().numColumns());
+           Matlab.toMFile(matrix.getMatrix(), new File(folder,matlabMatrixFile));
+        } finally {
+            fos.close();
+        }
        return  matrix;
     }
 }

@@ -272,14 +272,18 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
         File file = new File(workDir,fileName);
         if (file.isFile()) {
             FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
             try {
-               return (Histogram) ois.readObject();
-            } catch (ClassNotFoundException cnfe) {
-               logger.log(Level.SEVERE, cnfe.getMessage(), cnfe); 
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                try {
+                   return (Histogram) ois.readObject();
+                } catch (ClassNotFoundException cnfe) {
+                   logger.log(Level.SEVERE, cnfe.getMessage(), cnfe); 
+                } finally {
+                    ois.close();
+                }  
             } finally {
-                ois.close();
-            }  
+                fis.close();
+            }
         }
         return null;
     }
@@ -287,12 +291,16 @@ public final class IssuesPageRankStatHandler implements JavaFileHandler<GenericG
     private void writeHist(File workDir, String fileName, Histogram hist) throws IOException {
         if (hist != null) {
             FileOutputStream fos = new FileOutputStream(new File(workDir,fileName));
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
             try {
-                oos.writeObject(hist);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                try {
+                    oos.writeObject(hist);
+                } finally {
+                    oos.close();
+                }  
             } finally {
-                oos.close();
-            }  
+                fos.close();
+            }
         }
     }
 

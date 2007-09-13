@@ -13,14 +13,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -229,11 +226,16 @@ public final class Repository {
         File csFile = new File (getCacheRoot(),COMPILATION_STATUS_FILE);
         if (csFile.exists()) {
             try {
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(csFile));
+                FileInputStream fis = new FileInputStream(csFile);
                 try {
-                    return (CompilationStatus) ois.readObject();
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+                    try {
+                        return (CompilationStatus) ois.readObject();
+                    } finally {
+                        ois.close();
+                    }
                 } finally {
-                    ois.close();
+                    fis.close();
                 }
             } catch (IOException ioe ) {
                 logger.log(Level.SEVERE,"CompilationStatus reading error.",ioe);

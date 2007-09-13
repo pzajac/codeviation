@@ -163,8 +163,11 @@ public class BlocksMetricTest extends TestCase {
    private  byte[] getBytes(File file) throws IOException {
        FileInputStream fis = new FileInputStream(file);
        byte bytes[] = new byte[(int)file.length()];
-       fis.read(bytes);
-       fis.close();
+       try {
+           fis.read(bytes);
+        } finally {
+           fis.close();
+        }
        return bytes;
    }
 }
