@@ -146,7 +146,7 @@ public class RunJavacTest extends TestCase {
         assertUsage(it,"1.3","1.3","java.io.PrintStream","println(java.lang.String)","System.out",ur,cvs);
         assertFalse(it.hasNext());
         
-        Repository rep = PersistenceManager.getDefault().getDefault().getRepository(ExamplesSetup.getCvsWork());
+        Repository rep = PersistenceManager.getDefault().getRepository(ExamplesSetup.getCvsWork());
         assertEquals(1,rep.getSourceRoots().size());
         SourceRoot sr = rep.getSourceRoots().get(0);
         
