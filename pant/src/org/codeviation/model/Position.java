@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.List;
 import org.codeviation.model.Version;
 
 /**
@@ -58,10 +59,36 @@ public final class Position implements  Serializable {
      public int hashCode() {
          return getOffset() + line.hashCode();          
      }
+     /** Get offset on the line 
+      * 
+      * @return offset on the line
+      */
      public int getOffset() {
          return offset;
      }
-     
+
+     /** Get absolute position in file for revision v
+      * 
+      * @param v revision of abs pos
+      * @return absolute position
+      */
+     public int getAbsolutePosition(Version v) {
+        List<Line> lines = v.getJavaFile().getLines(v);
+        boolean found = false;
+        int absPos = 0;
+         for (int i = 0; i < lines.size(); i++) {
+             Line line = lines.get(i);
+             if (line == this.line) {
+                 found = true;
+                 break;
+             }
+             absPos += line.getNewContent().length();
+         }
+        if (!found) {
+            throw new IllegalStateException("No  line in Version " +  v + " for position " + this);
+        }
+        return absPos + getOffset();
+     }
      public String toString() {
          String linePos = null;
          if (line != null && line.getPosition() != null) {

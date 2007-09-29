@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.IllegalStateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,12 +19,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.codeviation.model.PersistenceManager;
 import org.codeviation.model.vcs.CVSMetric;
 import org.codeviation.model.vcs.CvsUtil;
 import org.codeviation.model.vcs.Diff;
-import org.codeviation.model.Version;
-import org.codeviation.model.Position;
 
 /**
  * JavaFile in package

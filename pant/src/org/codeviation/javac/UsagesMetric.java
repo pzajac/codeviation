@@ -53,7 +53,7 @@ public class UsagesMetric extends VersionedMetric<UsageItem> implements  java.io
         }
     }
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {        
+     private void writeObject(ObjectOutputStream oos) throws IOException {        
         Set<PositionIntervalResult<UsageItem>> usages = getStorage().getAllObjects();
         oos.writeInt(usages.size());
         for (PositionIntervalResult<UsageItem> usage : usages) {

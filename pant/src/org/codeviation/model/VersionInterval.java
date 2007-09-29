@@ -14,11 +14,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.codeviation.model.Line;
-import org.codeviation.model.Version;
 
 /**
- *
+ * Inferval for all revision betveen two versions. "from" <= "to";
  * @author pzajac
  */
 public final class VersionInterval  {
@@ -43,6 +41,7 @@ public final class VersionInterval  {
             this.from = v1;            
         }
     }
+   
     public Version getFrom() {
         return from;
     }
@@ -80,7 +79,7 @@ public final class VersionInterval  {
             to = v;
        }
     }
-    
+    /** Get all creation version of lines */
     public static VersionInterval get(List<Line> lines) {
             if (lines.size() < 2) {
                 throw new IndexOutOfBoundsException("lines.size() < 2");

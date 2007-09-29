@@ -53,6 +53,20 @@ public final class PositionVersionIntervalResultContainer<Y> implements Serializ
               ver.addVersion(version);
           }
     }
+    /** Get PositionIntervalResult with version v 
+     * 
+     * @param v
+     * @return
+     */
+    public Set<PositionIntervalResult<Y>> getPirs(Version v) {
+        Set<PositionIntervalResult<Y>> pirs = new HashSet<PositionIntervalResult<Y>>();
+        for (Map.Entry<PositionIntervalResult<Y>, VersionInterval> entry : map.entrySet()) {
+            if (entry.getValue().contains(v)) {
+                pirs.add(entry.getKey());
+            }
+        }
+        return pirs;
+    }
     public void add(PositionIntervalResult<Y> srcVer,VersionInterval vi) {
           VersionInterval ver = map.get(srcVer);
           if (ver == null) {

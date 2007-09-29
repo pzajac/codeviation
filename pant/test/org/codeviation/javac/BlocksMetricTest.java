@@ -11,10 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -25,13 +25,16 @@ import org.codeviation.javac.impl.blocks.Blocks;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.PositionInterval;
 import org.codeviation.model.PositionIntervalResult;
+import org.codeviation.model.PositionIntervalResultGraph.Item;
 import org.codeviation.model.PositionVersionIntervalResultContainer;
 import org.codeviation.model.TestUtil;
+import org.codeviation.model.Version;
 import org.codeviation.model.vcs.CVSMetric;
 import org.codeviation.model.vcs.ExamplesSetup;
 import org.codeviation.javac.impl.blocks.BlocksBuilder;
 import org.codeviation.javac.impl.blocks.BlocksItem;
 import org.codeviation.javac.impl.blocks.BlocksMetric;
+import org.codeviation.model.PositionIntervalResultGraph;
 import org.codeviation.model.VersionInterval;
 
 /**
@@ -118,12 +121,24 @@ public class BlocksMetricTest extends TestCase {
        assertEquals(1,classes.getAllObjects().size());
        PositionIntervalResult<String> res = classes.getAllObjects().iterator().next();
        assertEquals("class name","testblockmetrics.Simple",res.getObject());
+       System.out.println("startPosition:" + res.getInterval().getStartPosition());
+       System.out.println("endPosition:" + res.getInterval().getEndPosition());
        
        PositionVersionIntervalResultContainer<String> methods = bm.getMethods();
        assertEquals(1,classes.getAllObjects().size());
        Iterator<PositionIntervalResult<String>> pirIt = methods.getAllObjects().iterator();
+       pirIt.next();
        PositionIntervalResult<String> pir = pirIt.next();
        assertEquals("Simple(boolean)",pir.getObject());
+//       System.out.println("startPosition:" + pir.getInterval().getStartPosition());
+//       System.out.println("endPosition:" + pir.getInterval().getEndPosition());
+//        Set<PositionIntervalResult<BlocksItem>> allObjects = bm.getStorage().getAllObjects();
+//        for (PositionIntervalResult<BlocksItem> positionIntervalResult : allObjects) {
+//            System.out.println(positionIntervalResult.getObject());
+//            System.out.println(positionIntervalResult.getInterval().getStartPosition());
+//            System.out.println(positionIntervalResult.getInterval().getEndPosition());
+//        }
+        doPositionIntervalResultGraph();
     }
    public void testMany() throws IOException, InterruptedException {
        Blocks.setDebug(true); 
@@ -160,6 +175,43 @@ public class BlocksMetricTest extends TestCase {
 
    }
  
+   public void doPositionIntervalResultGraph () {
+       String filePath = "pantexamples/testblockmetrics/src/testblockmetrics/Simple.java";
+       File file = new File(testPrjF,"src/testblockmetrics/Simple.java");
+       JavaFile jf = JavaFile.getJavaFile(file, "testblockmetrics");
+       BlocksMetric bm = jf.getMetric(BlocksMetric.class);
+       PositionVersionIntervalResultContainer<String> classes = bm.getClasses();
+       PositionVersionIntervalResultContainer<String> methods = bm.getMethods();
+       Version version = jf.getCVSResultMetric().getRootVersion().getVersion("1.2");
+       List<PositionVersionIntervalResultContainer<?>> all = new ArrayList<PositionVersionIntervalResultContainer<?>>();
+       all.add(classes);
+       all.add(methods);
+       EnumSet<BlocksItem> filter = EnumSet.of(BlocksItem.IF, BlocksItem.ELSE,BlocksItem.SWITCH);
+       PositionVersionIntervalResultContainer<BlocksItem> filter1 = bm.filter(filter);
+       all.add(filter1);
+       PositionIntervalResultGraph pirg = PositionIntervalResultGraph.createGraph(all, version, 1);
+       List<Item> items = pirg.getItems(1);
+       assertEquals(2,items.size());
+       Item item = items.get(0);
+       assertEquals("Simple(boolean)", item.getPir().getObject());
+        List<Item> children = item.getChildren();
+        assertEquals(3, children.size());
+        Item item1 = children.get(0);
+        BlocksItem bi = (BlocksItem)item1.getPir().getObject();
+        assertEquals(BlocksItem.IF,bi);
+ 
+//        for (Item itemx: items) {
+//           System.out.println(itemx.getPir().getObject());
+//           System.out.println("Children:");
+//            for (Item item11 : itemx.getChildren()) {
+//               System.out.println(item11.getPir().getObject());
+//               System.out.println("  Children2:");
+//               for (Item item2 : item11.getChildren()) {
+//                   System.out.println(item2.getPir().getObject());
+//               }
+//           }
+//       }
+   }
    private  byte[] getBytes(File file) throws IOException {
        FileInputStream fis = new FileInputStream(file);
        byte bytes[] = new byte[(int)file.length()];

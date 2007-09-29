@@ -45,6 +45,46 @@ public final class PositionInterval implements Serializable,Comparable<PositionI
         return retVal;
     }
 
+    /** @return true if pi is in this PositionInterval
+     * 
+     * @param pi tested position interval
+     */
+    public boolean contains(PositionInterval pi) {
+        return contains(pi.getStartPosition()) && contains(pi.getEndPosition());
+        
+    }
+    
+    /** check if position is inside interval
+     * 
+     * @param pos
+     * @return
+     */
+    public boolean contains(Position pos) {
+        List<Line> lines = pos.getVersion().getLines();
+        int lp = lines.indexOf(pos.getLine());
+        if (lp == -1 ) {
+            throw new IllegalStateException("Not line found:" + pos);
+        }
+        int lstart = lines.indexOf(startPosition.getLine());
+        if (lstart == -1) {
+            return false;
+        }
+        int lend = lines.indexOf(endPosition.getLine());
+        if (lend == -1) {
+            return false;
+        }
+        if (lp > lstart && lp < lend) {
+            return true;
+        }
+        if (lp == lstart) {
+            return startPosition.getOffset() <= pos.getOffset();
+        }
+        if (lp == lend) {
+            return pos.getOffset() <= endPosition.getOffset();
+        }
+        return false;
+        
+    }
     public Position getStartPosition() {
         return startPosition;
     }
@@ -98,7 +138,7 @@ public final class PositionInterval implements Serializable,Comparable<PositionI
         
     }
     
-    public void write (ObjectOutputStream oos) throws IOException {
+     public void write (ObjectOutputStream oos) throws IOException {
         startPosition.write(oos);
         endPosition.write(oos);
     }

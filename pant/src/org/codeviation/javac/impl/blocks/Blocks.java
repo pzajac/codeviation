@@ -107,13 +107,13 @@ public class Blocks {
 
     public void addClassName(int startPos,int endPos,String className) {
         Interval i = new Interval(startPos,endPos);
-        if (startPos != -1 && endPos != -1 && !intervals.containsKey(i)) {
+        if (startPos != -1 && endPos != -1 ) {
             classes.put(i,className);
         }
     }
     public void addMethodSignature(int startPos,int endPos,String className) {
         Interval i = new Interval(startPos,endPos);
-        if (startPos != -1 && endPos != -1 && !intervals.containsKey(i)) {
+        if (startPos != -1 && endPos != -1) {
             methods.put(i,className);
         }
     }

@@ -3,6 +3,7 @@ package  org.codeviation.javac.impl.blocks;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.EnumSet;
 import java.util.Set;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector;
@@ -39,6 +40,15 @@ public class BlocksMetric extends VersionedMetric<BlocksItem> implements java.io
        return methods;
    }
 
+   public PositionVersionIntervalResultContainer<BlocksItem> filter(EnumSet<BlocksItem> enums) {
+       PositionVersionIntervalResultContainer<BlocksItem> filtered = new PositionVersionIntervalResultContainer<BlocksItem>();
+       for (PositionIntervalResult<BlocksItem> pir : getStorage().getAllObjects()) {
+           if (enums.contains(pir.getObject())) {
+                filtered.add(pir, getStorage().get(pir));
+           }
+       }
+       return filtered;
+   }
     /** Creates a new instance of BlocksMetric */
     public BlocksMetric() {
     }

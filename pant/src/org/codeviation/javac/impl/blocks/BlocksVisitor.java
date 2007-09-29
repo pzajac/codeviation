@@ -186,7 +186,6 @@ import org.netbeans.modules.java.source.usages.ClassFileUtil;
          @Override public Void visitClass (final ClassTree node, final Blocks p) {
             TreePath path = TreePath.getPath(cu, node);
             final ClassSymbol sym = ((JCTree.JCClassDecl)node).sym;
-            p.addClassName(getStartPosition(path),getEndPosition(path),sym.toString());
             boolean errorInDecl = false;
             boolean errorIgnorSubtree = true;
             if (sym != null) {
@@ -209,6 +208,7 @@ import org.netbeans.modules.java.source.usages.ClassFileUtil;
                         throw new IllegalStateException("Broken stack: " + node);
                     }
                     addBlockItem(offset.getStartOffset(),offset.getEndOffset()  , p, BlocksItem.CLASS);
+                    p.addClassName(offset.getStartOffset(),offset.getEndOffset() ,sym.toString());
                 } finally {
                     enclosingElement = old;
                 }
@@ -232,9 +232,10 @@ import org.netbeans.modules.java.source.usages.ClassFileUtil;
             if (bn != null) {
                 TreePath path = TreePath.getPath(cu, bn);
                 int sp = getStartPosition(path);
-                p.addMethodSignature(getStartPosition(mpath),sp, enclosingElement.toString());
+                
                 treeStack.lastElement().updateStartOffset(sp);
                 addBlockItem(sp, getEndPosition(path),p,BlocksItem.METHOD);
+                p.addMethodSignature(getStartPosition(mpath),getEndPosition(path), enclosingElement.toString());
                 return super.visitBlock(bn,p);
             }
             return null;

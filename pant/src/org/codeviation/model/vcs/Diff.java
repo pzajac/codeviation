@@ -185,7 +185,7 @@ public final class Diff  {
     public int getAddedLines() {
         int number = 0;
         for (int i = 0 ; i < lines.size() ; i++ ) {
-             if (((Line)lines.get(i)).getState() == Line.State.CREATED) {
+             if (lines.get(i).getState() == Line.State.CREATED) {
                  number++;
              }
         }
@@ -196,7 +196,7 @@ public final class Diff  {
     public int getRemovedLines() {
         int number = 0;
         for (int i = 0 ; i < lines.size() ; i++ ) {
-             if (((Line)lines.get(i)).getState() == Line.State.REMOVED) {
+             if (lines.get(i).getState() == Line.State.REMOVED) {
                  number++;
              }
         }
