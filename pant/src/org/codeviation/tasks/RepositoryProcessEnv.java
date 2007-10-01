@@ -1,10 +1,8 @@
 
 package org.codeviation.tasks;
 
-import java.awt.Event;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -51,7 +49,7 @@ public final class RepositoryProcessEnv {
     }
     
     @SuppressWarnings("unchecked")
-public void performRepositoryAction (RepositoryProcess proc,Event<?> event) {
+    public void performRepositoryAction (RepositoryProcess proc,Event<?> event) {
        List<ProcessListener> copy = null;
        synchronized(this) {
            copy = new ArrayList<ProcessListener>(listeners);

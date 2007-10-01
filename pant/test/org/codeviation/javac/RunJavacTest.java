@@ -62,7 +62,7 @@ public class RunJavacTest extends TestCase {
         return new File (testPrjF,"build");
         
     }
-    static void runJavac(File testPrjF) {
+    public static void runJavac(File testPrjF) {
         Javac javac = new Javac();
         Project prj = new Project();
         prj.setProperty("build.compiler","org.codeviation.javac.MeasuringJavac");

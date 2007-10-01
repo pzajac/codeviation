@@ -1,6 +1,5 @@
 package org.codeviation.tasks;
 
-import java.io.File;
 import org.codeviation.model.SourceRoot;
 
 /**
@@ -8,9 +7,8 @@ import org.codeviation.model.SourceRoot;
  * @author pzajac
  */
 public interface SourceRootFilter {
-    /** @return true if source root is accepted
+    /** @param srcRoot tested source root
+     * @return true if source root is accepted
      */
-    public boolean accept(SourceRoot srcRoot) ;
-
-  
+    public boolean accept(SourceRoot srcRoot);  
 }

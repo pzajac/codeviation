@@ -15,6 +15,7 @@ import no.uib.cipr.matrix.sparse.SparseVector;
 import org.codeviation.model.JavaFile;
 import org.codeviation.model.Package;
 import org.codeviation.model.PositionIntervalResult;
+import org.codeviation.model.PositionVersionIntervalResultContainer;
 import org.codeviation.model.Repository;
 import org.codeviation.model.SourceRoot;
 import org.codeviation.model.Version;
@@ -23,6 +24,8 @@ import org.codeviation.tasks.SourceRootFilter;
 import org.codeviation.javac.CVSVersionsByPant;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
+import org.codeviation.javac.impl.blocks.BlocksMetric;
+import org.codeviation.model.PositionIntervalResultGraph;
 
 /**
  * Generates sparse matrix for  Class -> Class mappings
@@ -30,7 +33,7 @@ import org.codeviation.javac.UsagesMetric;
  */
 public class ClassRankMatrixGenerator {
     private static final double CONVERGENCE_EPSILON = 1e-12;
-    private  Map<String,ClassItem> usedClasses = new HashMap<String,ClassItem>();
+    private  Map<String,Item> usedItems = new HashMap<String,Item>();
     private FlexCompRowMatrix matrix;
     private int index = 0;
     /** if (exists link from a class the row[i] = true
@@ -38,17 +41,28 @@ public class ClassRankMatrixGenerator {
     private boolean rows [];  
     private double alpha;
     private String tagName;
+    
+    final ElementType type;
+    public static enum ElementType {
+        CLASS,
+        METHOD
+    }
     /** Index in matrix
      */
-    private static class ClassItem implements Comparable<ClassItem>{
+    private static class Item implements Comparable<Item>{
         String className;
+        String methodName;
         int index;
         double rank;
         Package pack;
-        public ClassItem(String className, int index,Package pack) {
+        ElementType type = ElementType.CLASS;
+        
+        public Item(String className,String methodName, int index,Package pack,ElementType type) {
             this.className = className;
             this.index = index;
             this.pack = pack;
+            this.type = type;
+            this.methodName = methodName;
         }
         
         @Override
@@ -56,10 +70,13 @@ public class ClassRankMatrixGenerator {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            final ClassItem test = (ClassItem) o;
+            final Item test = (Item) o;
 
             if ( this.className != null &&
                 !this.className.equals(test.className)) {
+                return false;
+            }
+            if (this.methodName != null && !this.methodName.equals(test.methodName)) {
                 return false;
             }
             return true;
@@ -75,7 +92,11 @@ public class ClassRankMatrixGenerator {
         
         @Override
         public int hashCode() {
-            return  className.hashCode();
+            int hc = className.hashCode();
+            if (methodName != null) {
+                hc += methodName.hashCode();
+            }
+            return hc ;
         }
         public int getIndex() {
             return index;
@@ -87,7 +108,7 @@ public class ClassRankMatrixGenerator {
         public double getRank() {
             return rank;
         }
-        public int compareTo(ClassItem ci) {
+        public int compareTo(Item ci) {
             double diff = ci.rank - rank;
             if (diff > 0) {
                 return 1;
@@ -101,36 +122,72 @@ public class ClassRankMatrixGenerator {
             return pack;
         }
        
+    } // class Item
+
+    public ClassRankMatrixGenerator(ElementType type) {
+        this.type = type;
+    }
+    
+    public ClassRankMatrixGenerator() {
+        this.type = ElementType.CLASS;
     }
 
     public void setTagName(String tagName) {
         this.tagName = tagName;
     }
     
-    public void initClass(String className) {
-        if (!usedClasses.containsKey(className)) {
-            usedClasses.put(className,new ClassItem(className,index++,null));
+    public void initItem(String itemName,String methodName) {
+        if (!usedItems.containsKey(itemName)) {
+            usedItems.put(itemName,new Item(itemName,methodName,index++,null,type));
         }
     }
-    public void initClass(String className,Package pack) {
-        if (!usedClasses.containsKey(className)) {
-            usedClasses.put(className,new ClassItem(className,index++,pack));
+    public void initItem(String itemName,String methodName, Package pack) {
+        if (!usedItems.containsKey(itemName)) {
+            usedItems.put(itemName,new Item(itemName,methodName,index++,pack,type));
         }
     }
     
-    public int getClassIndex(String className) {
-        ClassItem item = usedClasses.get(className);
+    public int getItemIndex(String itemName) {
+        Item item = usedItems.get(itemName);
         return  (item != null) ? item.getIndex() : -1; 
-    } 
-    public void initClasses(SourceRoot srcRoot) {
+    }
+
+  
+    private void initItem(SourceRoot srcRoot) {
         for (Package pack : srcRoot.getPackages()) {
             for (JavaFile jf : pack.getJavaFiles()) {
-                if (tagName == null) {
-                    initClass(jf.getClassName(),pack);
+                CVSVersionsByPant cvbp = jf.getMetric(CVSVersionsByPant.class);
+                Version v = null;
+                if (cvbp != null) {
+                    v = cvbp.getVersion(tagName) ;
+                }
+                if (type == ElementType.CLASS) {
+                    // classses
+                    if (tagName == null) {
+                        initItem(jf.getClassName(),null,pack);
+                    } else {
+                        if (v != null) {
+                            initItem(jf.getClassName(),null,pack);
+                        }
+                    }
                 } else {
-                    CVSVersionsByPant cvbp = jf.getMetric(CVSVersionsByPant.class);
-                    if (cvbp.getVersion(tagName) != null) {
-                        initClass(jf.getClassName(),pack);
+                    // methods
+                    if (tagName == null) {
+                        throw new IllegalStateException("not supported for multirevisions ClassRank");
+                    } else {
+                        BlocksMetric bm = jf.getMetric(BlocksMetric.class);
+                        PositionVersionIntervalResultContainer<String> classes = bm.getClasses();
+                        PositionVersionIntervalResultContainer<String> methods = bm.getMethods();
+                        List<PositionVersionIntervalResultContainer<?>> list = new ArrayList<PositionVersionIntervalResultContainer<?>>();
+                        list.add(classes);
+                        list.add(methods);
+                        PositionIntervalResultGraph pirg = PositionIntervalResultGraph.createGraph(list, v, 1);
+                        for (PositionIntervalResultGraph.Item item : pirg.getItems(1)) {
+                            PositionIntervalResultGraph.Item parent = item.getParent();
+                            if (parent != null) {
+                                initItem((String)parent.getPir().getObject(), (String)item.getPir().getObject());
+                            }
+                        }
                     }
                 }
             }
@@ -147,9 +204,42 @@ public class ClassRankMatrixGenerator {
                     ver = cvbp.getVersion(tagName);
                 }
                 if (um != null) {
-                    for (PositionIntervalResult<UsageItem> pir : um.getStorage().getAllObjects()) {
-                        if (ver != null && um.getStorage().get(pir).contains(ver)) {
-                            addUsage(jf.getClassName() , pir.getObject().getClazz());
+                    PositionIntervalResultGraph pirg = null;
+                    Map <PositionIntervalResult<String>,String> method2Class = null;
+                    if (type == ElementType.METHOD) {
+                        BlocksMetric bm = jf.getMetric(BlocksMetric.class);
+                        // init method to class
+                        if (bm != null) {
+                            PositionVersionIntervalResultContainer<String> classes = bm.getClasses();
+                            PositionVersionIntervalResultContainer<String> methods = bm.getMethods();
+                            List<PositionVersionIntervalResultContainer<?>> list = new ArrayList<PositionVersionIntervalResultContainer<?>>();
+                            list.add(classes);
+                            list.add(methods);
+                            list.add(um.getStorage());
+                            pirg = PositionIntervalResultGraph.createGraph(list, ver, 1);
+                        }
+                    }
+                    if (type == ElementType.CLASS) {
+                        for (PositionIntervalResult<UsageItem> pir : um.getStorage().getAllObjects()) {
+                            if (ver != null && um.getStorage().get(pir).contains(ver)) {
+                                if (type == ElementType.CLASS) {
+                                    addClassUsage(jf.getClassName() , pir.getObject().getClazz());
+                                } 
+                            }
+                        }
+                    } else {
+                        if (pirg != null) {
+                            for (PositionIntervalResultGraph.Item item : pirg.getItems(2) ) {
+                                PositionIntervalResultGraph.Item method = item.getParent();
+                                if (method != null) {
+                                    PositionIntervalResultGraph.Item clazz = method.getParent();
+                                    if (clazz != null) {
+                                        addMethodUsage((PositionIntervalResult<UsageItem>)item.getPir(),
+                                                (String) clazz.getPir().getObject(),
+                                                (String) method.getPir().getObject());
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -157,7 +247,7 @@ public class ClassRankMatrixGenerator {
         }
     }
     public void normalizeMatrix(double alpha) {
-        double emptyRation = 1.0 /usedClasses.size();
+        double emptyRation = 1.0 /usedItems.size();
         this.alpha = alpha;
         for (int r = 0 ; r < matrix.numRows() ; r++ ) {
             SparseVector row = matrix.getRow(r);
@@ -173,20 +263,30 @@ public class ClassRankMatrixGenerator {
             }
         }
     }
-    public void addUsage(String className,String toClass) {
+    public void addClassUsage(String className,String toClass) {
             if (rows == null ) {
-                rows = new boolean[usedClasses.size()];
+                rows = new boolean[usedItems.size()];
             }
             if (matrix == null) {
-                matrix = new FlexCompRowMatrix(usedClasses.size(),usedClasses.size());
+                matrix = new FlexCompRowMatrix(usedItems.size(),usedItems.size());
             }    
-            int row = getClassIndex(className);
-            int column = getClassIndex(toClass);
+            int row = getItemIndex(className);
+            int column = getItemIndex(toClass);
             if (row != -1 && column != -1 && row != column) {
                matrix.set(row, column, 1.0);
             }
     }
     
+   public  void addMethodUsage(PositionIntervalResult<UsageItem> pir, String clazz,String method) {
+        UsageItem usage = pir.getObject();
+        String usageStr = usage.toString();
+        String key = clazz + "." + method;
+        int row = getItemIndex(usageStr);
+        int column = getItemIndex(key);
+        if (row != -1 && column != -1 ) {
+            matrix.set(row,column,1.0);
+        }
+    }
     public Matrix getMatrix() {
         return matrix;
     }
@@ -194,7 +294,7 @@ public class ClassRankMatrixGenerator {
     /** @return total number of nodes in graph
      */ 
     public int size() {
-       return usedClasses.size();  
+       return usedItems.size();  
     }
     
     /** computes first eigen vector
@@ -240,7 +340,7 @@ public class ClassRankMatrixGenerator {
             initV.set(workV1);
             if (Math.abs(prevAbsVal - absVal) < CONVERGENCE_EPSILON && it > 70) {
                 // set rank
-               for (ClassItem ci : usedClasses.values()) {
+               for (Item ci : usedItems.values()) {
                  ci.setRank(initV.get(ci.getIndex()));  
                }
                return it;
@@ -252,22 +352,22 @@ public class ClassRankMatrixGenerator {
     }
     public Vector compute (List<SourceRoot> roots) {
         for (SourceRoot srcRoot : roots) {
-          initClasses(srcRoot);
+          initItem(srcRoot);
         }
         if (matrix == null) {
-            matrix = new FlexCompRowMatrix(usedClasses.size(),usedClasses.size());
+            matrix = new FlexCompRowMatrix(usedItems.size(),usedItems.size());
         }    
         
        for (SourceRoot srcRoot : roots) {
             addUsage(srcRoot);
        }
        normalizeMatrix(0.9);
-       Vector vec = new DenseVector (usedClasses.size());
-       double value = 1.0/ usedClasses.size();
-       for (int i = 0 ; i < usedClasses.size() ; i++ ) {
+       Vector vec = new DenseVector (usedItems.size());
+       double value = 1.0/ usedItems.size();
+       for (int i = 0 ; i < usedItems.size() ; i++ ) {
             vec.set(i, value);
        }
-       if (usedClasses.isEmpty()) {
+       if (usedItems.isEmpty()) {
            throw new IllegalStateException("No class for pageRank");
        }
        if (compute(vec) == -1 ) {
@@ -281,7 +381,7 @@ public class ClassRankMatrixGenerator {
        matrix = null;
        rows = null;
        setTagName(tag);
-       usedClasses.clear();
+       usedItems.clear();
        List<SourceRoot> roots = new ArrayList<SourceRoot>();
        for (SourceRoot root : rep.getSourceRoots()) {
            if (filter == null || filter.accept(root)) {
@@ -290,26 +390,31 @@ public class ClassRankMatrixGenerator {
        }
        Vector vec = compute(roots);
        // store results
-       List<ClassItem> allItems = new ArrayList<ClassItem>(usedClasses.values());
-       Collections.sort(allItems);
-       for (int i = 0 ; i < allItems.size() ; i++) {
-           ClassItem item = allItems.get(i);
-           JavaFile jf = item.getJavaFile();
-           PageRankMetric prm = jf.getMetric(PageRankMetric.class);
-           if (prm == null ) {
-               prm = new PageRankMetric();
-               prm.setJavaFile(jf);
+       if (type == ElementType.CLASS) {
+           List<Item> allItems = new ArrayList<Item>(usedItems.values());
+           Collections.sort(allItems);
+           for (int i = 0 ; i < allItems.size() ; i++) {
+               Item item = allItems.get(i);
+               JavaFile jf = item.getJavaFile();
+               PageRankMetric prm = jf.getMetric(PageRankMetric.class);
+               if (prm == null ) {
+                   prm = new PageRankMetric();
+                   prm.setJavaFile(jf);
+               }
+               CVSVersionsByPant cvsbp = jf.getMetric(CVSVersionsByPant.class);
+               if (cvsbp == null) {
+                   cvsbp = new CVSVersionsByPant();
+                   cvsbp.setJavaFile(jf);
+               }
+               Version v = cvsbp.getVersion(tag);
+               if (v != null) {
+                  prm.put(tag, item.getRank(),i,((double)i)/allItems.size());
+                  jf.setMetric(prm);
+               }
            }
-           CVSVersionsByPant cvsbp = jf.getMetric(CVSVersionsByPant.class);
-           if (cvsbp == null) {
-               cvsbp = new CVSVersionsByPant();
-               cvsbp.setJavaFile(jf);
-           }
-           Version v = cvsbp.getVersion(tag);
-           if (v != null) {
-              prm.put(tag, item.getRank(),i,((double)i)/allItems.size());
-              jf.setMetric(prm);
-           }
+       } else {
+           // store methods
+           
        }
               
     } 

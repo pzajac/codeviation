@@ -9,13 +9,9 @@ import org.codeviation.main.ClassRankMatrixGenerator;
  * @author pzajac
  */
 public class PageRankProcess implements RepositoryProcess {
-    
-    /** Creates a new instance of PageRankProcess */
-    public PageRankProcess() {
-    }
-    
+        
     public boolean execute(Repository rep, RepositoryProcessEnv env) {
-        ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator();
+        ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator(ClassRankMatrixGenerator.ElementType.CLASS);
         for (String tag : env.getTags()) {
             generator.computeAndStore(rep, tag,env.getSourceRootFilter());
         }
