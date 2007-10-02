@@ -12,6 +12,7 @@ package org.codeviation.tasks;
 import java.io.File;
 import java.io.IOException;
 import junit.framework.TestCase;
+import no.uib.cipr.matrix.Matrix;
 import org.codeviation.javac.MeasuringJavac;
 import org.codeviation.javac.RunJavacTest;
 import org.codeviation.main.ClassRankMatrixGenerator;
@@ -50,12 +51,32 @@ public class MethodRankTest extends TestCase {
         RunJavacTest.runJavac(prjDir);
         
         // CLASS RANK
-        ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator(ClassRankMatrixGenerator.ElementType.CLASS);
-        generator.computeAndStore(rep, "conf1",new PageRankRootFilter());
+//        ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator(ClassRankMatrixGenerator.ElementType.CLASS);
+//        generator.computeAndStore(rep, "conf1",new PageRankRootFilter());
  
         // METHOD RANK
-        generator = new ClassRankMatrixGenerator(ClassRankMatrixGenerator.ElementType.METHOD);
+        ClassRankMatrixGenerator generator = new ClassRankMatrixGenerator(ClassRankMatrixGenerator.ElementType.METHOD);
         generator.computeAndStore(rep, "conf1",new PageRankRootFilter());
+        Matrix matrix = generator.getMatrix();
+        int aA2 = generator.getItemIndex("pagerank.A.a2()");
+        int aA1 = generator.getItemIndex("pagerank.A.a1()");
+
+        addMethodUsage("pagerank.A.a1()" ,"pagerank.A.a2()",generator);
+        addMethodUsage("pagerank.A.a2()" ,"pagerank.A.a3()",generator);
+        addMethodUsage("pagerank.A.a3()" ,"pagerank.B.B()",generator);
+        addMethodUsage("pagerank.A.a3()" ,"pagerank.B.b1()",generator);
+        addMethodUsage("pagerank.C.c1()" ,"pagerank.C.c2()",generator);
+        assertTrue(aA2 != -1);
+        assertTrue(aA1 != -1);
+    }
+
+    private void addMethodUsage(String from, String to, ClassRankMatrixGenerator generator) {
+        Matrix matrix = generator.getMatrix();
+        int fromI = generator.getItemIndex(from);
+        int toI = generator.getItemIndex(to);
+        assertTrue(fromI != -1);
+        assertTrue(toI != -1);
+        assertTrue(matrix.get(fromI, toI) > 0);
     }
     
 

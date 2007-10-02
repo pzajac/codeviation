@@ -25,6 +25,8 @@ import org.codeviation.javac.CVSVersionsByPant;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
 import org.codeviation.javac.impl.blocks.BlocksMetric;
+import org.codeviation.math.LogsUtil;
+import org.codeviation.math.MatrixUtil;
 import org.codeviation.model.PositionIntervalResultGraph;
 
 /**
@@ -90,6 +92,9 @@ public class ClassRankMatrixGenerator {
              return pack.getJavaFile(name + ".java");
         }
         
+        public String getName() {
+            return (methodName == null) ? className : className + "." + methodName;
+        }
         @Override
         public int hashCode() {
             int hc = className.hashCode();
@@ -121,6 +126,9 @@ public class ClassRankMatrixGenerator {
         Package getPackage() {
             return pack;
         }
+        public String toString() {
+            return className + "." + methodName + "->" + index; 
+        }
        
     } // class Item
 
@@ -138,12 +146,14 @@ public class ClassRankMatrixGenerator {
     
     public void initItem(String itemName,String methodName) {
         if (!usedItems.containsKey(itemName)) {
-            usedItems.put(itemName,new Item(itemName,methodName,index++,null,type));
+            Item item = new Item(itemName,methodName,index++,null,type);
+            usedItems.put(item.getName(),item);
         }
     }
     public void initItem(String itemName,String methodName, Package pack) {
         if (!usedItems.containsKey(itemName)) {
-            usedItems.put(itemName,new Item(itemName,methodName,index++,pack,type));
+            Item item = new Item(itemName,methodName,index++,pack,type);
+            usedItems.put(itemName,item);
         }
     }
     
@@ -264,12 +274,7 @@ public class ClassRankMatrixGenerator {
         }
     }
     public void addClassUsage(String className,String toClass) {
-            if (rows == null ) {
-                rows = new boolean[usedItems.size()];
-            }
-            if (matrix == null) {
-                matrix = new FlexCompRowMatrix(usedItems.size(),usedItems.size());
-            }    
+        initMatrix();
             int row = getItemIndex(className);
             int column = getItemIndex(toClass);
             if (row != -1 && column != -1 && row != column) {
@@ -278,11 +283,13 @@ public class ClassRankMatrixGenerator {
     }
     
    public  void addMethodUsage(PositionIntervalResult<UsageItem> pir, String clazz,String method) {
+        initMatrix();
         UsageItem usage = pir.getObject();
         String usageStr = usage.toString();
         String key = clazz + "." + method;
-        int row = getItemIndex(usageStr);
-        int column = getItemIndex(key);
+        int column = getItemIndex(usageStr);
+        int row = getItemIndex(key);
+        System.out.println("addMethodUsage(\"" + key  + "\" ,\"" + usageStr + "\",generator);");
         if (row != -1 && column != -1 ) {
             matrix.set(row,column,1.0);
         }
@@ -361,6 +368,11 @@ public class ClassRankMatrixGenerator {
        for (SourceRoot srcRoot : roots) {
             addUsage(srcRoot);
        }
+       LogsUtil.printMatrix(matrix);
+        for (Map.Entry<String, Item> entry : usedItems.entrySet()) {
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        }
+
        normalizeMatrix(0.9);
        Vector vec = new DenseVector (usedItems.size());
        double value = 1.0/ usedItems.size();
@@ -417,7 +429,16 @@ public class ClassRankMatrixGenerator {
            
        }
               
-    } 
+    }
+
+    private void initMatrix() {
+        if (rows == null) {
+            rows = new boolean[usedItems.size()];
+        }
+        if (matrix == null) {
+            matrix = new FlexCompRowMatrix(usedItems.size(), usedItems.size());
+        }
+    }
 //    public static void main(String args[]) throws NotConvergedException {
 //        if (System.getProperty(PersistenceManager.PANT_CACHE_FOLDER) == null) {
 //           // XXX
