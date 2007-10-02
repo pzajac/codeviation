@@ -20,6 +20,7 @@ import org.apache.tools.ant.taskdefs.Javac;
 import org.codeviation.model.JavaFile;
 import org.codeviation.javac.MetricBuilder;
 import org.codeviation.model.SourceRoot;
+import org.codeviation.model.vcs.CVSMetric;
 import org.openide.util.Lookup;
 
 /**
@@ -108,7 +109,7 @@ public class MetricsRunner implements TaskListener {
                 if (lastJavaFile != null) {
                     lastSourceRoot = lastJavaFile.getPackage().getSourceRoot();
                     lastSourceRoot.addCvsTag(cvsTag);
-                    CVSVersionsByPant cvspant = lastJavaFile.getMetric(CVSVersionsByPant.class);
+                     CVSVersionsByPant cvspant = lastJavaFile.getMetric(CVSVersionsByPant.class);
                     String version = lastJavaFile.getCVSVersionName();
                     if (version != null) {
                         boolean containsRev = cvspant.containsRevision(version);
@@ -119,7 +120,10 @@ public class MetricsRunner implements TaskListener {
                         }
                         for (MetricBuilder metric : metrics) {
                             if (!containsRev || metric.canProcessTheSameRevision() ) {
-                                metric.visit( e.getTypeElement() );
+                                CVSMetric cvsm = lastJavaFile.getCVSResultMetric();
+                                if (cvsm != null && cvsm.getAllDiffs().length != 0) { 
+                                    metric.visit( e.getTypeElement() );
+                                }
                             } else {
                                 logger.fine("Already processed: " + lastJavaFile.getName() + " " + metric.getClass());
                             }

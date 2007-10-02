@@ -92,6 +92,7 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
             rootVersion = getRootVersion();
             try {
                 diffs =  util.getAllDiffs(javaFile.getCVSPath(),rootVersion,diffs);
+                fixPositions();
             } catch (Exception ex) {
                 // catching problems
                 log.log(Level.SEVERE,
@@ -99,7 +100,6 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
                      ex);
                 log.log(Level.SEVERE,"Exception for:" + javaFile.getCVSPath());                                                 
             }
-            fixPositions();
             javaFile.setMetric(this);
             log.log(Level.FINE, "getAllDiffs() End:" + javaFile.getCVSPath());
         } 
@@ -107,11 +107,13 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
     }
     private void fixPositions() {                 
        // reconstruct all verfsions and assing correct position
-        List<Line> lines = new ArrayList<Line>(500); 
-        for (Diff d : diffs) {
-            lines = d.patch(lines);
-            d.fixPositions(lines);
-        }
+       if (diffs != null) {
+            List<Line> lines = new ArrayList<Line>(500); 
+            for (Diff d : diffs) {
+                lines = d.patch(lines);
+                d.fixPositions(lines);
+            }
+       }
     } 
                         
     /** @return version 1.0 and its siblings and branches 

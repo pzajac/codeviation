@@ -60,6 +60,10 @@ public class CVSMetricTest extends TestCase {
     public void testBaseOptions () throws IOException {
         doFile("BaseOptionsBeanInfo.java");
     }
+   public void testActionImplementationFactory() throws IOException {
+        doFile("ActionsImplementationFactory.java");
+    }
+ 
     public void testCatalogNode () throws IOException {
         // broken cvs :(
         
