@@ -12,7 +12,6 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 import org.codeviation.model.vcs.CVSMetric;
 import org.codeviation.model.vcs.Diff;
-import org.codeviation.model.Position;
 
 /**
  *
@@ -121,12 +120,15 @@ public final class Line {
             }  
             pointer += line.getNewContent().length() + 1;
         }
-        throw new IllegalStateException("offset = " + offset + " > " + pointer + "," + v + "," + v.getJavaFile());
+        throw new IllegalStateException("offset = " + offset + " > " + pointer + "," + v + "," + 
+       v.getJavaFile().getPackage().getSourceRoot() + "/" + v.getJavaFile().getPackage() + "." +  v.getJavaFile());
     }
+    @Override
     public String toString() {
           return "(" + initialLineNumber + "," + newLineNumber + ")" + position + "\n" 
                   + initialContent + "\n" + newContent + "\n";
     }
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -142,6 +144,7 @@ public final class Line {
         }
         return ret;
     }
+    @Override
     public int hashCode() {
         int hashCode = newLineNumber + initialLineNumber<<15 ;
         if (newContent != null) {

@@ -83,23 +83,25 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
     
     public Diff [] getAllDiffs() {
         String ver = javaFile.getCVSVersionName();
+        Logger log = Logger.getLogger(getClass().getName());
         // version should be sometimes null (for example non versioned file
         if (updateCVS && (diffs == null || diffs.length == 0 || !(ver != null && rootVersion.contains(ver)))) {
+            log.log(Level.FINE, "getAllDiffs() Start:" + javaFile.getCVSPath());
+            CvsUtil util = javaFile.getPackage().getCvsUtil();
+            rootVersion = null;
+            rootVersion = getRootVersion();
             try {
-                Logger.getLogger(getClass().getName()).log(Level.FINE, "getAllDiffs() Start:" + javaFile.getCVSPath());
-                CvsUtil util = javaFile.getPackage().getCvsUtil();
-                rootVersion = null;
-                rootVersion = getRootVersion();
                 diffs =  util.getAllDiffs(javaFile.getCVSPath(),rootVersion,diffs);
-                fixPositions();
-                javaFile.setMetric(this);
-                Logger.getLogger(getClass().getName()).log(Level.FINE, "getAllDiffs() End:" + javaFile.getCVSPath());
-            } catch (IOException ex) {
-                java.util.logging.Logger.getLogger(CVSMetric.class.getName()).log(java.util.logging.Level.SEVERE,
-                                                                 ex.getMessage(),
-                                                                 ex);
-                diffs = new Diff[0];
-            } 
+            } catch (Exception ex) {
+                // catching problems
+                log.log(Level.SEVERE,
+                     ex.getMessage(),
+                     ex);
+                log.log(Level.SEVERE,"Exception for:" + javaFile.getCVSPath());                                                 
+            }
+            fixPositions();
+            javaFile.setMetric(this);
+            log.log(Level.FINE, "getAllDiffs() End:" + javaFile.getCVSPath());
         } 
         return (diffs != null) ? diffs : new Diff[0];
     }
