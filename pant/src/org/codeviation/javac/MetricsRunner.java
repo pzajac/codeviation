@@ -10,6 +10,7 @@ import com.sun.tools.javac.api.JavacTaskImpl;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,11 +68,15 @@ public class MetricsRunner implements TaskListener {
                 return null;
             }
             String packageName = cut.getPackageName().toString();
-            Tree tree = cut.getTypeDecls().iterator().next();
-            if (tree.getKind() == Kind.CLASS) {
-              // scan class
-              return JavaFile.getJavaFile(MetricsRunner.getFile(),packageName); 
+            Iterator<? extends Tree> iterator = cut.getTypeDecls().iterator();
+            if (iterator.hasNext()) { 
+                Tree tree = iterator.next();
+                if (tree.getKind() == Kind.CLASS) {
+                  // scan class
+                  return JavaFile.getJavaFile(MetricsRunner.getFile(),packageName); 
+                 }
             }
+            return null;
         }
         return lastJavaFile;
     }
