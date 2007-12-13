@@ -42,6 +42,10 @@ public class RepositoryTest extends TestCase {
         rep.properties = null;
         assertEquals("test property","test",rep.getProperty("test1.property"));
     }
+       
+    public void testGetJavaClass() throws IOException {
+        assertTrue(true);
+    }
 
 }
     
