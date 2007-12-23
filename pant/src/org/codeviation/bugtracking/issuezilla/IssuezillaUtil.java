@@ -89,6 +89,12 @@ public final class IssuezillaUtil {
     
    
     public static synchronized Connection getConnection() throws SQLException{
+        // XXX ugly hack, Lustr will remove it,  I hope, lustr will fix it
+        String possibleUrls[] = new String[]{
+            "jdbc:mysql://qa-amd64-linux.czech.sun.com:3306/issuezilla",
+            "jdbc:mysql://192.168.2.13/issuezilla",
+            "jdbc:mysql://localhost/issuezilla"
+        };
         if (connection == null ) {
             try {
                Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -96,7 +102,16 @@ public final class IssuezillaUtil {
                 cnfe.printStackTrace();
                 throw new SQLException(" Exception: " + cnfe );
            }
-            connection = DriverManager.getConnection("jdbc:mysql://qa-amd64-linux.czech.sun.com:3306/issuezilla",  "guest", "guest");
+            for (String url: possibleUrls) {
+                try {
+                    connection = DriverManager.getConnection(url,  "guest", "guest");
+                } catch(Exception e) {
+                    Logger.global.log(Level.FINE, "SQL connection failed",e);
+                }
+            }
+            if (connection == null) {
+                throw new SQLException("No connection to bugtracking system was established.");
+            }
         }
         return connection;
     }
