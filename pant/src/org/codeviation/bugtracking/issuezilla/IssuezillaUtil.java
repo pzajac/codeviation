@@ -105,6 +105,9 @@ public final class IssuezillaUtil {
             for (String url: possibleUrls) {
                 try {
                     connection = DriverManager.getConnection(url,  "guest", "guest");
+                    if (connection != null) {
+                        break;
+                    }
                 } catch(Exception e) {
                     Logger.global.log(Level.FINE, "SQL connection failed",e);
                 }
