@@ -1,11 +1,3 @@
-/*
- * PersistenceManager.java
- *
- * Created on October 29, 2006, 10:25 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
 
 package org.codeviation.model;
 import java.io.BufferedReader;
@@ -15,12 +7,14 @@ import java.io.IOException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.codeviation.model.configuration.ConfigurationContext;
+import org.codeviation.model.configuration.ConfigurationProvider;
+import org.openide.util.Lookup;
 
 
 /**
@@ -38,7 +32,7 @@ public class PersistenceManager implements Serializable{
     private static  PersistenceManager pm;
     /** repository root -> repository name 
      */
-    private final Map<File,Repository> repositories = new TreeMap<File,Repository>(); 
+    private final Map<File,Repository> repositories = new TreeMap<File,Repository>();
     /** Creates a new instance of PersistenceManager */
     private PersistenceManager(File folder) {
         this.folder = folder;
@@ -72,6 +66,20 @@ public class PersistenceManager implements Serializable{
         } catch (IOException ioe) {
             logger.log(Level.SEVERE, "reading repositories", ioe);
         }
+    }
+
+    private Repository touchRepository(Repository rep) {
+         ConfigurationContext current = ConfigurationContext.getCurrent();
+         Repository prevRep = current.getPrevRepository();
+        if (prevRep != rep) {
+            Collection<? extends ConfigurationProvider> providers = Lookup.getDefault().lookupAll(ConfigurationProvider.class);
+            for (ConfigurationProvider provider : providers) {
+                provider.register(current, prevRep, rep);
+            }
+            current.setPrevRepository(rep);
+
+        }
+        return rep;
     }
     
     private void writeRepositories() {
@@ -111,7 +119,7 @@ public class PersistenceManager implements Serializable{
         return getOrCreateSourceRoot(new File(absPath.substring(0,absPath.length() - relPath.length())));
     } 
     
-    public Repository getOrCreateRepository(File root,String name) {
+    public synchronized Repository getOrCreateRepository(File root,String name) {
         Repository rep = repositories.get(root);
         if (rep == null) {
            System.out.println("Creating repository:" + root +"," + name);
@@ -121,7 +129,7 @@ public class PersistenceManager implements Serializable{
             throw new IllegalStateException ("Found repository with the same root = " + root + 
                     " but different name, " + name + "!=" + rep.getName());
         }
-        return rep;
+        return touchRepository(rep);
     }
     /**
      * @throws IllegalArgumentException if repository name or root has been
@@ -143,22 +151,22 @@ public class PersistenceManager implements Serializable{
     
     /** @return folder for metrics of CvsRepository
      */
-    public Repository getRepository(File cvsFile) {
+    public synchronized Repository getRepository(File cvsFile) {
         for (Repository rep : repositories.values()) {
             if (cvsFile.getAbsolutePath().indexOf(rep.getCvsRoot().getAbsolutePath()) == 0) {
-                    return rep;
+                    return touchRepository(rep);
             }
         }
-        return null;
+        return touchRepository(null);
     }
     
-    public Repository getRepository(String name) {
+    public synchronized Repository getRepository(String name) {
         for (Repository rep : repositories.values()) {
              if (name.equals(rep.getName())) {
-                 return rep;
+                 return touchRepository(rep);
              }
         }
-        return null;
+        return touchRepository(null);
     }
     
 //    File getRepositoryFolderForSrcRoot(File srcRoot) throws IOException {
@@ -189,10 +197,10 @@ public class PersistenceManager implements Serializable{
         return pm;
     }
     
-    public List<Repository> getRepositories() {
-        return new ArrayList<Repository>(repositories.values());
-    }
-    
+//    public List<Repository> getRepositories() {
+//        return new ArrayList<Repository>(repositories.values());
+//    }
+//    
     public File getFolder() {
         return folder;
     }
