@@ -29,7 +29,6 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.compilers.Javac13;
 import org.apache.tools.ant.types.Commandline;
 import org.codeviation.model.PersistenceManager;
-import org.codeviation.javac.MetricsRunner;
 import org.codeviation.model.SourceRoot;
 
 /**
@@ -52,6 +51,7 @@ public final class MeasuringJavac extends Javac13 {
      *
      * @exception BuildException if the compilation has problems.
      */
+    @Override
     public boolean execute() throws BuildException{
         MetricsRunner.setLastSourceRoot(null);
         attributes.log("Using patched compiler compiler", Project.MSG_VERBOSE);
