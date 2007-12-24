@@ -19,7 +19,6 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.codeviation.model.JavaFile;
-import org.codeviation.javac.MetricBuilder;
 import org.codeviation.model.SourceRoot;
 import org.codeviation.model.vcs.CVSMetric;
 import org.openide.util.Lookup;
@@ -98,7 +97,7 @@ public class MetricsRunner implements TaskListener {
     
     /** Creates a new instance of MetricsRunner */
     public MetricsRunner( Javac attributes ) {
-        this.attributes = attributes;
+        MetricsRunner.attributes = attributes;
     }
     
     public void started(TaskEvent e) {
@@ -106,7 +105,7 @@ public class MetricsRunner implements TaskListener {
 
     public void finished(TaskEvent e) {
         if ( e.getKind() == TaskEvent.Kind.ANALYZE ) {
-            this.event = e;
+            MetricsRunner.event = e;
             try {
                 // reset last javafile
                 lastJavaFile = null;
@@ -136,7 +135,13 @@ public class MetricsRunner implements TaskListener {
                     }
                } 
             } catch (Exception ex) {
-                Logger.getLogger(MetricsRunner.class.getName()).log(Level.SEVERE,ex.getMessage(),ex);
+                if (lastJavaFile != null) {
+                    logger.severe("Error on processing : " + 
+                            lastJavaFile.getPackage().getSourceRoot().getRelPath() + "/" +
+                            lastJavaFile.getPackage().getName() + ", version =  " + 
+                            lastJavaFile.getCVSVersion());
+                }
+                logger.log(Level.SEVERE,ex.getMessage(),ex);
             }
         }
     }
@@ -169,12 +174,12 @@ public class MetricsRunner implements TaskListener {
     public static JavacTaskImpl getTask() {
         return task;
     }
-    public static void saveResults() {
-        for (MetricBuilder metric : metrics) {
-            System.out.println( metric.getName() );
-            System.out.println( metric );
-        } 
-    }
+//    public static void saveResults() {
+//        for (MetricBuilder metric : metrics) {
+//            System.out.println( metric.getName() );
+//            System.out.println( metric );
+//        } 
+//    }
 
     public static SourceRoot getLastSourceRoot() {
         return lastSourceRoot;
