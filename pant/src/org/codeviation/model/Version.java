@@ -368,14 +368,13 @@ public class Version implements Comparable<Version> , Serializable {
         List<Line> lines = javaFile.getLines(this);
         List<Line> result = new ArrayList<Line>();
         
-        Line line1 = null, line2 = null;
         int i1 = lines.indexOf(startPos.getLine());
         int i2 = lines.indexOf(endPos.getLine());
         if (i1 == - 1 || i2 == -1) {
-            throw new IllegalStateException("Missing line, i1 = " + i1 + " i2 = " + i2);
+            throw new IllegalStateException(javaFile.getPackage() + " " + javaFile.getName() + "," + getRevision() + ": Missing line, i1 = " + i1 + " i2 = " + i2);
         }
         if (i1 > i2) {
-            throw new IllegalStateException(" i1 > i2 : " + i1 + " < " + i2);
+            throw new IllegalStateException(javaFile.getPackage() + " " + javaFile.getName() + "," + getRevision() +  ":  i1 > i2 : " + i1 + " < " + i2);
         }                       
         for (; i1 <= i2  ; i1++) {
             result.add(lines.get(i1));
