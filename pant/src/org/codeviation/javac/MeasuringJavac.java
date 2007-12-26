@@ -117,6 +117,7 @@ public final class MeasuringJavac extends Javac13 {
         } else {
             handler = new ConsoleHandler();
         }
+        MetricsRunner.setHandler(handler);
          handler.setLevel(Level.INFO);
          Logger.getLogger("org.codeviation").addHandler(handler);
     }

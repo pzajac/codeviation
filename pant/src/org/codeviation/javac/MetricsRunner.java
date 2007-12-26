@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.lang.model.element.Element;
@@ -41,6 +42,7 @@ public class MetricsRunner implements TaskListener {
     private static boolean initialized ;    
     private static JavaFile lastJavaFile; 
     private static SourceRoot  lastSourceRoot; 
+    private static Handler handler;
     
     private static List<MetricBuilder> metrics = new ArrayList<MetricBuilder>(); 
     
@@ -94,6 +96,10 @@ public class MetricsRunner implements TaskListener {
         }
         return null;
     }
+
+    static void setHandler(Handler handler) {
+        MetricsRunner.handler = handler;
+    }
     
     /** Creates a new instance of MetricsRunner */
     public MetricsRunner( Javac attributes ) {
@@ -104,6 +110,7 @@ public class MetricsRunner implements TaskListener {
     }
 
     public void finished(TaskEvent e) {
+        MetricBuilder   lastMetricsBuilder = null;
         if ( e.getKind() == TaskEvent.Kind.ANALYZE ) {
             MetricsRunner.event = e;
             try {
@@ -125,8 +132,33 @@ public class MetricsRunner implements TaskListener {
                         for (MetricBuilder metric : metrics) {
                             if (!containsRev || metric.canProcessTheSameRevision() ) {
                                 CVSMetric cvsm = lastJavaFile.getCVSResultMetric();
-                                if (cvsm != null && cvsm.getAllDiffs().length != 0) { 
-                                    metric.visit( e.getTypeElement() );
+                                try { 
+                                    if (cvsm != null && cvsm.getAllDiffs().length != 0) { 
+                                        metric.visit( e.getTypeElement() );
+                                    }
+                                } catch (Exception ex ) {
+                                    if (lastJavaFile != null) {
+                                        handler.setLevel(Level.FINE);
+                                        try {
+                                            logger.severe("Error on processing : " + 
+                                                    lastJavaFile.getPackage().getSourceRoot().getRelPath() + "/" +
+                                                    lastJavaFile.getPackage().getName() + ", version =  " + 
+                                                    lastJavaFile.getCVSVersion());
+                                            if (lastMetricsBuilder != null) {
+                                                logger.severe("Metrics builder: " + lastMetricsBuilder.getName());
+                                            }
+                                            // run it one more with fine logging
+                                            logger.fine("Fine logging enabled.");
+ 
+                                            if (cvsm != null && cvsm.getAllDiffs().length != 0) { 
+                                                metric.visit( e.getTypeElement() );
+                                            }
+                                        } finally {
+                                            handler.setLevel(Level.INFO);
+                                        }
+                                    }
+                                    
+                                    
                                 }
                             } else {
                                 logger.fine("Already processed: " + lastJavaFile.getName() + " " + metric.getClass());
@@ -140,6 +172,9 @@ public class MetricsRunner implements TaskListener {
                             lastJavaFile.getPackage().getSourceRoot().getRelPath() + "/" +
                             lastJavaFile.getPackage().getName() + ", version =  " + 
                             lastJavaFile.getCVSVersion());
+                    if (lastMetricsBuilder != null) {
+                        logger.severe("Metrics builder: " + lastMetricsBuilder.getName());
+                    }
                 }
                 logger.log(Level.SEVERE,ex.getMessage(),ex);
             }
