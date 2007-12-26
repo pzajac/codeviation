@@ -127,10 +127,15 @@ public class BlocksMetricTest extends TestCase {
        
        PositionVersionIntervalResultContainer<String> methods = bm.getMethods();
        assertEquals(1,classes.getAllObjects().size());
-       Iterator<PositionIntervalResult<String>> pirIt = methods.getAllObjects().iterator();
-       pirIt.next();
+       List<PositionIntervalResult<String>> pirs = new ArrayList<PositionIntervalResult<String>>(methods.getAllObjects());
+       Collections.sort(pirs, new PIRComparator<String>());
+       assertEquals("pirs size",2,pirs.size());
+       Iterator<PositionIntervalResult<String>> pirIt = pirs.iterator();
+   //    pirIt.next();
        PositionIntervalResult<String> pir = pirIt.next();
-       assertEquals(pir.getObject(),"Simple(boolean,int)",pir.getObject());
+       assertEquals(pir.getObject(),"Simple(boolean)",pir.getObject());
+       pir = pirIt.next();
+       assertEquals(pir.getObject(),"methodA(boolean,int)",pir.getObject());
 //       System.out.println("startPosition:" + pir.getInterval().getStartPosition());
 //       System.out.println("endPosition:" + pir.getInterval().getEndPosition());
 //        Set<PositionIntervalResult<BlocksItem>> allObjects = bm.getStorage().getAllObjects();
@@ -191,14 +196,14 @@ public class BlocksMetricTest extends TestCase {
        PositionVersionIntervalResultContainer<BlocksItem> filter1 = bm.filter(filter);
        all.add(filter1);
        PositionIntervalResultGraph pirg = PositionIntervalResultGraph.createGraph(all, version, 1);
-       List<Item> items = new ArrayList(pirg.getItems(1));
+       List<PositionIntervalResultGraph.Item> items = new ArrayList(pirg.getItems(1));
        Collections.sort(items);
        assertEquals(2,items.size());
-       Item item = items.get(0);
-       assertEquals("methodA(boolean,int])", item.getPir().getObject());
+       PositionIntervalResultGraph.Item item = items.get(0);
+       assertEquals("Simple(boolean)", item.getPir().getObject());
         List<Item> children = item.getChildren();
         assertEquals(3, children.size());
-        Item item1 = children.get(0);
+        PositionIntervalResultGraph.Item item1 = children.get(0);
         BlocksItem bi = (BlocksItem)item1.getPir().getObject();
         assertEquals(BlocksItem.IF,bi);
  

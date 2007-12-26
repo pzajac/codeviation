@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +50,7 @@ public class RunJavacTest extends TestCase {
     public RunJavacTest(String testName) {
         super(testName);
     }
+    @Override
     protected void setUp() {
         ExamplesSetup.checkoutExamples = false;
         TestUtil.clearCache();
@@ -136,7 +136,7 @@ public class RunJavacTest extends TestCase {
         assertTrue(items.size() > 0);
         List<PositionIntervalResult<UsageItem>> sortedItems = new ArrayList<PositionIntervalResult<UsageItem>>();
         sortedItems.addAll(items);
-        Collections.sort(sortedItems, new PIRComparator());
+        Collections.sort(sortedItems, new PIRComparator<UsageItem>());
         
         Iterator<PositionIntervalResult<UsageItem>> it = sortedItems.iterator();
           
@@ -169,7 +169,7 @@ public class RunJavacTest extends TestCase {
 
         sortedItems.clear();
         sortedItems.addAll(items);
-        Collections.sort(sortedItems, new PIRComparator());
+        Collections.sort(sortedItems, new PIRComparator<UsageItem>());
          
         it = sortedItems.iterator();
         assertUsage(it,"1.1","1.1","java.security.Policy","Policy()","",ur,cvs);
@@ -238,7 +238,7 @@ diff -r1.1 -r1.2
         CVSMetric cvs = JavaFileUtil.getCVSResultMetric(jf);
         List<PositionIntervalResult<UsageItem>> sortedItems = new ArrayList<PositionIntervalResult<UsageItem>>();
         sortedItems.addAll(items);
-        Collections.sort(sortedItems, new PIRComparator());
+        Collections.sort(sortedItems, new PIRComparator<UsageItem>());
         
         Iterator<PositionIntervalResult<UsageItem>> it = sortedItems.iterator();
     
