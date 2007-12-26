@@ -27,6 +27,7 @@ public class CVSMetricTest extends TestCase {
     public CVSMetricTest(String testName) {
         super(testName);
     }
+    @Override
     protected void setUp() throws IOException, InterruptedException {
         TestUtil.clearCache();
         prj = ExamplesSetup.getTestJ2seProjectDir();
@@ -62,6 +63,11 @@ public class CVSMetricTest extends TestCase {
     }
    public void testActionImplementationFactory() throws IOException {
         doFile("ActionsImplementationFactory.java");
+    }
+   public void testToolbarConfiguration() throws IOException {
+       TestUtil.enableMetricLogger();
+       doFile("ToolbarConfiguration.java");
+        
     }
  
     public void testCatalogNode () throws IOException {

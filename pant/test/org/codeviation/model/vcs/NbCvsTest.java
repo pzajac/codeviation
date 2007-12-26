@@ -34,6 +34,7 @@ public class NbCvsTest extends TestCase {
         super(name);
     }
     
+    @Override
     protected void setUp() {
         ExamplesSetup.initNbCvsTestingCache();
     }

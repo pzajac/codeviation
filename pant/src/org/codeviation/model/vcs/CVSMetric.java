@@ -95,7 +95,7 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
             } catch (Exception ex) {
                 // catching problems
                 log.log(Level.SEVERE,
-                     ex.getMessage(),
+                     javaFile.getCVSPath() + ": " + ex.getMessage(),
                      ex);
                 log.log(Level.SEVERE,"Exception for:" + javaFile.getCVSPath());                                                 
             }

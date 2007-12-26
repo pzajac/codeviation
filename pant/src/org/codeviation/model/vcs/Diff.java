@@ -130,10 +130,10 @@ public final class Diff  {
         for (; i < changedCount ; i++) {
            lines.add(new Line(info.removedOffset + i ,info.addedOffset + i,removedLines.get(i),addedLines.get(i),Line.State.CHANGED));
         }
-        for (int r = i; r < info.removedCount ; r++) {
+        for (int r = i; r < info.removedCount && r < removedLines.size() ; r++) {
            lines.add(new Line(info.removedOffset + r ,-1,removedLines.get(r),null,Line.State.REMOVED));
         }
-        for (int a = i; a < info.addedCount ; a++) {
+        for (int a = i; a < info.addedCount && a < addedLines.size() ; a++) {
            lines.add(new Line(-1,info.addedOffset + a,null,addedLines.get(a),Line.State.CREATED));
         }
     } //diffBlocks
@@ -547,7 +547,10 @@ public final class Diff  {
             String line = null;
             lines.clear();
             while (count-- > 0 && (line = reader.readLine()) != null ) {
-                lines.add(line);
+                // CVSMetricTest.testToolbarConfiguration()
+                if (line.length() > 1) {
+                    lines.add(line);
+                }
             }
         }
     } // class Info
