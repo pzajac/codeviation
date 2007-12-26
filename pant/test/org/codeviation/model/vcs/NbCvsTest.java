@@ -9,7 +9,6 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 import junit.framework.TestCase;
 import org.codeviation.model.JavaFile;
-import org.codeviation.model.JavaFileUtil;
 import org.codeviation.model.Line;
 import org.codeviation.model.Package;
 import org.codeviation.model.PersistenceManager;
@@ -22,6 +21,7 @@ import org.codeviation.model.TestUtil;
 import org.codeviation.model.Version;
 import org.codeviation.javac.UsageItem;
 import org.codeviation.javac.UsagesMetric;
+import org.codeviation.model.JavaFileTestUtil;
 
 /**
  *
@@ -95,7 +95,7 @@ public class NbCvsTest extends TestCase {
         CVSMetric cvsm = jf.getCVSResultMetric();
         Version v = cvsm.getRootVersion();
         assertNotNull(v);
-        JavaFileUtil.setCurrentJavaFile(jf);
+//        JavaFileUtil.setCurrentJavaFile(jf);
         while (v != null) {
             List<Line> lines = jf.getLines(v);
             for (int i = 0 ; i < lines.size() ; i++) {
@@ -105,7 +105,7 @@ public class NbCvsTest extends TestCase {
                 line.writeRef(oos);
                 oos.close();
                 ByteArrayInputStream bis  = new ByteArrayInputStream(bos.toByteArray());
-                ObjectInputStream ois = new ObjectInputStream(bis);
+                ObjectInputStream ois = JavaFileTestUtil.createInputStream(bis, jf);
                 assertNotNull(Line.readRef(ois));
             }
             System.out.println(v.getRevision());

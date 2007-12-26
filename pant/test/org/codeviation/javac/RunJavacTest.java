@@ -30,7 +30,6 @@ import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.FileList;
 import org.apache.tools.ant.types.Path;
 import org.codeviation.model.JavaFile;
-import org.codeviation.model.JavaFileUtil;
 import org.codeviation.model.TestUtil;
 import org.codeviation.model.vcs.CVSMetric;
 import org.codeviation.model.vcs.ExamplesSetup;
@@ -132,7 +131,7 @@ public class RunJavacTest extends TestCase {
         UsagesMetric ur = jf.getMetric(UsagesMetric.class);
         PositionVersionIntervalResultContainer<UsageItem> storage =  ur.getStorage();
         Set<PositionIntervalResult<UsageItem>> items = storage.getAllObjects();
-        CVSMetric cvs = JavaFileUtil.getCVSResultMetric(jf);
+        CVSMetric cvs = jf.getCVSResultMetric();
         assertTrue(items.size() > 0);
         List<PositionIntervalResult<UsageItem>> sortedItems = new ArrayList<PositionIntervalResult<UsageItem>>();
         sortedItems.addAll(items);
@@ -235,7 +234,7 @@ diff -r1.1 -r1.2
         UsagesMetric ur = jf.getMetric(UsagesMetric.class);
         PositionVersionIntervalResultContainer<UsageItem> storage =  ur.getStorage();
         Set<PositionIntervalResult<UsageItem>> items = storage.getAllObjects();
-        CVSMetric cvs = JavaFileUtil.getCVSResultMetric(jf);
+        CVSMetric cvs = jf.getCVSResultMetric();
         List<PositionIntervalResult<UsageItem>> sortedItems = new ArrayList<PositionIntervalResult<UsageItem>>();
         sortedItems.addAll(items);
         Collections.sort(sortedItems, new PIRComparator<UsageItem>());
@@ -350,7 +349,7 @@ diff -r1.1 -r1.2
         
         PositionVersionIntervalResultContainer<UsageItem> storage =  ur.getStorage();
         
-        CVSMetric cvs = JavaFileUtil.getCVSResultMetric(jf);
+        CVSMetric cvs = jf.getCVSResultMetric();
         for (PositionIntervalResult<UsageItem> item : items) {
             VersionInterval vers = storage.get(item);
 

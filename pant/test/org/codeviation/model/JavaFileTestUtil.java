@@ -9,6 +9,10 @@
 
 package org.codeviation.model;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+
 /**
  *
  * @author pzajac
@@ -21,5 +25,9 @@ public class JavaFileTestUtil {
     
     public static void clearCVSMetric(JavaFile jf) {
         jf.cvsMetric = null;
+    }
+    
+    public static ObjectInputStream createInputStream(InputStream is,JavaFile jf) throws IOException {
+        return new SourceRoot.JFObjectInputStream(is, jf);
     }
 }

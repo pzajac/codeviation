@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codeviation.model.JavaFile;
-import org.codeviation.model.JavaFileUtil;
 import org.codeviation.model.Line;
 import org.codeviation.model.StaticMetric;
 import org.codeviation.model.Position;
@@ -218,7 +217,7 @@ public final class CVSMetric implements StaticMetric,java.io.Serializable {
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        javaFile = JavaFileUtil.getCurrentJavaFile();
+        javaFile = JavaFile.getJavaFile(ois);
         javaFile.setCVSMetric(this);
         Version rootVersion = (Version) ois.readObject();
         if (rootVersion != null) {

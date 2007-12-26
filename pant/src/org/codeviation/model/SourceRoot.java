@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
@@ -27,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codeviation.javac.CVSVersionsByPant;
 import org.codeviation.javac.MetricUtil;
-import org.codeviation.model.Metric;
 import java.util.logging.Logger;
 import org.codeviation.main.PrepareNbTags;
 
@@ -145,7 +145,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
         return packageNames;
     }  
     @SuppressWarnings("unchecked")
-    public <T extends Metric> T getMetric(String packageName,String fileName,Class<T> clazz){
+     <T extends Metric> T getMetric(String packageName,String fileName,Class<T> clazz,JavaFile jf){
         File pfile = getPackageFile(packageName,true);
         File f = new File(pfile,fileName + "_" + clazz.getName() + JAVA_METRICS_EXT);
         log.fine("getMetric:" + f.getAbsolutePath());
@@ -153,7 +153,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
             try {
                 FileInputStream fis = new FileInputStream(f);
                 try {
-                    ObjectInputStream ois = new ObjectInputStream(fis);
+                    ObjectInputStream ois = new JFObjectInputStream(fis,jf);
                     try {
                       return (T)ois.readObject();  
                     } finally {
@@ -207,6 +207,7 @@ public final  class SourceRoot implements Iterable<JavaFile> {
     private void log(Exception e) {
         Logger.getLogger(MetricUtil.LOGGER).log(Level.SEVERE, "SourceRoot", e);
     }
+    @Override
     public String toString() {
         return cvsRelPath;
     }
@@ -361,4 +362,18 @@ public final  class SourceRoot implements Iterable<JavaFile> {
         }
         return files.iterator();
     }    
+
+    
+    /////////////////
+    // inner classes
+    static class JFObjectInputStream extends ObjectInputStream {
+        private JavaFile jf;
+        public JFObjectInputStream(InputStream is, JavaFile jf) throws IOException {
+            super(is);
+            this.jf = jf;
+        }
+        public JavaFile getJavaFile() {
+            return jf;
+        }
+    }
 }

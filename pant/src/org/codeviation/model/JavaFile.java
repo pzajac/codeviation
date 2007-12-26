@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,8 +129,8 @@ public final class JavaFile {
             if (type == CVSMetric.class && cvsMetric != null) {
                 return (T) cvsMetric;
             } 
-            JavaFileUtil.setCurrentJavaFile(this);
-            T mr =  getPackage().getSourceRoot().getMetric(getPackage().getName(),getName(),type);
+            //JavaFileUtil.setCurrentJavaFile(this);
+            T mr =  getPackage().getSourceRoot().getMetric(getPackage().getName(),getName(),type,this);
             if (mr == null) {
                // try get non persistent metric
                 mr = (T) staticMetrics.get(type);
@@ -298,6 +299,16 @@ public final class JavaFile {
         }
     }
     
+    /** Get JavaFile on deserialization metric
+     * 
+     * @param is ois used by pant
+     * @return JavaFile 
+     * @throws ClassCastException
+     */
+    public static JavaFile getJavaFile(ObjectInputStream ois) {
+        return ((SourceRoot.JFObjectInputStream)ois).getJavaFile();
+    } 
+    @Override
     public String toString() {
         return name;
     }

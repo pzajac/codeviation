@@ -168,7 +168,7 @@ public final class Line {
        String revision = (String)ois.readObject();
        int initLn = ois.readInt();
        int newLn = ois.readInt();
-       CVSMetric cvsRes = JavaFileUtil.getCurrentJavaFile().getMetric(CVSMetric.class);
+       CVSMetric cvsRes = JavaFile.getJavaFile(ois).getMetric(CVSMetric.class);
        Version version = cvsRes.getRootVersion().getVersion(revision);
        if (version == null) {
            throw new IOException("Missing version : " + initLn + "," + newLn + "," + revision + "," + cvsRes.getJavaFile());

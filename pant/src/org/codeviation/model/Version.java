@@ -440,7 +440,8 @@ public class Version implements Comparable<Version> , Serializable {
     }
     
     public static Version readRef(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        CVSMetric cvsm = JavaFileUtil.getCVSResultMetric(JavaFileUtil.getCurrentJavaFile());
+        JavaFile javaFile1 = JavaFile.getJavaFile(ois);
+        CVSMetric cvsm = javaFile1.getCVSResultMetric();
         return cvsm.getRootVersion().getVersion((String)ois.readObject());
     }
     
