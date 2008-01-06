@@ -244,7 +244,7 @@ public class SVDTest extends TestCase {
     }
 
     private FlexCompRowMatrix getPackagesMatrix() throws IOException, ClassNotFoundException {
-        File dataFolder = new File("/home/pzajac/skola/prakssvd/data");
+        File dataFolder = new File("/cvss/svddata");
         File file = new File(dataFolder, "matrix_package.ser");
         System.out.println("read");
         FileInputStream fis = new FileInputStream(file);
