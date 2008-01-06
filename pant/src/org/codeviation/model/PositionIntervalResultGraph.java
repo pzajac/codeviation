@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *  Create graph for PositionIntervalResult. Tested in BlockMetricsTest.
+ *  Create sorted hierchy for positions intervals
+ * (PositionIntervalResult). Tested in BlockMetricsTest.
  * @author pzajac
  */
 public final class PositionIntervalResultGraph {
