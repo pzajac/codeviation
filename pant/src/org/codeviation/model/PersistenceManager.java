@@ -99,14 +99,14 @@ public class PersistenceManager implements Serializable{
         }
     }
     
-    public SourceRoot getOrCreateSourceRoot(File srcRoot) throws IOException { 
+    SourceRoot getOrCreateSourceRoot(File srcRoot) throws IOException { 
         Repository rep = getRepository(srcRoot);
         if (rep == null) {
             throw new IllegalStateException("Mising repository. Please add new repository root record to repositories.lst for srcroot " + srcRoot);
         }
         return rep.getOrCreateSourceRoot(srcRoot);
     }
-    public SourceRoot getOrCreateSourceRoot(File javaFile,String packageName) throws IOException {
+    SourceRoot getOrCreateSourceRoot(File javaFile,String packageName) throws IOException {
   //      String packageName = MetricUtil.getPackageName(className); 
         if (packageName == null) {
             return getOrCreateSourceRoot(javaFile.getParentFile());
@@ -119,7 +119,7 @@ public class PersistenceManager implements Serializable{
         return getOrCreateSourceRoot(new File(absPath.substring(0,absPath.length() - relPath.length())));
     } 
     
-    public synchronized Repository getOrCreateRepository(File root,String name) {
+    synchronized Repository getOrCreateRepository(File root,String name) {
         Repository rep = repositories.get(root);
         if (rep == null) {
            System.out.println("Creating repository:" + root +"," + name);

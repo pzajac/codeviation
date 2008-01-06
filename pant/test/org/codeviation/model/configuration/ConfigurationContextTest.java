@@ -8,6 +8,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.codeviation.model.DefaultLookupUtil;
 import org.codeviation.model.PersistenceManager;
+import org.codeviation.model.PersistenceManagerBridge;
 import org.codeviation.model.Repository;
 import org.codeviation.model.TestUtil;
 
@@ -44,8 +45,8 @@ public class ConfigurationContextTest extends TestCase{
         File repFile2 = TestUtil.getTmpFolder(repName2);
         repFile1.mkdirs();
         repFile2.mkdirs();
-        Repository rep1 = manager.getOrCreateRepository(repFile1,repName1);
-        Repository rep2 = manager.getOrCreateRepository(repFile2,repName2); 
+        Repository rep1 = PersistenceManagerBridge.getOrCreateRepository(manager,repFile1,repName1);
+        Repository rep2 = PersistenceManagerBridge.getOrCreateRepository(manager,repFile2,repName2); 
         assertNotSame(rep2, rep1);
         // create testing ConfigurationProvider
         for (int i = 0 ; i < threadsCount ; i++) {

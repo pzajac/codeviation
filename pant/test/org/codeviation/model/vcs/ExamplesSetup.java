@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import junit.framework.Assert;
 import org.codeviation.model.PersistenceManager;
+import org.codeviation.model.PersistenceManagerBridge;
 import org.codeviation.model.TestUtil;
 
 /**
@@ -70,7 +71,7 @@ public class ExamplesSetup {
             Assert.assertTrue("${test.cvsroot}/pantexamples exists. " + getCvsRoot(), new File(getCvsWork(),"pantexamples").exists());
             checkoutExamples = true;
         }
-        PersistenceManager.getDefault().getOrCreateRepository(getCvsWork(), "pantexamples");
+        PersistenceManagerBridge.getOrCreateRepository(PersistenceManager.getDefault(),getCvsWork(), "pantexamples");
     }
     
     public static File getPantProject() throws IOException, InterruptedException {
@@ -79,7 +80,7 @@ public class ExamplesSetup {
         CvsUtil.executeCvsCommand(new String[]{"cvs","-d",getCvsRoot() ,"checkout","pant"} , getCvsWork()); 
         Assert.assertTrue("${test.cvsroot}/pant exists.", new File(getCvsWork(),"pant").exists());
         checkoutExamples = true;
-        PersistenceManager.getDefault().getOrCreateRepository(getCvsWork(), "pantexamples");
+        PersistenceManagerBridge.getOrCreateRepository(PersistenceManager.getDefault(),getCvsWork(), "pantexamples");
         return new File(getCvsWork(),"pant");
     }
     
@@ -124,5 +125,11 @@ public class ExamplesSetup {
         TestUtil.dropPersistenceManager();
         System.setProperty(PersistenceManager.PANT_CACHE_FOLDER, "/cvss/pantcache");
         CVSMetric.setUpdateCVS(false);        
-    }
+     }
+     public static void initTestHpiCvsCavhe() {
+        TestUtil.dropPersistenceManager();
+        System.setProperty(PersistenceManager.PANT_CACHE_FOLDER, "/cvss/testhpi/testhpi");
+        CVSMetric.setUpdateCVS(false);        
+         
+     } 
  }
