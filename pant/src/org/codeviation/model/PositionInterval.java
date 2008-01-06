@@ -54,10 +54,10 @@ public final class PositionInterval implements Serializable,Comparable<PositionI
         
     }
     
-    /** check if position is inside interval
+    /** check if position pos is inside interval
      * 
      * @param pos
-     * @return
+     * @return true is pos is inside
      */
     public boolean contains(Position pos) {
         List<Line> lines = pos.getVersion().getLines();
@@ -100,22 +100,6 @@ public final class PositionInterval implements Serializable,Comparable<PositionI
         return getStartPosition() + " -> " + getEndPosition();
     }
 
-    private static final class PosOffComparator implements Comparator<Position> {
-        public int compare(Position p1, Position p2) {
-            int res = p1.getVersion().compareTo(p2.getVersion());
-            if (res == 0) {
-                res = p2.getLine().getNewLineNumber() - p2.getLine().getNewLineNumber() ;
-                if (res == 0) {
-                    res = p2.getOffset() - p1.getOffset();
-                    if (res == 0) {
-                        res = p2.hashCode() - p1.hashCode();
-                    }
-                }
-            }
-            return res;
-        }
-        
-    }
     
     /** ordering for testing purpose
      */
@@ -141,5 +125,20 @@ public final class PositionInterval implements Serializable,Comparable<PositionI
      public void write (ObjectOutputStream oos) throws IOException {
         startPosition.write(oos);
         endPosition.write(oos);
+    }
+    private static final class PosOffComparator implements Comparator<Position> {
+        public int compare(Position p1, Position p2) {
+            int res = p1.getVersion().compareTo(p2.getVersion());
+            if (res == 0) {
+                res = p2.getLine().getNewLineNumber() - p2.getLine().getNewLineNumber() ;
+                if (res == 0) {
+                    res = p2.getOffset() - p1.getOffset();
+                    if (res == 0) {
+                        res = p2.hashCode() - p1.hashCode();
+                    }
+                }
+            }
+            return res;
+        }        
     }
 }
