@@ -3,7 +3,6 @@ package org.codeviation.javac.impl.blocks;
 
 
 import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import javax.lang.model.element.Element;
 import org.codeviation.model.JavaFile;
@@ -30,7 +29,6 @@ public class BlocksBuilder implements MetricBuilder {
     
     public void visit(Element e) {
       CompilationUnitTree cut = MetricsRunner.getCompilationUnitTree();
-      Tree tree = cut.getTypeDecls().iterator().next();
             
       BlocksVisitor visitor = new BlocksVisitor(MetricsRunner.getTask(),MetricsRunner.getCompilationUnitTree(),MetricsRunner.getFileManager(),MetricsRunner.getFileObject());
       JavaFile jf = MetricsRunner.getJavaFile(e);
