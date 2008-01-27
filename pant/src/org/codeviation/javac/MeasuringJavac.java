@@ -11,7 +11,7 @@ package org.codeviation.javac;
 
 import com.sun.tools.javac.api.JavacTaskImpl;
 import com.sun.tools.javac.api.JavacTool;
-import com.sun.tools.javac.util.DefaultFileManager;
+import com.sun.tools.javac.util.JavacFileManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public final class MeasuringJavac extends Javac13 {
             // XXX this is not the best way how to setup the compiler
             JavacTool jt = JavacTool.create();
 
-            DefaultFileManager dfm = jt.getStandardFileManager(null,null,null);
+            JavacFileManager dfm = jt.getStandardFileManager(null,null,null);
             MetricsRunner.setFileManager(dfm);
             JavacTaskImpl task = (JavacTaskImpl) jt.getTask(null, null, null, options, null,
                                        dfm.getJavaFileObjectsFromFiles(Arrays.asList(compileList)));
