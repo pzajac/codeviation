@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
@@ -33,7 +34,7 @@ import org.codeviation.model.SourceRoot;
 
 /**
  *
- * @author phrebejk
+ * @author phrebejk,pzajac
  */
 public final class MeasuringJavac extends Javac13 {
     public static final String CVS_TAG_PROP_NAME = "pant.cvs.tag";
@@ -70,10 +71,16 @@ public final class MeasuringJavac extends Javac13 {
             Commandline cmd = new Commandline();
             
             setupModernJavacCommandlineSwitches( cmd );
-            List<String> options = Arrays.asList( cmd.getArguments() );
+            List<String> options = new ArrayList<String>(Arrays.asList( cmd.getArguments() ));
+            // XXX -JxmXXX fails
             attributes.log("Options:");
-            for (String o : options) {
-                attributes.log(o + ",");
+            for (int i = 0 ; i < options.size() ; i++) {
+                String o = options.get(i);
+                if (o.startsWith("-J-Xmx")) {
+                    options.remove(i--);
+                } else {
+                    attributes.log(o + ",");
+                }
             }
             // XXX this is not the best way how to setup the compiler
             JavacTool jt = JavacTool.create();
