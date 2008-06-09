@@ -42,7 +42,7 @@ public class MetricsRunner implements TaskListener {
     private static boolean initialized ;    
     private static JavaFile lastJavaFile; 
     private static SourceRoot  lastSourceRoot; 
-    private static Handler handler;
+//    private static Handler handler;
     
     private static List<MetricBuilder> metrics = new ArrayList<MetricBuilder>(); 
     
@@ -97,9 +97,9 @@ public class MetricsRunner implements TaskListener {
         return null;
     }
 
-    static void setHandler(Handler handler) {
-        MetricsRunner.handler = handler;
-    }
+//    static void setHandler(Handler handler) {
+//        MetricsRunner.handler = handler;
+//    }
     
     /** Creates a new instance of MetricsRunner */
     public MetricsRunner( Javac attributes ) {
@@ -138,23 +138,27 @@ public class MetricsRunner implements TaskListener {
                                     }
                                 } catch (Exception ex ) {
                                     if (lastJavaFile != null) {
-                                        handler.setLevel(Level.FINE);
-                                        try {
-                                            logger.severe("Error on processing : " + 
+                                        Logger logger = Logger.getLogger("org.codeviation");
+                                        Level level = logger.getLevel();
+                                         logger.severe("Error on processing : " + 
                                                     lastJavaFile.getPackage().getSourceRoot().getRelPath() + "/" +
                                                     lastJavaFile.getPackage().getName() + ", version =  " + 
                                                     lastJavaFile.getCVSVersion());
-                                            if (lastMetricsBuilder != null) {
-                                                logger.severe("Metrics builder: " + lastMetricsBuilder.getName());
+                                        if (level.intValue() > Level.FINE.intValue()) {
+                                            logger.setLevel(Level.FINE);
+                                            try {
+                                                if (lastMetricsBuilder != null) {
+                                                    logger.severe("Metrics builder: " + lastMetricsBuilder.getName());
+                                                }
+                                                // run it one more with fine logging
+                                                logger.fine("Fine logging enabled.");
+
+                                                if (cvsm != null && cvsm.getAllDiffs().length != 0) { 
+                                                    metric.visit( e.getTypeElement() );
+                                                }
+                                            } finally {
+                                                logger.setLevel(level);
                                             }
-                                            // run it one more with fine logging
-                                            logger.fine("Fine logging enabled.");
- 
-                                            if (cvsm != null && cvsm.getAllDiffs().length != 0) { 
-                                                metric.visit( e.getTypeElement() );
-                                            }
-                                        } finally {
-                                            handler.setLevel(Level.INFO);
                                         }
                                     }
                                     

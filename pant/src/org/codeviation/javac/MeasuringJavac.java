@@ -12,18 +12,10 @@ package org.codeviation.javac;
 import com.sun.tools.javac.api.JavacTaskImpl;
 import com.sun.tools.javac.api.JavacTool;
 import com.sun.tools.javac.util.JavacFileManager;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -115,18 +107,18 @@ public final class MeasuringJavac extends Javac13 {
         }
     }
     private void setupLogFile() throws IOException {
-        String logFileName = System.getProperty(LOG_FILE_SYSTEM_PROPERTY_NAME);
-        if (logFileName != null) {
-             attributes.log(LOG_FILE_SYSTEM_PROPERTY_NAME + ":" + logFileName);
-             File logFile = new File (logFileName);
-             OutputStream oos = new FileOutputStream(logFile,true);
-             handler = new StreamHandler(oos,new SimpleFormatter());
-        } else {
-            handler = new ConsoleHandler();
-        }
-        MetricsRunner.setHandler(handler);
-         handler.setLevel(Level.INFO);
-         Logger.getLogger("org.codeviation").addHandler(handler);
+//        String logFileName = System.getProperty(LOG_FILE_SYSTEM_PROPERTY_NAME);
+//        if (logFileName != null) {
+//             attributes.log(LOG_FILE_SYSTEM_PROPERTY_NAME + ":" + logFileName);
+//             File logFile = new File (logFileName);
+//             OutputStream oos = new FileOutputStream(logFile,true);
+//             handler = new StreamHandler(oos,new SimpleFormatter());
+//        } else {
+//            handler = new ConsoleHandler();
+//        }
+//        MetricsRunner.setHandler(handler);
+//         handler.setLevel(Level.INFO);
+//         Logger.getLogger("org.codeviation").addHandler(handler);
     }
 
     @Override

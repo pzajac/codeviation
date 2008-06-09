@@ -79,19 +79,28 @@ public class CvsUtil {
      */ 
     public static BufferedReader executeCvsCommand(String commandParameters[],File cvsDirectory) throws IOException, InterruptedException {
         Runtime runtime = Runtime.getRuntime();
-        for (int i = 0 ;i < commandParameters.length ; i++ ) {            
-            log.fine(commandParameters[i].toString());
+        StringBuilder logParameters = new StringBuilder("Cvs parameters: ");
+        for (int i = 0 ;i < commandParameters.length ; i++ ) {
+            logParameters.append('\'');
+            logParameters.append(commandParameters[i].toString());
+            logParameters.append("\' ");
         }
+        log.fine(logParameters.toString());
+        log.fine("CVS dir: " + cvsDirectory.getAbsolutePath());
+        
         assert cvsDirectory.exists();
         Process process = runtime.exec(commandParameters,null,cvsDirectory);
         ReadThread it = new ReadThread(process.getInputStream());
         new Thread(it,"STD Out").start();
         ReadThread et = new ReadThread(process.getErrorStream());
         new Thread(et,"STD Error").start();
-        process.waitFor();
+        if (process.waitFor() != 0) {
+            log.severe(logParameters.toString());
+            log.severe("CVS dir: " + cvsDirectory.getAbsolutePath());
+        }
         String output = it.getOutput();
-        log.fine(output);
-        log.fine(et.getOutput());
+        log.fine("cvs stdout: " + output);
+        log.fine("cvs stderr: " + et.getOutput());
         return new BufferedReader (new StringReader(output)  ) ;
     }
     
@@ -247,6 +256,14 @@ public class CvsUtil {
        
     public Diff diff(String fileName, Version v1,Version v2) throws IOException {
            log.fine(fileName);
+           String cvsDirPath = cvsDirectory.getAbsolutePath();
+           // use rather rel path 
+           if (fileName.indexOf(cvsDirPath) == 0) {
+               fileName = fileName.substring(cvsDirPath.length());
+               if (fileName.startsWith("/")) {
+                   fileName = fileName.substring(1);
+               }
+           }
            String params[] = new String[] {cvsFile.getAbsolutePath(),
                "diff","-N","-r",v1.getRevision(),"-r",v2.getRevision(),fileName};
              String line = null;
