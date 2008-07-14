@@ -5,7 +5,7 @@ import org.codeviation.model.Repository;
 import org.codeviation.main.ClassRankMatrixGenerator;
 
 /**
- * Computes history of page rank
+ * Computes history of class rank
  * @author pzajac
  */
 public class PageRankProcess implements RepositoryProcess {
