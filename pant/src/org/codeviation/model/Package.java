@@ -57,6 +57,10 @@ public final class Package implements Iterable<JavaFile>{
         return sourceRoot.getCvsDir().getPath() + File.separatorChar +  name.replace('.',File.separatorChar) + File.separator;
     }
     
+    /** Get file for folder of package located in CVS chechout
+     * 
+     * @return
+     */
     public File getCVSFile() {
         return new File (getCVSPath());
     }
@@ -112,17 +116,17 @@ public final class Package implements Iterable<JavaFile>{
         }
         return null;
     }
-    /** find JavaFile in this Package 
-     */
-    public JavaFile findJavaFile(String fileName) {
-        Collection<JavaFile> files = getJavaFiles();
-        for (JavaFile file :  files) {
-            if (file.getName().equals(fileName)) {
-                return file;
-            }
-        }
-        return null;
-    }
+//    /** find JavaFile in this Package 
+//     */
+//    public JavaFile findJavaFile(String fileName) {
+//        Collection<JavaFile> files = getJavaFiles();
+//        for (JavaFile file :  files) {
+//            if (file.getName().equals(fileName)) {
+//                return file;
+//            }
+//        }
+//        return null;
+//    }
     
     
     public int[] getBugs() throws IOException {
