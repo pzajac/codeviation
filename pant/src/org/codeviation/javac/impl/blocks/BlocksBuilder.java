@@ -15,10 +15,6 @@ import org.codeviation.javac.MetricsRunner;
  */
 public class BlocksBuilder implements MetricBuilder {
     
-    public Object getValue() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
     public String getName() {
         return "Usage metric";
     }
